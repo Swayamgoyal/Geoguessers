@@ -1,0 +1,24 @@
+# raw / generated rasters live outside the repo (D:\geoguessers_data)
+*.tif
+*.tiff
+*.vrt
+*.aux.xml
+!datasets/*.tar.gz
+
+# generated results (runs.csv and machine.json are committed)
+results/raw/
+results/tiles/
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# node / cesium
+node_modules/
+viz/cesium/dist/
+
+# editors / os
+.vscode/
+.idea/
+Thumbs.db

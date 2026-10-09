@@ -1,0 +1,26 @@
+name: geo
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  # GIS stack
+  - gdal>=3.9
+  - rasterio
+  - rio-tiler
+  - mercantile
+  - xarray-spatial
+  # compute
+  - numpy
+  - numba
+  - cupy
+  - cuda-version=12
+  # benchmarking + analysis
+  - psutil
+  - pandas
+  - pyarrow
+  - matplotlib
+  # tile server
+  - fastapi
+  - uvicorn
+  # tests
+  - pytest

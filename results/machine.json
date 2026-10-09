@@ -1,0 +1,28 @@
+{
+  "machine_id": "Baracuda",
+  "captured_at": "2026-10-09T12:34:12",
+  "os": "Windows-11-10.0.26200-SP0",
+  "cpu": "Intel(R) Core(TM) Ultra 9 185H",
+  "cores_physical": 16,
+  "cores_logical": 22,
+  "ram_gb": 15.5,
+  "gpus": [
+    {
+      "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+      "memory_total": "8188 MiB",
+      "driver": "596.08"
+    }
+  ],
+  "python": "3.14.3",
+  "packages": {
+    "numpy": "2.4.3",
+    "numba": "0.64.0",
+    "cupy": null,
+    "rasterio": null,
+    "GDAL": null,
+    "xarray-spatial": null,
+    "rio-tiler": null,
+    "fastapi": null,
+    "gdalinfo": null
+  }
+}
