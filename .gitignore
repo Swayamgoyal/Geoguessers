@@ -1,11 +1,9 @@
-# raw / generated rasters live outside the repo (D:\geoguessers_data)
+# rasters live outside the repo: benchmark inputs on D:\geoguessers_data, archive on K:\spatial project
 *.tif
 *.tiff
 *.vrt
 *.aux.xml
-!unnecessary/*.tar.gz
 datasets/**/*.png
-unnecessary/**/*.png
 *.properties
 
 # generated results (runs.csv and machine.json are committed)

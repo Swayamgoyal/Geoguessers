@@ -15,7 +15,7 @@ from pathlib import Path
 BBOX = dict(west=79.10, south=30.01, east=80.26, north=30.99)
 DEMS = {"COP30": "cop30_tile571.tif", "COP90": "cop90_tile571.tif"}
 API = "https://portal.opentopography.org/API/globaldem"
-# raw downloads live in $GEO_RAW (on the benchmark laptop: K:\GeoGuessers_archive\raw_downloads), else datasets/
+# raw downloads live in $GEO_RAW (on the benchmark laptop: K:\spatial project\raw_downloads), else datasets/
 OUT_DIR = Path(os.environ.get("GEO_RAW", Path(__file__).resolve().parent))
 
 

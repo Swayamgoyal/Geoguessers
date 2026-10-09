@@ -24,7 +24,7 @@ from osgeo import gdal, osr
 gdal.UseExceptions()
 
 # Raw downloads (only read here, never benchmarked) live in $GEO_RAW; on the benchmark laptop that is the
-# external archive K:\GeoGuessers_archive\raw_downloads. Default: this datasets/ folder.
+# external archive K:\spatial project\raw_downloads. Default: this datasets/ folder.
 HERE = Path(os.environ.get("GEO_RAW", Path(__file__).resolve().parent))
 ROOT = Path(os.environ.get("GEO_DATA", r"D:\geoguessers_data"))
 OUT = ROOT / "prepared"
