@@ -37,23 +37,26 @@ Spatial Informatics course project. We investigate how far large, high-resolutio
    This registers a scheduled task that empties the file cache (`RAMMap -Et`). Benchmarks trigger it
    through `bench/cache.py` and do not need admin themselves.
 
-Raw DEMs are kept outside the repo in `D:\geoguessers_data\`; every dataset is listed in [datasets/manifest.csv](datasets/manifest.csv).
+Benchmark grids are kept outside the repo in `D:\geoguessers_data\`; every dataset is listed in [datasets/manifest.csv](datasets/manifest.csv).
 
 ## Data
 
-**Storage rule:** everything a benchmark reads or writes stays on the laptop's internal NVMe SSD
-(`D:\geoguessers_data\prepared`, `synthetic`, `bench_out`), so timings measure the tools, not a USB disk.
-The external drive is only an archive: raw downloads, results exports, logs and finished experiment copies live in
-`K:\spatial project\`. Nothing is deleted: old or unneeded files move to `K:\spatial project\unnecessary files\`. Scripts find the raw downloads through the `GEO_RAW` environment variable
-(`K:\spatial project\raw_downloads` on the benchmark laptop; defaults to `datasets/`). Raw files are only
-needed to rebuild the prepared grids.
+**Storage rules**
+- Everything a benchmark reads or writes stays on the laptop's internal NVMe SSD (`D:\geoguessers_data\prepared`,
+  `synthetic`, `bench_out`), so timings measure the tools, not a USB disk.
+- The external drive (`K:\spatial project\`) is only for **large files (> 1 GB) produced by runs** once their results
+  are recorded (e.g. the E2 layout copies), so the internal disk does not fill up. Move them with
+  `bench\archive_large.ps1` (hash-verified).
+- Small files stay in the project folder. Nothing is deleted: old or unneeded files go to `unnecessary/`
+  (see its README).
+- Raw downloads live in `datasets/` (gitignored); `GEO_RAW` can point the scripts elsewhere.
 
 ```
 $env:OPENTOPO_API_KEY = "<your key>"; python datasets/download_cop.py   # Copernicus 30 / 90 m
 python datasets/prepare.py               # real 90 / 30 / 8 / 2 m -> aligned UTM 44N COGs
 python datasets/prepare.py --synthetic   # + 2 m and 1 m grids for timing only (~22 GB)
 ```
-The HMA 8 m tile (NASA Earthdata login) and the Chamoli 2 m DEM (Zenodo 4554647) are downloaded by hand into `$GEO_RAW`.
+The HMA 8 m tile (NASA Earthdata login) and the Chamoli 2 m DEM (Zenodo 4554647) are downloaded by hand into `datasets/`.
 
 ## Benchmarks (Phase 2)
 

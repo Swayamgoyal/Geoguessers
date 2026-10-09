@@ -1,10 +1,17 @@
-# rasters live outside the repo: benchmark inputs on D:\geoguessers_data, archive on K:\spatial project
+# rasters are not committed: raw downloads in datasets/, benchmark grids on D:\geoguessers_data,
+# large finished run files on K:\spatial project
 *.tif
 *.tiff
 *.vrt
 *.aux.xml
+!unnecessary/*.tar.gz
 datasets/**/*.png
+unnecessary/**/*.png
+unnecessary/**/*.exe
 *.properties
+
+# sweep logs (one line per run)
+logs/
 
 # generated results (runs.csv and machine.json are committed)
 results/raw/
