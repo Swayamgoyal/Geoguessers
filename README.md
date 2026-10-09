@@ -43,8 +43,8 @@ Raw DEMs are kept outside the repo in `D:\geoguessers_data\`; every dataset is l
 
 **Storage rule:** everything a benchmark reads or writes stays on the laptop's internal NVMe SSD
 (`D:\geoguessers_data\prepared`, `synthetic`, `bench_out`), so timings measure the tools, not a USB disk.
-The external drive is only an archive: raw downloads, old test files, logs and finished experiment copies live in
-`K:\spatial project\`. Scripts find the raw downloads through the `GEO_RAW` environment variable
+The external drive is only an archive: raw downloads, results exports, logs and finished experiment copies live in
+`K:\spatial project\`. Nothing is deleted: old or unneeded files move to `K:\spatial project\unnecessary files\`. Scripts find the raw downloads through the `GEO_RAW` environment variable
 (`K:\spatial project\raw_downloads` on the benchmark laptop; defaults to `datasets/`). Raw files are only
 needed to rebuild the prepared grids.
 
