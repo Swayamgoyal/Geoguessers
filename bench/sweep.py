@@ -59,8 +59,9 @@ def wait_for_space(free_before, timeout=900):
     return True
 
 
-def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=False):
-    """jobs: dicts with the CSV metadata plus '_src' (input path) and optional '_cmd' (prebuilt command)."""
+def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=False, snapshot=True):
+    """jobs: dicts with the CSV metadata plus '_src' (input path) and optional '_cmd' (prebuilt command).
+    snapshot: record the run conditions (results/env); callers that run one sweep in parts pass it once."""
     rec = Recorder(csv_path)
     todo = [j for j in jobs if not rec.is_done(j)]
     print(f"{len(jobs)} runs planned, {len(jobs) - len(todo)} already in {csv_path}, {len(todo)} to run", flush=True)
@@ -73,8 +74,9 @@ def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=Fals
         return
     check_power(allow_battery)
     cpus = performance_cpus()
-    env = snapshot_env(experiment)
-    print(f"pinned to {cpus}; power: {env['power_scheme']}", flush=True)
+    if snapshot:
+        env = snapshot_env(experiment)
+        print(f"pinned to {cpus}; power: {env['power_scheme']}", flush=True)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     keep_awake(True)
     t_start = time.perf_counter()

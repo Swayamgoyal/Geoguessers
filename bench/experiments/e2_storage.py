@@ -4,15 +4,21 @@ The same grid is written in 7 layouts (strips vs tiles, 256 vs 512 tiles, no com
 LZW / DEFLATE / ZSTD with the floating-point predictor). For each layout: the conversion itself
 ('create', 1 run: measures the write/compress cost), a pure read ('read'), and gdaldem slope Horn.
 Datasets: real 8 m (full protocol) and synthetic 2 m (3 cold + 1 warm). Variants are written to
-$GEO_DATA/e2/ and kept, so file sizes can be compared afterwards.
+$GEO_DATA/e2/. The sweep runs one layout at a time; each layout's file size is recorded in
+results/e2_files.csv, and once its runs are done a copy larger than 1 GB (the 2 m layouts, up to
+10 GB each) is moved to the external archive, so D: never holds more than one big copy at a time.
 
     python -m bench.experiments.e2_storage --plan
     python -m bench.experiments.e2_storage
 """
 import argparse
+import csv
 
+from bench.archive import archive_large
 from bench.harness import tool
 from bench.sweep import CSV, DATA, impl_of, raster_meta, run_jobs
+
+FILES_CSV = CSV.parent / "e2_files.csv"
 
 E2_DIR = DATA / "e2"
 DATASETS = [
@@ -66,7 +72,27 @@ def main():
     ap.add_argument("--csv", default=str(CSV))
     ap.add_argument("--allow-battery", action="store_true")
     a = ap.parse_args()
-    run_jobs(jobs_for(), "E2", a.csv, a.plan, a.allow_battery)
+    jobs = jobs_for()
+    if a.plan:
+        run_jobs(jobs, "E2", a.csv, plan_only=True)
+        return
+    sizes = {}
+    if FILES_CSV.exists():
+        with FILES_CSV.open(newline="") as f:
+            sizes = {(r["dataset"], r["variant"]): r["bytes"] for r in csv.DictReader(f)}
+    first = True
+    for key in dict.fromkeys((j["dataset"], j["variant"]) for j in jobs):
+        part = [j for j in jobs if (j["dataset"], j["variant"]) == key]
+        run_jobs(part, "E2", a.csv, allow_battery=a.allow_battery, snapshot=first)
+        first = False
+        path = variant_path(*key)
+        if path.exists() and key not in sizes:
+            sizes[key] = path.stat().st_size
+            with FILES_CSV.open("w", newline="") as f:
+                w = csv.writer(f)
+                w.writerow(["dataset", "variant", "bytes"])
+                w.writerows([k[0], k[1], v] for k, v in sizes.items())
+        print(archive_large(path, "e2"), flush=True)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,8 @@
 Measures the display side of the baseline: open the layer (incl. QGIS's default min/max stretch)
 and render one 1920x1080 view, either the full extent or a 1920 m x 1080 m zoom at the centre.
 Pyramid 'use' = the file's internal overviews; 'none' = hidden, as for a plain GeoTIFF.
-Per case: 3 cold + 1 warm (the last cold run is the warm-up).
+Per case: 3 cold + 1 warm (the last cold run is the warm-up). GDAL's .aux.xml statistics caches are
+disabled (GDAL_PAM_ENABLED=NO), so every open starts from the same clean state.
 
 op='render', method='<view>-<overviews>', t_total = whole QGIS process incl. start-up,
 t_internal = render time; extra = {t_init, t_open, peak_mb, filled}. peak_rss_mb is the QGIS
@@ -38,6 +39,9 @@ def qgis_env(cpus):
     env = {k: v for k, v in os.environ.items() if k.upper() not in LEAKY and not k.upper().startswith("CONDA_")}
     env["PATH"] = ";".join(p for p in env.get("PATH", "").split(";") if "miniforge" not in p.lower())
     env["BENCH_AFFINITY_MASK"] = str(sum(1 << c for c in cpus))
+    # No .aux.xml statistics caches: otherwise the first open writes min/max/histogram next to the grid and
+    # every later run reuses it, so 'open' would no longer measure what a fresh open costs.
+    env["GDAL_PAM_ENABLED"] = "NO"
     return env
 
 

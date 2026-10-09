@@ -1,4 +1,4 @@
-"""Phase 2 analysis: tables (results/phase2_tables.md) and charts (results/plots/*.png) from results/runs.csv.
+﻿"""Phase 2 analysis: tables (results/phase2_tables.md) and charts (results/plots/*.png) from results/runs.csv.
 
     python -m bench.analysis.phase2_report
 
@@ -6,7 +6,6 @@ Medians over measured repeats (rep >= 1; rep 0 is the warm-up). Large synthetic 
 3 cold + 1 warm runs, so their 'warm' value is a single run.
 """
 import json
-import os
 from pathlib import Path
 
 import matplotlib
@@ -18,7 +17,6 @@ import matplotlib.pyplot as plt  # noqa: E402
 REPO = Path(__file__).resolve().parents[2]
 RES = REPO / "results"
 PLOTS = RES / "plots"
-E2_DIR = Path(os.environ.get("GEO_DATA", r"D:\geoguessers_data")) / "e2"
 ORDER = ["tile571_90m", "tile571_30m", "tile571_8m", "chamoli_2m", "tile571_2m_cubic", "tile571_1m_cubic"]
 LABEL = {"tile571_90m": "90 m", "tile571_30m": "30 m", "tile571_8m": "8 m", "chamoli_2m": "2 m real (Chamoli)",
          "tile571_2m_cubic": "2 m synthetic", "tile571_1m_cubic": "1 m synthetic"}
@@ -31,7 +29,7 @@ INK, INK2, MUTED, GRID, AXIS, SURF = "#0b0b0b", "#52514e", "#898781", "#e1e0d9",
 plt.rcParams.update({
     "font.family": ["Segoe UI", "DejaVu Sans"], "font.size": 10, "figure.facecolor": SURF,
     "axes.facecolor": SURF, "axes.edgecolor": AXIS, "axes.labelcolor": INK2, "axes.titlecolor": INK,
-    "axes.titlesize": 12, "axes.titleweight": "semibold", "axes.titlelocation": "left", "axes.grid": True,
+    "axes.titlesize": 12, "axes.titleweight": "bold", "axes.titlelocation": "left", "axes.grid": True,
     "grid.color": GRID, "grid.linewidth": 0.6, "xtick.color": MUTED, "ytick.color": MUTED,
     "axes.spines.top": False, "axes.spines.right": False, "lines.linewidth": 2, "lines.markersize": 6,
     "legend.frameon": False, "legend.labelcolor": INK2, "savefig.dpi": 160, "savefig.bbox": "tight",
@@ -223,18 +221,22 @@ def plot_e1_ops(d):
 # ---------------------------------------------------------------- E2
 def e2_table(d):
     e = d[d.experiment == "E2"]
+    sizes = {}
+    if (RES / "e2_files.csv").exists():
+        s = pd.read_csv(RES / "e2_files.csv")
+        sizes = {(r.dataset, r.variant): r.bytes for r in s.itertuples()}
     rows = []
     for ds in ["tile571_8m", "tile571_2m_cubic"]:
         for v in VARIANTS:
             g = e[(e.dataset == ds) & (e.variant == v)]
             if g.empty:
                 continue
-            f = E2_DIR / f"{ds}_{v}.tif"
+            size = sizes.get((ds, v), float("nan"))
 
             def m(op, cache, col="t_total"):
                 s = g[(g.op == op) & (g.cache_state == cache)][col]
                 return s.median() if len(s) else float("nan")
-            rows.append({"grid": LABEL[ds], "layout": v, "file MB": f.stat().st_size / 2**20 if f.exists() else float("nan"),
+            rows.append({"grid": LABEL[ds], "layout": v, "file MB": size / 2**20,
                          "create s": m("create", "warm"), "read cold s": m("read", "cold", "t_internal"),
                          "read warm s": m("read", "warm", "t_internal"), "slope cold s": m("slope", "cold"),
                          "slope warm s": m("slope", "warm")})
@@ -243,6 +245,8 @@ def e2_table(d):
 
 def plot_e2(d):
     t = e2_table(d)
+    if t.empty:
+        return
     t = t[t.grid == LABEL["tile571_2m_cubic"]]
     if t.empty:
         return
@@ -256,7 +260,7 @@ def plot_e2(d):
         ax.grid(axis="y", visible=False)
         ax.set_xlim(0, t[col].max() * 1.3)
     axes[0].invert_yaxis()
-    fig.suptitle("E2: storage layout, 2 m synthetic grid (2.7 B cells)", x=0.01, ha="left", fontweight="semibold", color=INK)
+    fig.suptitle("E2: storage layout, 2 m synthetic grid (2.7 B cells)", x=0.01, ha="left", fontweight="bold", color=INK)
     fig.savefig(PLOTS / "e2_storage.png")
     plt.close(fig)
 
