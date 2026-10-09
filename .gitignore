@@ -3,8 +3,9 @@
 *.tiff
 *.vrt
 *.aux.xml
-!datasets/*.tar.gz
+!unnecessary/*.tar.gz
 datasets/**/*.png
+unnecessary/**/*.png
 *.properties
 
 # generated results (runs.csv and machine.json are committed)

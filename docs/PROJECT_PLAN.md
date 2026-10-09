@@ -63,19 +63,25 @@ All benchmarking uses **one study area at several resolutions**. Run time depend
 |---|---|---|---|---|---|
 | 90 m | `datasets/cop90_tile571.tif` | Copernicus GLO-90, OpenTopography API | **Real** (have it) | 1.6 M | Coarsest level; secondary accuracy check |
 | 30 m | `datasets/cop30_tile571.tif` | Copernicus GLO-30, OpenTopography API | **Real** (have it) | 14.7 M | Baseline level; secondary accuracy check |
-| **8 m** | `datasets/HMA_DEM8m_MOS_20170716_tile-571.tif` | NSIDC `HMA_DEM8m_MOS`, NASA Earthdata | **Real** (have it) | 156 M | **Finest real level; "truth" for accuracy (E5)** |
-| 4, 2, 1 m | `D:\geoguessers_data\synthetic\` | Resampled from the 8 m tile with `gdalwarp` | Generated | 0.6 B / 2.5 B / 10 B | **Timing only**: pushes past the 16 GB RAM limit |
+| **8 m** | `datasets/HMA_DEM8m_MOS_20170716_tile-571.tif` | NSIDC `HMA_DEM8m_MOS`, NASA Earthdata | **Real** (have it) | 156 M | 8 m level; "truth" for accuracy over the full tile |
+| 4, 2, 1 m | `D:\geoguessers_data\synthetic\` | Upsampled from the 8 m tile with `gdalwarp -r cubic` | Generated | 0.6 B / 2.5 B / 10 B | **Timing only**: pushes past the 16 GB RAM limit |
 
-All real data is downloaded and checked (see `datasets/manifest.csv`). The Copernicus files are re-created with `python datasets/download_cop.py` (needs `OPENTOPO_API_KEY` set in the environment; the key is never committed).
+**Real high-resolution sub-area: Chamoli / Rishiganga** (79.48–79.81°E, 30.29–30.59°N, ~32 × 33 km, inside tile-571):
 
-### 3.3 Test fixtures (small, for correctness only)
+| Res | File | Source | Real / generated | Cells | Role |
+|---|---|---|---|---|---|
+| **2 m** | `datasets/Chamoli_Sept2015_Composite_DEM2m_wmean.tif` | Chamoli pre-event 2 m DEM composite, Sept 2015 ([Zenodo 4554647](https://zenodo.org/records/4554647); NSIDC `HMA2_CPRE`), CC-BY-NC-4.0 | **Real** (downloading, 810 MB) | ~270 M | **Finest real level; accuracy truth for E5** |
+| 4 m | generated | Averaged (downsampled) from the real 2 m | Real-derived | ~67 M | Fills the 2 m → 8 m gap with real detail |
 
-| File | Contents | Use |
-|---|---|---|
-| `rasters_COP90.tar.gz` → `output_hh.tif` | Copernicus 90 m crop, 272 × 191 px, Everest / Khumbu, EPSG:4326 | Unit-test input |
-| `viz (1).tar.gz` | OpenTopography gdaldem slope / aspect / hillshade / roughness for the same crop | Reference answers. QGIS slope (scale 111120) already matches them to 1e-5° |
-| `hma8m_strips/HMA_DEM8m_AT_20161105_…tif` | Single 8 m strip, Kumaon (inside tile-571), 3.5 M cells, 78% valid | Strip-vs-mosaic check |
-| `hma8m_strips/HMA_DEM8m_AT_20161106_…tif` | Single 8 m strip, Ganesh Himal (Nepal), 11.7 M cells, 60% valid | Nodata/gap handling tests |
+Downsampling real fine data (2 m → 4 m) is legitimate: it keeps real terrain. Upsampling (8 m → 1 m) is not: it adds cells but no information (see §3.6).
+
+**No free 1 m DEM exists for this area.** India has no public lidar. Bhuvan CartoDEM is free only at 30 m (the 10 m version is restricted), and commercial 0.5–5 m products (AW3D Enhanced, WorldDEM Neo) are paid. So 1 m stays synthetic and is used for timing only.
+
+All real data is listed in `datasets/manifest.csv`. The Copernicus files are re-created with `python datasets/download_cop.py` (needs `OPENTOPO_API_KEY` set in the environment; the key is never committed).
+
+### 3.3 Unused files
+
+Early downloads that are not part of this design (the Everest 90 m crop with its OpenTopography reference outputs, and the single 8 m HMA strips) are kept in `unnecessary/`. Its README describes each file and how to reuse it. Correctness references for our kernels are now generated with `gdaldem` directly on the study-area data.
 
 ### 3.4 Data checks done (9 Oct)
 
@@ -85,10 +91,25 @@ All real data is downloaded and checked (see `datasets/manifest.csv`). The Coper
 
 ### 3.5 Rules
 
-1. **Timing** experiments use the ladder above on tile-571 only.
-2. **Accuracy** experiments use real data only. The main E5 numbers compare the 8 m tile with coarser levels derived from *itself* (same source). Copernicus 30/90 m is a secondary comparison, since it comes from a different sensor and date.
-3. Generated 4/2/1 m grids are stored **uncompressed** for timing runs. Resampled terrain compresses much better than real terrain and would make disk reads look artificially fast.
+1. **Timing** experiments use the tile-571 ladder (90 / 30 / 8 m real, 4 / 2 / 1 m synthetic).
+2. **Accuracy** experiments use real data only. On the Chamoli sub-area the truth is the real 2 m DEM, and coarser levels (4, 8, 16 … m) are built from it (same source). On the full tile the truth is the 8 m DEM. Copernicus 30/90 m and HMA 8 m are secondary comparisons, since they come from different sensors and dates.
+3. Synthetic grids are made with **cubic** upsampling, never nearest-neighbour (see §3.6).
 4. Every file is listed in `datasets/manifest.csv`. Rasters are gitignored. Large generated grids live in `D:\geoguessers_data\` (C: has only ~60 GB free).
+
+### 3.6 How reliable is synthetic (upsampled) data? Measured 9 Oct
+
+Test: a 4000 × 4000 crop (16 M cells) of the real 8 m tile, compared with an 8 m grid rebuilt from a 16 m version of itself.
+
+| Version | gdaldem slope time | LZW file size | Slope RMSE vs real | Cells off by > 5° |
+|---|---|---|---|---|
+| Real 8 m | 0.90 s | 56.2 MB | – | – |
+| Synthetic, nearest | 0.89 s | **41.8 MB (−26%)** | 3.04° | 8.3% |
+| Synthetic, bilinear | 0.87 s | 57.3 MB | 2.78° | 7.1% |
+| Synthetic, cubic | 0.88 s | 57.3 MB | 2.32° | 4.5% |
+
+- **Compute timing: reliable.** Run time is the same within noise (0.87–0.90 s). gdaldem does the same work per cell whatever the values are.
+- **Disk / IO timing: reliable only with bilinear or cubic.** Nearest-neighbour data compresses 26% better than real terrain, which would make reads look faster than they are. The lit-review pilot used nearest; our runs will use cubic.
+- **Accuracy: not reliable.** Even a single 2× upsample gives a slope error of 2.3–3.0° RMSE. 8 m → 1 m (8×) adds no real detail at all. Synthetic grids are never used for accuracy results.
 
 ---
 
@@ -138,7 +159,7 @@ We **do not modify GDAL's C++ internals**. We build our own small engine (`demla
 | **E2** Storage / IO | Does file layout matter more than the algorithm? | striped GTiff vs tiled COG; none / LZW / DEFLATE / ZSTD; block 256 / 512 | read time, file size, total time | G1 |
 | **E3** CPU engine | How much do tiling and parallelism help? | naive NumPy vs Numba with 1 → 22 threads; tile size | time, speedup, RSS | G1 |
 | **E4** GPU | When does the GPU actually help? | size × tile size; **H2D / kernel / D2H timed separately**; 8 GB VRAM limit | GPU-vs-CPU crossover size; share of time spent on transfer | G1 |
-| **E5** Pyramid on demand | How wrong is slope from a coarse level, and how much time does it save? | pyramid levels 16–128 m built from the **real** 8 m tile; slope-from-overview vs full-res 8 m slope aggregated to the same grid; secondary: vs real Copernicus 30/90 m | RMSE, bias, % cells with error > 5°, split by slope class; time per level | **G2** |
+| **E5** Pyramid on demand | How wrong is slope from a coarse level, and how much time does it save? | pyramid levels built from **real** data (Chamoli 2 m → 4–64 m; tile-571 8 m → 16–128 m); slope-from-level vs full-res slope aggregated to the same grid; secondary: vs independent HMA 8 m and Copernicus 30/90 m | RMSE, bias, % cells with error > 5°, split by slope class; time per level | **G2** |
 | **E6** Interactive | Can on-the-fly computation keep up with pan and zoom? | precomputed tiles vs on-the-fly CPU vs GPU; cache on/off | tile latency p50/p95, cache hit rate, Cesium FPS | G1, G2 |
 | E7 *(stretch)* Viewshed | Speed and accuracy of approximate visibility | R3 vs XDraw vs `gdal_viewshed`; DEM size, observer height | time, % cells misclassified vs R3 | G3 |
 | E8 *(stretch)* Terrain distance | How much does the A* heuristic save? | Dijkstra vs A*; grid size | time, nodes expanded, path equality | G3 |
@@ -214,7 +235,8 @@ P7                                                        ███████�
 ### Phase 1: Data (9–14 Oct) · KK · downloads ✅ done 9 Oct
 - ✅ Real data for tile-571 at 8 / 30 / 90 m downloaded, checked and listed in the manifest (§3).
 - Reproject all three to UTM 44N on a common grid; convert to COG with overviews.
-- Generate the 4 / 2 / 1 m timing grids from the 8 m tile (uncompressed, on D:).
+- Generate the 4 / 2 / 1 m timing grids from the 8 m tile (cubic upsampling, on D:).
+- Chamoli 2 m (Zenodo download in progress): check coverage and datum, reproject to UTM 44N, and build the real 4 m by averaging.
 - Optional: geoid-correct the 8 m tile to EGM2008 (only needed for E7).
 
 ### Phase 2: Baseline benchmark, E1 + E2 (12–17 Oct) · SC (harness by SG)
@@ -230,7 +252,9 @@ P7                                                        ███████�
 
 ### Phase 4: Pyramid on demand, E5 (19–25 Oct) · SC
 - Compute slope directly from overview level k using that level's cell size.
-- Compare with full-resolution 8 m slope aggregated to the same grid (16, 32, 64, 128 m levels).
+- Main: on the Chamoli sub-area, compare slope from levels 4, 8, 16, 32, 64 m with the real 2 m slope aggregated to the same grid.
+- Full tile: the same comparison with 8 m as truth (levels 16–128 m).
+- Cross-source: does our 8 m level from the Chamoli 2 m match the independent HMA 8 m DEM?
 - Secondary check: does slope from our 32 m / 64 m level match slope from the real Copernicus 30 m / 90 m as well as the two products match each other?
 - Error-vs-time-saved curves, split by slope class (flat / moderate / steep). **Headline result.**
 
