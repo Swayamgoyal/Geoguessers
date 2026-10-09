@@ -2,7 +2,7 @@
 
 **Large-scale DEM processing and visualisation on a laptop**
 Spatial Informatics · Team: Swayam Goyal (SG), Siddharth Choudhary (SC), Kartikeya (KK)
-Deadline: **31 Oct 2026** · Plan date: 9 Oct 2026
+Duration: **3 weeks** (Week 1–3), ending at the course submission deadline
 
 ---
 
@@ -81,7 +81,7 @@ All real data is listed in `datasets/manifest.csv`. The Copernicus files are re-
 
 Early downloads that are not part of this design (the Everest 90 m crop with its OpenTopography reference outputs, and the single 8 m HMA strips) are kept in `unnecessary/`. Its README describes each file and how to reuse it. Correctness references for our kernels are now generated with `gdaldem` directly on the study-area data.
 
-### 3.4 Data checks done (9 Oct)
+### 3.4 Data checks done
 
 - **Coverage:** tile-571 is 90.4% valid. Most of the tile is 85–99% valid; gaps are concentrated in the south-east corner (that corner's blocks are only 23–80% valid). The Copernicus 30/90 m files cover the whole tile with no gaps.
 - **Vertical datum:** the 8 m minus Copernicus 30 m difference has median **−24.5 m** (std 21.8 m). This is consistent with HMA heights being relative to the WGS84 ellipsoid and Copernicus to the EGM2008 geoid. A near-constant offset does not affect slope, aspect, hillshade, TRI or roughness. It **does** matter for viewshed (E7) and absolute-height comparisons, so apply a geoid correction (`gdalwarp` with an EGM2008 vertical CRS) before those.
@@ -94,7 +94,7 @@ Early downloads that are not part of this design (the Everest 90 m crop with its
 3. Synthetic grids are made with **cubic** upsampling, never nearest-neighbour (see §3.6).
 4. Every file is listed in `datasets/manifest.csv`. Rasters are gitignored. Large generated grids live in `D:\geoguessers_data\` (C: has only ~60 GB free).
 
-### 3.6 How reliable is synthetic (upsampled) data? Measured 9 Oct
+### 3.6 How reliable is synthetic (upsampled) data? (measured)
 
 Test: a 4000 × 4000 crop (16 M cells) of the real 8 m tile, compared with an 8 m grid rebuilt from a 16 m version of itself.
 
@@ -211,8 +211,10 @@ For the O(N) local operators, naive and optimised versions have the same complex
 
 ## 8. Phases and timeline
 
+The project runs for three weeks (Week 1–3), ending at the submission deadline.
+
 ```
-Oct   9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31
+      |Week 1              |Week 2              |Week 3
 P0    ███████
 P1       ███████████████
 P2             ██████████████████
@@ -223,32 +225,32 @@ P6 (stretch)                                        ░░░░░░░░░�
 P7                                                        ███████████████████
 ```
 
-### Phase 0: Setup (9–11 Oct) · SG · ✅ done 9 Oct
+### Phase 0: Setup (start of Week 1) · SG · ✅ done
 - Miniforge at `D:\miniforge3` (the install path must not contain spaces); conda env `geo` from `environment.yml` (Python 3.12, GDAL 3.13.3, CuPy 14.2, Numba 0.68).
 - QGIS LTR 3.44.14 installed; `qgis_process` works headless.
 - Repo scaffold; `results/machine.json` written by `bench/machine_info.py`.
 - Exit checks passed: `gdalinfo --version`; CuPy runs on the RTX 4060; COP90 fixture opens; QGIS slope matches the OpenTopography reference.
 - Remaining: Cesium client (Node + Vite) in `viz/cesium/`, moved to Phase 5.
 
-### Phase 1: Data (9–14 Oct) · KK · downloads ✅ done 9 Oct
+### Phase 1: Data (Week 1) · KK · ✅ done except Chamoli 2 m
 - ✅ Real data for tile-571 at 8 / 30 / 90 m downloaded, checked and listed in the manifest (§3).
 - ✅ `python datasets/prepare.py`: 90 / 30 / 8 m reprojected to UTM 44N on one aligned grid (origin snapped to 360 m) and written as COGs (512 tiles, ZSTD, AVERAGE overviews) to `D:\geoguessers_data\prepared\`. gdaldem slope runs on all three (0.15 s / 0.55 s / 9.7 s).
 - Chamoli 2 m (Zenodo download in progress): re-run `prepare.py` when it finishes; it skips incomplete files.
-- Decided 9 Oct: **no extra 4 m / 16 m datasets.** The real ladder is 2 / 8 / 30 / 90 m; intermediate levels come from the COG overviews. One large synthetic grid (cubic, timing only) is made in Phase 2 only if needed to reach the 16 GB RAM limit.
+- Decision: **no extra 4 m / 16 m datasets.** The real ladder is 2 / 8 / 30 / 90 m; intermediate levels come from the COG overviews. One large synthetic grid (cubic, timing only) is made in Phase 2 only if needed to reach the 16 GB RAM limit.
 - Optional: geoid-correct the 8 m tile to EGM2008 (only needed for E7).
 
-### Phase 2: Baseline benchmark, E1 + E2 (12–17 Oct) · SC (harness by SG)
+### Phase 2: Baseline benchmark, E1 + E2 (end of Week 1 – middle of Week 2) · SC (harness by SG)
 - `bench/harness.py`: subprocess runner, psutil sampler, cache flush, CSV writer.
 - Run `gdaldem` for all ops × sizes × cold/warm, with spot checks through QGIS tools.
 - Find and document the break point. Run the format/compression sweep.
-- **Milestone, 17 Oct: baseline curves done. Send a progress update to the professor.**
+- **Milestone, middle of Week 2: baseline curves done. Send a progress update to the professor.**
 
-### Phase 3: Engine, E3 + E4 (14–22 Oct) · SG (CPU, tiling), KK (GPU)
+### Phase 3: Engine, E3 + E4 (end of Week 1 – end of Week 2) · SG (CPU, tiling), KK (GPU)
 - `demlab/kernels/` with NumPy, Numba and CUDA versions of Horn/ZT slope, aspect, hillshade, TRI, TPI, roughness.
 - `demlab/tiling.py`: windowed read + halo + write for out-of-core runs.
 - Correctness tests against gdaldem (must pass first). Then thread scaling, tile-size sweep, GPU stage split, and the GPU crossover point.
 
-### Phase 4: Pyramid on demand, E5 (19–25 Oct) · SC
+### Phase 4: Pyramid on demand, E5 (middle of Week 2 – middle of Week 3) · SC
 - Compute slope directly from overview level k using that level's cell size.
 - Main: on the Chamoli sub-area, compare slope from levels 4, 8, 16, 32, 64 m with the real 2 m slope aggregated to the same grid.
 - Full tile: the same comparison with 8 m as truth (levels 16–128 m).
@@ -256,29 +258,29 @@ P7                                                        ███████�
 - Secondary check: does slope from our 32 m / 64 m level match slope from the real Copernicus 30 m / 90 m as well as the two products match each other?
 - Error-vs-time-saved curves, split by slope class (flat / moderate / steep). **Headline result.**
 
-### Phase 5: Tile server and visualisation, E6 (20–27 Oct) · SG (server), KK (Cesium, QGIS)
+### Phase 5: Tile server and visualisation, E6 (end of Week 2 – middle of Week 3) · SG (server), KK (Cesium, QGIS)
 - FastAPI server: zoom → level → windowed read → kernel → colour map → PNG, with LRU cache.
 - QGIS XYZ layer; CesiumJS page with terrain + slope/aspect/hillshade overlay and an op switcher.
 - Measure tile latency: precomputed vs on-the-fly CPU vs GPU.
 - Record a demo video as a backup for the live demo.
 
 ### Phase 6 (stretch): Viewshed and distance, E7 + E8 · SC
-Only if Phases 2–5 are on track by **24 Oct**. R3 vs XDraw vs `gdal_viewshed` on a 30 m crop; Dijkstra vs A*.
+Only if Phases 2–5 are on track by the **start of Week 3**. R3 vs XDraw vs `gdal_viewshed` on a 30 m crop; Dijkstra vs A*.
 
-### Phase 7: Report and demo (26–31 Oct) · all
+### Phase 7: Report and demo (Week 3) · all
 - Report: introduction → literature review (reuse, fix grammar) → method → results E1–E6 → **bottleneck discussion** (where the real bottleneck is at each size) → limitations → conclusion.
 - Slides + live demo (video fallback). Freeze code, tag the release.
 
 ### Weekly checkpoints
-| Date | Must be true |
+| When | Must be true |
 |---|---|
-| 11 Oct | Environment works on the benchmark laptop |
-| 14 Oct | All datasets downloaded and in the manifest |
-| 17 Oct | E1/E2 curves done; update sent to the professor |
-| 22 Oct | Engine passes correctness tests; E3/E4 results in CSV |
-| 25 Oct | E5 results done; tile server serves slope tiles |
-| 27 Oct | Cesium/QGIS demo works; E6 measured |
-| 31 Oct | Report, slides, code submitted |
+| Start of Week 1 | Environment works on the benchmark laptop |
+| End of Week 1 | All datasets downloaded and in the manifest |
+| Middle of Week 2 | E1/E2 curves done; update sent to the professor |
+| End of Week 2 | Engine passes correctness tests; E3/E4 results in CSV |
+| Middle of Week 3 | E5 results done; tile server serves slope tiles |
+| Late Week 3 | Cesium/QGIS demo works; E6 measured |
+| End of Week 3 (deadline) | Report, slides, code submitted |
 
 ---
 
