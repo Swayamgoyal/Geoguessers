@@ -9,6 +9,11 @@ Spatial Informatics course project. We investigate how far large, high-resolutio
 ## Setup
 
 1. Install [Miniforge](https://github.com/conda-forge/miniforge) and QGIS LTR.
+   The Miniforge install path must not contain spaces (e.g. use `D:\miniforge3`, not `C:\Users\first last\...`):
+   ```
+   winget install --id CondaForge.Miniforge3 -e --scope user --location "D:\miniforge3"
+   winget install --id OSGeo.QGIS_LTR -e
+   ```
 2. Create the environment:
    ```
    conda env create -f environment.yml
