@@ -169,26 +169,31 @@ We **do not modify GDAL's C++ internals**. We build our own small engine (`demla
 ## 6. Benchmark methodology
 
 ### 6.1 Recording format
-One row per run, appended to `results/runs.csv`:
+One row per run, appended to `results/runs.csv` by `bench/harness.py`:
 
 ```
-run_id, timestamp, machine_id, git_sha,
-dataset, res_m, cells, format, compression, tile_px,
-op, method, impl, device, threads, cache_state,
-t_read, t_compute, t_h2d, t_d2h, t_write, t_total,
-peak_rss_mb, peak_vram_mb, cpu_pct, ok, error
+run_id, experiment, machine_id, git_sha, dataset, variant, res_m, cells, real_or_synthetic,
+format, compression, op, method, impl, device, threads, cpu_set, cache_state, rep,
+t_total, t_internal, peak_rss_mb, avg_cores, proc_read_mb, proc_write_mb, disk_read_mb,
+ok, error, extra, cmd
 ```
-`results/machine.json` stores CPU, RAM, GPU, driver, OS, and GDAL/Python/library versions.
+- `t_total`: wall time of the whole process. `t_internal`: time the tool reports for its own core work (e.g. the read loop without Python start-up, or QGIS draw time). `rep 0` is a warm-up and is excluded from results.
+- `peak_rss_mb`, `avg_cores`, `proc_read/write_mb` are **exact totals for the measured process** (read from its handle after it exits), not samples. This fixes the pilot, which measured QGIS instead of gdaldem.
+- `disk_read_mb`: bytes physically read from disk during the run (separates real disk reads from cache hits).
+- No timestamps per run. Per-sweep conditions go to `results/env/<experiment>_<n>.json`: power plan, AC power, Defender state, CPU core classes, pinned CPUs, free RAM, busiest processes. `results/machine.json` stores hardware and library versions.
+- GPU runs (Phase 3) will add transfer and kernel times to `extra`, measured with CUDA events.
 
 ### 6.2 Protocol
-- Laptop plugged in, Windows "Best performance" power mode, other applications closed.
+- Laptop plugged in (the harness refuses to run on battery and blocks sleep), other applications closed.
+- **Core pinning.** This CPU has 6 performance cores (12 threads) plus 8 efficiency and 2 low-power cores. Measured: gdaldem is **1.7× slower on an efficiency core and up to 2.7× slower on a low-power core**, and Windows can move a background process between them mid-run (the first E1 pass had one 2 m run take 108.9 s instead of ~56 s). Single-threaded tools are therefore pinned to the 12 performance-core threads, detected automatically (`performance_cpus()`). This measures every baseline tool at its best, so any speedup we report later is conservative. The unpinned first pass is kept in `results/e1_first_pass_unpinned.csv` as evidence.
+- **Power plan:** Windows default "Balanced", recorded per sweep. With pinning, repeated runs agree within a few %, so it was not changed.
+- **Windows Defender: left on (no exclusions).** Measured during a 2 m slope run that writes 10.8 GB: Defender used on average 0.02–0.05 of one core, under 1% of the run. Keeping the default keeps the machine realistic and no security setting is changed.
 - **1 warm-up run + 5 measured runs** per configuration; report **median and IQR**.
-- **E1 exception for the synthetic 2 m / 1 m grids (> 1 B cells):** only read/copy references + slope (Horn) + hillshade (Horn), 3 cold runs + 1 warm run (the preceding cold run is the warm-up). Method and operator comparisons are size-independent, so they come from the four real grids, which get the full protocol. This cuts E1 from ~9.5 h to ~4 h. At 1 m the file (~20 GB) is larger than RAM, so "warm" is effectively cold anyway.
+- **Exception for the synthetic 2 m / 1 m grids (> 1 B cells):** only read/copy references + slope (Horn) + hillshade (Horn), 3 cold runs + 1 warm run (the preceding cold run is the warm-up). Method and operator comparisons are size-independent, so they come from the four real grids, which get the full protocol. On these grids the file is too big for the cache to hold, so "warm" runs still read most of the file from disk; they are reported as such, not as true warm-cache runs.
 - **Cold cache:** flush the Windows standby list before the run with Sysinternals RAMMap `-Et`, via the elevated scheduled task `\GeoGuessers\GeoGuessers-FlushCache` (`bench/cache.py`; the benchmark itself runs without admin). Verified: after a flush the whole file is read from disk again. **Warm cache:** immediate repeat.
-- Early observation: on this NVMe SSD a raw cold read runs at ~1.9–2.0 GB/s, only ~20–30% slower than a warm read. The pilot's ~3× cold/warm gap therefore probably came from somewhere other than raw disk reads (e.g. tool start-up or a slower disk). E1 will show where.
-- Peak memory: sample the **child process** (e.g. gdaldem) with psutil every 50 ms. This fixes the pilot, which measured QGIS and not gdaldem.
-- GPU timings use CUDA events. Transfer and kernel time are reported separately.
-- Failures (out-of-memory, > 30 min timeout) are recorded as rows with `ok = false`. A failure is a result, not a missing value.
+- **Stage split** (where the time goes): `read` = read + decompress every full-resolution block and nothing else (`bench/read_blocks.py`, its own loop time); `copy` = `gdal_translate` to an uncompressed GeoTIFF (same read + same-size write as gdaldem). Then write + tool overhead ≈ copy − read, and compute ≈ gdaldem − copy. (The first version used `gdalinfo -checksum` as the read reference; computing the checksum itself cost more than half its time, so it was replaced.)
+- Below ~30 m the runs take < 0.3 s and are dominated by program start-up; they are not used for per-cell speed claims.
+- Failures (e.g. out-of-memory) are recorded as rows with `ok = False`. A failure is a result, not a missing value.
 
 ### 6.3 Standard plots
 1. Time vs cells (log-log), one line per implementation, with the 16 GB RAM line marked.

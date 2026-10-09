@@ -44,6 +44,21 @@ def cleanup():
         p.unlink()
 
 
+def wait_for_space(free_before, timeout=900):
+    """Wait until deleting the run's output has really freed its space.
+
+    Windows only releases a deleted file once every handle to it is closed; until then it sits in
+    the hidden NTFS $Deleted area. Defender scanning a 10-40 GB output can hold it for minutes, and
+    in the first E2 attempt 108 GB piled up and filled D:. Waiting here (outside the timed part)
+    also means the next run does not start while that scan is still busy."""
+    t = time.perf_counter()
+    while shutil.disk_usage(OUT_DIR).free < free_before - 2**30:
+        if time.perf_counter() - t > timeout:
+            return False
+        time.sleep(2)
+    return True
+
+
 def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=False):
     """jobs: dicts with the CSV metadata plus '_src' (input path) and optional '_cmd' (prebuilt command)."""
     rec = Recorder(csv_path)
@@ -68,8 +83,12 @@ def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=Fals
             if shutil.disk_usage(OUT_DIR).free < job["cells"] * 4 * 1.1 + 5 * 2**30:
                 raise SystemExit(f"Not enough free space on {OUT_DIR} for {job['dataset']} output")
             cmd = job.get("_cmd") or command(job["op"], job["method"], job["_src"], OUT_DIR / "out.tif")
+            free_before = shutil.disk_usage(OUT_DIR).free
             res = measure(cmd, job["cache_state"], cpus)
             cleanup()
+            if not job.get("_cmd") and not wait_for_space(free_before):
+                raise SystemExit(f"Deleted output was not released within 15 min ({OUT_DIR}); stopping before "
+                                 f"the disk fills. A restart frees it.")
             rec.write({k: v for k, v in job.items() if not k.startswith("_")}, res, cmd)
             el = time.perf_counter() - t_start
             print(f"[{i}/{len(todo)}] {job['dataset']} {job.get('variant', '')} {job['op']} {job['method']} "

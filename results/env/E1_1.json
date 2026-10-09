@@ -1,0 +1,81 @@
+{
+  "experiment": "E1",
+  "captured_at": "2026-10-09T20:13:51",
+  "git_sha": "68a8886",
+  "power_scheme": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)",
+  "on_ac_power": true,
+  "defender_realtime": "True",
+  "cpu_efficiency_classes": {
+    "0": 1,
+    "1": 1,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+    "6": 0,
+    "7": 0,
+    "8": 0,
+    "9": 0,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 1,
+    "17": 1,
+    "18": 1,
+    "19": 1,
+    "20": 0,
+    "21": 0
+  },
+  "pinned_cpus": [
+    0,
+    1,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "ram_available_gb": 4.1,
+  "busiest_processes_cores": [
+    [
+      19.41,
+      "System Idle Process"
+    ],
+    [
+      0.61,
+      "WmiPrvSE.exe"
+    ],
+    [
+      0.59,
+      "SearchIndexer.exe"
+    ],
+    [
+      0.34,
+      "SearchProtocolHost.exe"
+    ],
+    [
+      0.23,
+      "python.exe"
+    ],
+    [
+      0.08,
+      "Code.exe"
+    ],
+    [
+      0.07,
+      "svchost.exe"
+    ],
+    [
+      0.07,
+      "AWCC.UCSubAgent.exe"
+    ]
+  ]
+}
