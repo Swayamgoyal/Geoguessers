@@ -64,16 +64,14 @@ All benchmarking uses **one study area at several resolutions**. Run time depend
 | 90 m | `datasets/cop90_tile571.tif` | Copernicus GLO-90, OpenTopography API | **Real** (have it) | 1.6 M | Coarsest level; secondary accuracy check |
 | 30 m | `datasets/cop30_tile571.tif` | Copernicus GLO-30, OpenTopography API | **Real** (have it) | 14.7 M | Baseline level; secondary accuracy check |
 | **8 m** | `datasets/HMA_DEM8m_MOS_20170716_tile-571.tif` | NSIDC `HMA_DEM8m_MOS`, NASA Earthdata | **Real** (have it) | 156 M | 8 m level; "truth" for accuracy over the full tile |
-| 4, 2, 1 m | `D:\geoguessers_data\synthetic\` | Upsampled from the 8 m tile with `gdalwarp -r cubic` | Generated | 0.6 B / 2.5 B / 10 B | **Timing only**: pushes past the 16 GB RAM limit |
+| 2 or 1 m (only if needed) | `D:\geoguessers_data\synthetic\` | Upsampled from the 8 m tile with `gdalwarp -r cubic` | Generated | 2.5 B / 10 B | **Timing only**: made in Phase 2 only if needed to reach the 16 GB RAM limit |
 
 **Real high-resolution sub-area: Chamoli / Rishiganga** (79.48–79.81°E, 30.29–30.59°N, ~32 × 33 km, inside tile-571):
 
 | Res | File | Source | Real / generated | Cells | Role |
 |---|---|---|---|---|---|
 | **2 m** | `datasets/Chamoli_Sept2015_Composite_DEM2m_wmean.tif` | Chamoli pre-event 2 m DEM composite, Sept 2015 ([Zenodo 4554647](https://zenodo.org/records/4554647); NSIDC `HMA2_CPRE`), CC-BY-NC-4.0 | **Real** (downloading, 810 MB) | ~270 M | **Finest real level; accuracy truth for E5** |
-| 4 m | generated | Averaged (downsampled) from the real 2 m | Real-derived | ~67 M | Fills the 2 m → 8 m gap with real detail |
-
-Downsampling real fine data (2 m → 4 m) is legitimate: it keeps real terrain. Upsampling (8 m → 1 m) is not: it adds cells but no information (see §3.6).
+Intermediate levels (4, 16, 32 … m) are **not separate datasets**. They are the pyramid levels (overviews) inside each COG. Downsampling real fine data keeps real terrain; upsampling (8 m → 1 m) adds cells but no information (see §3.6).
 
 **No free 1 m DEM exists for this area.** India has no public lidar. Bhuvan CartoDEM is free only at 30 m (the 10 m version is restricted), and commercial 0.5–5 m products (AW3D Enhanced, WorldDEM Neo) are paid. So 1 m stays synthetic and is used for timing only.
 
@@ -234,9 +232,9 @@ P7                                                        ███████�
 
 ### Phase 1: Data (9–14 Oct) · KK · downloads ✅ done 9 Oct
 - ✅ Real data for tile-571 at 8 / 30 / 90 m downloaded, checked and listed in the manifest (§3).
-- Reproject all three to UTM 44N on a common grid; convert to COG with overviews.
-- Generate the 4 / 2 / 1 m timing grids from the 8 m tile (cubic upsampling, on D:).
-- Chamoli 2 m (Zenodo download in progress): check coverage and datum, reproject to UTM 44N, and build the real 4 m by averaging.
+- ✅ `python datasets/prepare.py`: 90 / 30 / 8 m reprojected to UTM 44N on one aligned grid (origin snapped to 360 m) and written as COGs (512 tiles, ZSTD, AVERAGE overviews) to `D:\geoguessers_data\prepared\`. gdaldem slope runs on all three (0.15 s / 0.55 s / 9.7 s).
+- Chamoli 2 m (Zenodo download in progress): re-run `prepare.py` when it finishes; it skips incomplete files.
+- Decided 9 Oct: **no extra 4 m / 16 m datasets.** The real ladder is 2 / 8 / 30 / 90 m; intermediate levels come from the COG overviews. One large synthetic grid (cubic, timing only) is made in Phase 2 only if needed to reach the 16 GB RAM limit.
 - Optional: geoid-correct the 8 m tile to EGM2008 (only needed for E7).
 
 ### Phase 2: Baseline benchmark, E1 + E2 (12–17 Oct) · SC (harness by SG)
