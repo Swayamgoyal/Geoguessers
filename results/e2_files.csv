@@ -1,0 +1,9 @@
+dataset,variant,bytes
+tile571_8m,strip_none,674159328
+tile571_8m,tile256_none,695227494
+tile571_8m,tile512_none,708843174
+tile571_8m,tile512_lzw,423367917
+tile571_8m,tile512_deflate,326445110
+tile571_8m,tile512_zstd,323524126
+tile571_8m,tile256_zstd,323638535
+tile571_2m_cubic,strip_none,10785928118
