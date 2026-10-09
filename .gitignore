@@ -4,6 +4,8 @@
 *.vrt
 *.aux.xml
 !datasets/*.tar.gz
+datasets/**/*.png
+*.properties
 
 # generated results (runs.csv and machine.json are committed)
 results/raw/

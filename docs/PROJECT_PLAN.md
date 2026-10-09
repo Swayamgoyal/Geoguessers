@@ -34,15 +34,16 @@ All reported numbers come from one machine so they are comparable. (The lit-revi
 | Disk | NVMe SSD; data stored on **D:** (~195 GB free) |
 | OS | Windows 11 |
 
-**Why this matters.** For a ~100 km × 100 km Himalayan study area in float32:
+**Why this matters.** For our 100 km × 100 km study area (HMA tile-571) in float32:
 
 | Resolution | Cells | Size in memory | Fits in 16 GB? |
 |---|---|---|---|
+| 90 m | ~1.2 M | 5 MB | yes |
 | 30 m | ~11 M | 44 MB | yes |
-| 10 m | ~100 M | 0.4 GB | yes |
-| 5 m | ~400 M | 1.6 GB | yes |
-| 2 m | ~2.5 B | 10 GB | borderline (input + output do not both fit) |
-| **1 m** | **~10 B** | **40 GB** | **no, out-of-core processing required** |
+| **8 m (real)** | **156 M** | **0.6 GB** | yes |
+| 4 m | 625 M | 2.5 GB | yes |
+| 2 m | 2.5 B | 10 GB | borderline (input + output do not both fit) |
+| **1 m** | **10 B** | **40 GB** | **no, out-of-core processing required** |
 
 The point where whole-array processing fails (between 2 m and 1 m) is exactly what we want to measure and then get past.
 
@@ -50,36 +51,44 @@ The point where whole-array processing fails (between 2 m and 1 m) is exactly wh
 
 ## 3. Datasets
 
-### 3.1 What we already have (`datasets/`)
+### 3.1 Design: one area, many resolutions
+
+All benchmarking uses **one study area at several resolutions**. Run time depends on the number of cells, not on which mountain is being processed, so changing the area would only add a second variable. Keeping the area fixed means resolution is the only thing that changes.
+
+**Study area: HMA tile-571, Uttarakhand / Nanda Devi.** 79.125–80.235°E, 30.033–30.970°N (~100 × 100 km). Elevation 674–7,790 m. It is in the same region as the lit-review pilot (N30 E79).
+
+### 3.2 Resolution ladder (all for tile-571)
+
+| Res | File | Source | Real / generated | Cells | Role |
+|---|---|---|---|---|---|
+| 90 m | `datasets/cop90_tile571.tif` | Copernicus GLO-90, OpenTopography API | **Real** (have it) | 1.6 M | Coarsest level; secondary accuracy check |
+| 30 m | `datasets/cop30_tile571.tif` | Copernicus GLO-30, OpenTopography API | **Real** (have it) | 14.7 M | Baseline level; secondary accuracy check |
+| **8 m** | `datasets/HMA_DEM8m_MOS_20170716_tile-571.tif` | NSIDC `HMA_DEM8m_MOS`, NASA Earthdata | **Real** (have it) | 156 M | **Finest real level; "truth" for accuracy (E5)** |
+| 4, 2, 1 m | `D:\geoguessers_data\synthetic\` | Resampled from the 8 m tile with `gdalwarp` | Generated | 0.6 B / 2.5 B / 10 B | **Timing only**: pushes past the 16 GB RAM limit |
+
+All real data is downloaded and checked (see `datasets/manifest.csv`). The Copernicus files are re-created with `python datasets/download_cop.py` (needs `OPENTOPO_API_KEY` set in the environment; the key is never committed).
+
+### 3.3 Test fixtures (small, for correctness only)
 
 | File | Contents | Use |
 |---|---|---|
-| `rasters_COP90.tar.gz` → `output_hh.tif` | Copernicus GLO-90 crop, 272 × 191 px, float32, 3″ (~90 m), WGS84 geographic. Top-left 86.813°E, 28.063°N (Everest / Khumbu) | Correctness fixture |
-| `viz (1).tar.gz` | OpenTopography gdaldem outputs for the same area: slope, aspect, hillshade, roughness, color-relief | Reference outputs. Our kernels must reproduce these |
+| `rasters_COP90.tar.gz` → `output_hh.tif` | Copernicus 90 m crop, 272 × 191 px, Everest / Khumbu, EPSG:4326 | Unit-test input |
+| `viz (1).tar.gz` | OpenTopography gdaldem slope / aspect / hillshade / roughness for the same crop | Reference answers. QGIS slope (scale 111120) already matches them to 1e-5° |
+| `hma8m_strips/HMA_DEM8m_AT_20161105_…tif` | Single 8 m strip, Kumaon (inside tile-571), 3.5 M cells, 78% valid | Strip-vs-mosaic check |
+| `hma8m_strips/HMA_DEM8m_AT_20161106_…tif` | Single 8 m strip, Ganesh Himal (Nepal), 11.7 M cells, 60% valid | Nodata/gap handling tests |
 
-These are far too small for scaling (~52 k cells) but ideal for unit tests. Note: they are in degrees, so the slope comparison must apply the degree→metre scale factor (or we reproject first).
+### 3.4 Data checks done (9 Oct)
 
-### 3.2 What to download
+- **Coverage:** tile-571 is 90.4% valid. Most of the tile is 85–99% valid; gaps are concentrated in the south-east corner (that corner's blocks are only 23–80% valid). The Copernicus 30/90 m files cover the whole tile with no gaps.
+- **Vertical datum:** the 8 m minus Copernicus 30 m difference has median **−24.5 m** (std 21.8 m). This is consistent with HMA heights being relative to the WGS84 ellipsoid and Copernicus to the EGM2008 geoid. A near-constant offset does not affect slope, aspect, hillshade, TRI or roughness. It **does** matter for viewshed (E7) and absolute-height comparisons, so apply a geoid correction (`gdalwarp` with an EGM2008 vertical CRS) before those.
+- **Projection:** the 8 m tile uses a custom Albers equal-area projection and Copernicus is in degrees. Everything is reprojected to **UTM 44N (EPSG:32644)** before computing derivatives.
 
-| Resolution | Dataset | Coverage | Role | Source |
-|---|---|---|---|---|
-| 30 m | **Copernicus GLO-30** | Global | Real-data baseline; top pyramid levels | OpenTopography, or AWS open data `copernicus-dem-30m` |
-| 30 m | NASADEM / ALOS AW3D30 / CartoDEM v3 | Global / India | Optional: cross-check of DEM source error | OpenTopography, Bhuvan |
-| **8 m** | **High Mountain Asia 8 m DEM** (NSIDC `HMA_DEM8m_MOS`) | Himalaya | **Real high-resolution Himalayan terrain** for accuracy work | NSIDC (needs a free NASA Earthdata login) |
-| 0.5–2 m | **swissALTI3D** or **USGS 3DEP 1 m** lidar | Swiss Alps / US Rockies | Real ~1 m alpine relief for the top of the scaling curve (no free 1 m Himalayan DEM exists) | swisstopo; AWS / OpenTopography |
-| 15/10/5/2/1 m (synthetic) | Resampled from GLO-30 | Same AOI | **Timing only.** Adds cells but no terrain detail | Our own `gdalwarp` |
+### 3.5 Rules
 
-**Areas of interest**
-- **Uttarakhand, N30 E79**, reprojected to UTM 44N (EPSG:32644). Main scaling region, same as the pilot.
-- **Everest / Khumbu**, UTM 45N (EPSG:32645). 8 m HMA accuracy work and the demo.
-
-**Rules**
-1. Timing experiments use the size ladder on one AOI, so only size changes.
-2. Accuracy experiments (E5, E7) use **only real high-resolution data**, never resampled grids.
-3. All DEMs are reprojected to a metric UTM CRS before computing derivatives.
-4. Every file goes into `datasets/manifest.csv` (name, source, resolution, CRS, size, cells, checksum). Raw data lives in `D:\geoguessers_data\` and is not committed.
-
-**First check (KK):** confirm that the HMA 8 m tiles actually cover the Khumbu AOI without large gaps, and that total download sizes fit on D:.
+1. **Timing** experiments use the ladder above on tile-571 only.
+2. **Accuracy** experiments use real data only. The main E5 numbers compare the 8 m tile with coarser levels derived from *itself* (same source). Copernicus 30/90 m is a secondary comparison, since it comes from a different sensor and date.
+3. Generated 4/2/1 m grids are stored **uncompressed** for timing runs. Resampled terrain compresses much better than real terrain and would make disk reads look artificially fast.
+4. Every file is listed in `datasets/manifest.csv`. Rasters are gitignored. Large generated grids live in `D:\geoguessers_data\` (C: has only ~60 GB free).
 
 ---
 
@@ -129,7 +138,7 @@ We **do not modify GDAL's C++ internals**. We build our own small engine (`demla
 | **E2** Storage / IO | Does file layout matter more than the algorithm? | striped GTiff vs tiled COG; none / LZW / DEFLATE / ZSTD; block 256 / 512 | read time, file size, total time | G1 |
 | **E3** CPU engine | How much do tiling and parallelism help? | naive NumPy vs Numba with 1 → 22 threads; tile size | time, speedup, RSS | G1 |
 | **E4** GPU | When does the GPU actually help? | size × tile size; **H2D / kernel / D2H timed separately**; 8 GB VRAM limit | GPU-vs-CPU crossover size; share of time spent on transfer | G1 |
-| **E5** Pyramid on demand | How wrong is slope from a coarse level, and how much time does it save? | pyramid level 0..k on **real** 8 m and ~1 m data; slope-from-overview vs full-res slope aggregated to the same grid | RMSE, bias, % cells with error > 5°, split by slope class; time per level | **G2** |
+| **E5** Pyramid on demand | How wrong is slope from a coarse level, and how much time does it save? | pyramid levels 16–128 m built from the **real** 8 m tile; slope-from-overview vs full-res 8 m slope aggregated to the same grid; secondary: vs real Copernicus 30/90 m | RMSE, bias, % cells with error > 5°, split by slope class; time per level | **G2** |
 | **E6** Interactive | Can on-the-fly computation keep up with pan and zoom? | precomputed tiles vs on-the-fly CPU vs GPU; cache on/off | tile latency p50/p95, cache hit rate, Cesium FPS | G1, G2 |
 | E7 *(stretch)* Viewshed | Speed and accuracy of approximate visibility | R3 vs XDraw vs `gdal_viewshed`; DEM size, observer height | time, % cells misclassified vs R3 | G3 |
 | E8 *(stretch)* Terrain distance | How much does the A* heuristic save? | Dijkstra vs A*; grid size | time, nodes expanded, path equality | G3 |
@@ -195,18 +204,18 @@ P6 (stretch)                                        ░░░░░░░░░�
 P7                                                        ███████████████████
 ```
 
-### Phase 0: Setup (9–11 Oct) · SG
-- Install Miniforge and create conda env `geo` (Python 3.12, conda-forge) from `environment.yml`.
-- Install QGIS LTR (OSGeo4W or standalone).
-- Set up the Cesium client (Node + Vite) in `viz/cesium/`.
-- Repo scaffold, `bench/machine_info.py` to write `results/machine.json`.
-- **Exit check:** `gdalinfo --version` works; `python -c "import cupy; cupy.show_config()"` sees the RTX 4060; QGIS opens the COP90 fixture.
+### Phase 0: Setup (9–11 Oct) · SG · ✅ done 9 Oct
+- Miniforge at `D:\miniforge3` (the install path must not contain spaces); conda env `geo` from `environment.yml` (Python 3.12, GDAL 3.13.3, CuPy 14.2, Numba 0.68).
+- QGIS LTR 3.44.14 installed; `qgis_process` works headless.
+- Repo scaffold; `results/machine.json` written by `bench/machine_info.py`.
+- Exit checks passed: `gdalinfo --version`; CuPy runs on the RTX 4060; COP90 fixture opens; QGIS slope matches the OpenTopography reference.
+- Remaining: Cesium client (Node + Vite) in `viz/cesium/`, moved to Phase 5.
 
-### Phase 1: Data (10–14 Oct) · KK
-- Download GLO-30 for Uttarakhand, HMA 8 m for Khumbu, and one swissALTI3D / 3DEP 1 m block.
-- Reproject to UTM and convert to COG with overviews.
-- Build the synthetic size ladder 30/15/10/5/2/1 m.
-- Fill `datasets/manifest.csv`.
+### Phase 1: Data (9–14 Oct) · KK · downloads ✅ done 9 Oct
+- ✅ Real data for tile-571 at 8 / 30 / 90 m downloaded, checked and listed in the manifest (§3).
+- Reproject all three to UTM 44N on a common grid; convert to COG with overviews.
+- Generate the 4 / 2 / 1 m timing grids from the 8 m tile (uncompressed, on D:).
+- Optional: geoid-correct the 8 m tile to EGM2008 (only needed for E7).
 
 ### Phase 2: Baseline benchmark, E1 + E2 (12–17 Oct) · SC (harness by SG)
 - `bench/harness.py`: subprocess runner, psutil sampler, cache flush, CSV writer.
@@ -221,7 +230,8 @@ P7                                                        ███████�
 
 ### Phase 4: Pyramid on demand, E5 (19–25 Oct) · SC
 - Compute slope directly from overview level k using that level's cell size.
-- Compare with full-resolution slope aggregated to the same grid, on real 8 m and ~1 m data.
+- Compare with full-resolution 8 m slope aggregated to the same grid (16, 32, 64, 128 m levels).
+- Secondary check: does slope from our 32 m / 64 m level match slope from the real Copernicus 30 m / 90 m as well as the two products match each other?
 - Error-vs-time-saved curves, split by slope class (flat / moderate / steep). **Headline result.**
 
 ### Phase 5: Tile server and visualisation, E6 (20–27 Oct) · SG (server), KK (Cesium, QGIS)
@@ -254,8 +264,8 @@ Only if Phases 2–5 are on track by **24 Oct**. R3 vs XDraw vs `gdal_viewshed` 
 
 | Risk | Fallback |
 |---|---|
-| HMA 8 m download slow, or AOI has gaps | Use swissALTI3D / 3DEP for all high-resolution accuracy work |
-| CuPy install fails on Windows | Numba-CUDA kernels |
+| Gaps in the 8 m tile (9.6% nodata) bias E5 | Report error only on cells whose full 3×3 neighbourhood is valid at every level; optionally restrict E5 to the gap-free northern part of the tile |
+| CuPy kernels misbehave on Windows | Numba-CUDA kernels (CuPy itself is installed and working) |
 | Cesium terrain provider too fiddly | Slope overlay on Cesium World Terrain; QGIS becomes the main demo |
 | 1 m runs too slow to repeat 5 times | 3 runs at 1 m, stated in the report |
 | Behind schedule | Drop Phase 6 entirely (the meeting marked these "if possible") |
@@ -267,7 +277,8 @@ Only if Phases 2–5 are on track by **24 Oct**. R3 vs XDraw vs `gdal_viewshed` 
 ```
 Geoguessers/
   docs/            PROJECT_PLAN.md, prof_questions.md
-  datasets/        small fixtures + manifest.csv  (raw data in D:\geoguessers_data, gitignored)
+  datasets/        real rasters (gitignored), fixtures, manifest.csv, download_cop.py
+                   (generated 4/2/1 m grids in D:\geoguessers_data, outside the repo)
   demlab/          io.py, tiling.py, pyramid.py, ops.py, kernels/{numpy_k,numba_k,cuda_k}.py
   bench/           harness.py, sampler.py, machine_info.py, experiments/e1_baseline.py … e6_tiles.py
   server/          app.py (FastAPI tile server)
