@@ -183,7 +183,8 @@ peak_rss_mb, peak_vram_mb, cpu_pct, ok, error
 ### 6.2 Protocol
 - Laptop plugged in, Windows "Best performance" power mode, other applications closed.
 - **1 warm-up run + 5 measured runs** per configuration; report **median and IQR**.
-- **Cold cache:** flush the Windows standby list before the run (Sysinternals RAMMap `-Ec`, admin). **Warm cache:** immediate repeat.
+- **Cold cache:** flush the Windows standby list before the run with Sysinternals RAMMap `-Et`, via the elevated scheduled task `\GeoGuessers\GeoGuessers-FlushCache` (`bench/cache.py`; the benchmark itself runs without admin). Verified: after a flush the whole file is read from disk again. **Warm cache:** immediate repeat.
+- Early observation: on this NVMe SSD a raw cold read runs at ~1.9–2.0 GB/s, only ~20–30% slower than a warm read. The pilot's ~3× cold/warm gap therefore probably came from somewhere other than raw disk reads (e.g. tool start-up or a slower disk). E1 will show where.
 - Peak memory: sample the **child process** (e.g. gdaldem) with psutil every 50 ms. This fixes the pilot, which measured QGIS and not gdaldem.
 - GPU timings use CUDA events. Transfer and kernel time are reported separately.
 - Failures (out-of-memory, > 30 min timeout) are recorded as rows with `ok = false`. A failure is a result, not a missing value.

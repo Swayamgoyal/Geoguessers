@@ -28,6 +28,14 @@ Spatial Informatics course project. We investigate how far large, high-resolutio
    gdalinfo --version
    python -c "import cupy; cupy.show_config()"
    ```
+5. Cold-cache benchmarks (one-time, needs one admin prompt): download
+   [RAMMap64.exe](https://live.sysinternals.com/RAMMap64.exe) to `D:\geoguessers_data\tools\`, then in an
+   **admin** PowerShell run
+   ```
+   powershell -ExecutionPolicy Bypass -File bench\register_flush_task.ps1
+   ```
+   This registers a scheduled task that empties the file cache (`RAMMap -Et`). Benchmarks trigger it
+   through `bench/cache.py` and do not need admin themselves.
 
 Raw DEMs are kept outside the repo in `D:\geoguessers_data\`; every dataset is listed in [datasets/manifest.csv](datasets/manifest.csv).
 
