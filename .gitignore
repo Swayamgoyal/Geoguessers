@@ -4,10 +4,7 @@
 *.tiff
 *.vrt
 *.aux.xml
-!unnecessary/*.tar.gz
 datasets/**/*.png
-unnecessary/**/*.png
-unnecessary/**/*.exe
 *.properties
 
 # sweep logs (one line per run)
@@ -30,3 +27,6 @@ viz/cesium/dist/
 .vscode/
 .idea/
 Thumbs.db
+
+# safeguard folder of earlier scripts, files and logs: kept locally, never committed
+old files/

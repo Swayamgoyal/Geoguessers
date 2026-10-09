@@ -47,7 +47,7 @@ Benchmark grids are kept outside the repo in `D:\geoguessers_data\`; every datas
 - The external drive (`K:\spatial project\`) is only for **large files (> 1 GB) produced by runs** once their results
   are recorded (e.g. the E2 layout copies), so the internal disk does not fill up. Move them with
   `bench\archive_large.ps1` (hash-verified).
-- Small files stay in the project folder. Nothing is deleted: old or unneeded files go to `unnecessary/`
+- Small files stay in the project folder. Nothing is deleted: old or unneeded files go to the local `old files/` folder (gitignored)
   (see its README).
 - Raw downloads live in `datasets/` (gitignored); `GEO_RAW` can point the scripts elsewhere.
 

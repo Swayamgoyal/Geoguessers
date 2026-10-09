@@ -79,7 +79,7 @@ All real data is listed in `datasets/manifest.csv`. The Copernicus files are re-
 
 ### 3.3 Unused files
 
-Early downloads that are not part of this design (the Everest 90 m crop with its OpenTopography reference outputs, and the single 8 m HMA strips) are kept in `unnecessary/`. Its README describes each file and how to reuse it. Project rule: nothing is deleted; old or unneeded files move to `unnecessary/`, and only large (> 1 GB) files produced by runs are moved to the external drive (`K:\spatial project\`). Correctness references for our kernels are now generated with `gdaldem` directly on the study-area data.
+Early downloads that are not part of this design (the Everest 90 m crop with its OpenTopography reference outputs, and the single 8 m HMA strips) are kept in the local `old files/` folder (gitignored; its README describes each file). Project rule: nothing is deleted; old scripts, files and logs move to `old files/`, and only large (> 1 GB) files produced by runs are moved to the external drive (`K:\spatial project\`). Correctness references for our kernels are now generated with `gdaldem` directly on the study-area data.
 
 ### 3.4 Data checks done
 
