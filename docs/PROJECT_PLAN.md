@@ -183,6 +183,7 @@ peak_rss_mb, peak_vram_mb, cpu_pct, ok, error
 ### 6.2 Protocol
 - Laptop plugged in, Windows "Best performance" power mode, other applications closed.
 - **1 warm-up run + 5 measured runs** per configuration; report **median and IQR**.
+- **E1 exception for the synthetic 2 m / 1 m grids (> 1 B cells):** only read/copy references + slope (Horn) + hillshade (Horn), 3 cold runs + 1 warm run (the preceding cold run is the warm-up). Method and operator comparisons are size-independent, so they come from the four real grids, which get the full protocol. This cuts E1 from ~9.5 h to ~4 h. At 1 m the file (~20 GB) is larger than RAM, so "warm" is effectively cold anyway.
 - **Cold cache:** flush the Windows standby list before the run with Sysinternals RAMMap `-Et`, via the elevated scheduled task `\GeoGuessers\GeoGuessers-FlushCache` (`bench/cache.py`; the benchmark itself runs without admin). Verified: after a flush the whole file is read from disk again. **Warm cache:** immediate repeat.
 - Early observation: on this NVMe SSD a raw cold read runs at ~1.9–2.0 GB/s, only ~20–30% slower than a warm read. The pilot's ~3× cold/warm gap therefore probably came from somewhere other than raw disk reads (e.g. tool start-up or a slower disk). E1 will show where.
 - Peak memory: sample the **child process** (e.g. gdaldem) with psutil every 50 ms. This fixes the pilot, which measured QGIS and not gdaldem.
@@ -293,7 +294,7 @@ Only if Phases 2–5 are on track by the **start of Week 3**. R3 vs XDraw vs `gd
 | Gaps in the 8 m tile (9.6% nodata) bias E5 | Report error only on cells whose full 3×3 neighbourhood is valid at every level; optionally restrict E5 to the gap-free northern part of the tile |
 | CuPy kernels misbehave on Windows | Numba-CUDA kernels (CuPy itself is installed and working) |
 | Cesium terrain provider too fiddly | Slope overlay on Cesium World Terrain; QGIS becomes the main demo |
-| 1 m runs too slow to repeat 5 times | 3 runs at 1 m, stated in the report |
+| 1 m runs too slow to repeat 5 times | 3 cold + 1 warm on synthetic 2 m / 1 m (adopted), stated in the report |
 | Behind schedule | Drop Phase 6 entirely (the meeting marked these "if possible") |
 
 ---

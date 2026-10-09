@@ -41,11 +41,12 @@ OPS = [("slope", "Horn"), ("slope", "ZevenbergenThorne"),
        ("hillshade", "Horn"), ("hillshade", "ZevenbergenThorne"),
        ("TRI", "Riley"), ("TRI", "Wilson"),
        ("TPI", ""), ("roughness", "")]
-# Agreed protocol: grids above LARGE_CELLS (synthetic 2 m and 1 m) get 3 measured runs instead
-# of 5; the 1 m grid runs only slope + hillshade. (Real chamoli_2m is only 264 M cells: full protocol.)
+# Agreed (trimmed) protocol. Real grids: all ops, 5 cold + warm-up + 5 warm.
+# Grids above LARGE_CELLS (synthetic 2 m and 1 m): only slope Horn + hillshade Horn (+ read/copy),
+# 3 cold + 1 warm. The last cold run has just loaded the file, so it serves as the warm-up.
+# Method/operator comparisons are size-independent and come from the real grids.
 LARGE_CELLS = 1_000_000_000
-ONLY_SLOPE_HILLSHADE_RES = 1
-SKIP_OPS = {"aspect", "TRI", "TPI", "roughness"}
+LARGE_OPS = [("slope", "Horn"), ("hillshade", "Horn")]
 
 
 def dataset_meta(path):
@@ -54,9 +55,12 @@ def dataset_meta(path):
     return ds.RasterXSize * ds.RasterYSize, s.get("LAYOUT", "GTiff"), s.get("COMPRESSION", "none")
 
 
-def runs_for(res, cells):
-    ops = [(o, m) for o, m in OPS if not (res == ONLY_SLOPE_HILLSHADE_RES and o in SKIP_OPS)]
-    return [("read", "checksum"), ("copy", "gtiff")] + ops, (3 if cells > LARGE_CELLS else 5)
+def runs_for(cells):
+    """(ops, cold reps, warm reps) for a grid of this size."""
+    refs = [("read", "checksum"), ("copy", "gtiff")]
+    if cells > LARGE_CELLS:
+        return refs + LARGE_OPS, range(1, 4), range(1, 2)
+    return refs + OPS, range(1, 6), range(0, 6)
 
 
 def command(op, method, src, out):
@@ -89,9 +93,9 @@ def main():
             print(f"{name}: missing ({path}), skipped")
             continue
         cells, layout, comp = dataset_meta(path)
-        ops, n = runs_for(res, cells)
+        ops, cold_reps, warm_reps = runs_for(cells)
         for op, method in ops:
-            for cache, reps in (("cold", range(1, n + 1)), ("warm", range(0, n + 1))):
+            for cache, reps in (("cold", cold_reps), ("warm", warm_reps)):
                 for rep in reps:
                     jobs.append({"experiment": "E1", "dataset": name, "res_m": res, "cells": cells,
                                  "real_or_synthetic": kind, "format": layout, "compression": comp,
