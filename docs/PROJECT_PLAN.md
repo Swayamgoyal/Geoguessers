@@ -70,7 +70,7 @@ All benchmarking uses **one study area at several resolutions**. Run time depend
 
 | Res | File | Source | Real / generated | Cells | Role |
 |---|---|---|---|---|---|
-| **2 m** | `datasets/Chamoli_Sept2015_Composite_DEM2m_wmean.tif` | Chamoli pre-event 2 m DEM composite, Sept 2015 ([Zenodo 4554647](https://zenodo.org/records/4554647); NSIDC `HMA2_CPRE`), CC-BY-NC-4.0 | **Real** (downloading, 810 MB) | ~270 M | **Finest real level; accuracy truth for E5** |
+| **2 m** | `datasets/Chamoli_Sept2015_Composite_DEM2m_wmean.tif` | Chamoli pre-event 2 m DEM composite, Sept 2015 ([Zenodo 4554647](https://zenodo.org/records/4554647); NSIDC `HMA2_CPRE`), CC-BY-NC-4.0 | **Real** (have it, 810 MB) | 270 M | **Finest real level; accuracy truth for E5** |
 Intermediate levels (4, 16, 32 … m) are **not separate datasets**. They are the pyramid levels (overviews) inside each COG. Downsampling real fine data keeps real terrain; upsampling (8 m → 1 m) adds cells but no information (see §3.6).
 
 **No free 1 m DEM exists for this area.** India has no public lidar. Bhuvan CartoDEM is free only at 30 m (the 10 m version is restricted), and commercial 0.5–5 m products (AW3D Enhanced, WorldDEM Neo) are paid. So 1 m stays synthetic and is used for timing only.
@@ -232,10 +232,11 @@ P7                                                        ███████�
 - Exit checks passed: `gdalinfo --version`; CuPy runs on the RTX 4060; COP90 fixture opens; QGIS slope matches the OpenTopography reference.
 - Remaining: Cesium client (Node + Vite) in `viz/cesium/`, moved to Phase 5.
 
-### Phase 1: Data (Week 1) · KK · ✅ done except Chamoli 2 m
-- ✅ Real data for tile-571 at 8 / 30 / 90 m downloaded, checked and listed in the manifest (§3).
-- ✅ `python datasets/prepare.py`: 90 / 30 / 8 m reprojected to UTM 44N on one aligned grid (origin snapped to 360 m) and written as COGs (512 tiles, ZSTD, AVERAGE overviews) to `D:\geoguessers_data\prepared\`. gdaldem slope runs on all three (0.15 s / 0.55 s / 9.7 s).
-- Chamoli 2 m (Zenodo download in progress): re-run `prepare.py` when it finishes; it skips incomplete files.
+### Phase 1: Data (Week 1) · KK · ✅ done
+- ✅ Real data for tile-571 at 8 / 30 / 90 m and Chamoli at 2 m downloaded, checked and listed in the manifest (§3). Chamoli 2 m MD5 matches Zenodo; all tiles readable.
+- ✅ `python datasets/prepare.py`: all four reprojected to UTM 44N on one aligned grid (origin snapped to 360 m) and written as COGs (512 tiles, ZSTD, AVERAGE overviews) to `D:\geoguessers_data\prepared\`. gdaldem slope runs on all four (90 m 0.15 s / 30 m 0.55 s / 8 m 9.7 s / 2 m 8.2 s).
+- ✅ Chamoli 2 m is re-gridded with nearest-neighbour (source is already 2 m UTM 44N, only 0.09 / 0.16 m off our grid), so its elevation values are unchanged: it stays a clean accuracy truth. 264 M cells, 93.9% valid.
+- ✅ Cross-source check: Chamoli 2 m averaged to 8 m vs the independent HMA 8 m tile: median difference −0.7 m, NMAD 5.1 m. The two share the same vertical reference, and the 8 m tile is consistent with the 2 m truth.
 - Decision: **no extra 4 m / 16 m datasets.** The real ladder is 2 / 8 / 30 / 90 m; intermediate levels come from the COG overviews. One large synthetic grid (cubic, timing only) is made in Phase 2 only if needed to reach the 16 GB RAM limit.
 - Optional: geoid-correct the 8 m tile to EGM2008 (only needed for E7).
 

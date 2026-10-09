@@ -5,7 +5,8 @@ Outputs go to $GEO_DATA/prepared (default D:\\geoguessers_data\\prepared):
     chamoli_2m.tif                                      (Chamoli 2 m composite extent)
 
 Grids are snapped to multiples of 360 m (divisible by 90, 30, 8 and 2), so every
-grid shares the same origin.  Overviews (the pyramid) use AVERAGE resampling.
+grid shares the same origin.  Reprojection is bilinear, except chamoli_2m (nearest,
+see JOBS).  Overviews (the pyramid) use AVERAGE resampling.
 
 Usage:  python datasets/prepare.py [--force]
 """
@@ -29,12 +30,15 @@ NODATA = -9999.0
 TILE_SRC = HERE / "HMA_DEM8m_MOS_20170716_tile-571.tif"
 CHAMOLI_SRC = HERE / "Chamoli_Sept2015_Composite_DEM2m_wmean.tif"
 
-# (output name, source, resolution m, extent source)
+# (output name, source, resolution m, extent source, resampling)
+# chamoli_2m uses "near": the source is already 2 m UTM 44N, offset from our grid by only
+# 0.09 / 0.16 m, so nearest keeps every elevation value unchanged (bilinear would smooth
+# the dataset we use as accuracy truth).
 JOBS = [
-    ("tile571_90m.tif", HERE / "cop90_tile571.tif", 90, TILE_SRC),
-    ("tile571_30m.tif", HERE / "cop30_tile571.tif", 30, TILE_SRC),
-    ("tile571_8m.tif", TILE_SRC, 8, TILE_SRC),
-    ("chamoli_2m.tif", CHAMOLI_SRC, 2, CHAMOLI_SRC),
+    ("tile571_90m.tif", HERE / "cop90_tile571.tif", 90, TILE_SRC, "bilinear"),
+    ("tile571_30m.tif", HERE / "cop30_tile571.tif", 30, TILE_SRC, "bilinear"),
+    ("tile571_8m.tif", TILE_SRC, 8, TILE_SRC, "bilinear"),
+    ("chamoli_2m.tif", CHAMOLI_SRC, 2, CHAMOLI_SRC, "near"),
 ]
 
 COG_OPTS = ["BLOCKSIZE=512", "COMPRESS=ZSTD", "PREDICTOR=FLOATING_POINT", "LEVEL=9",
@@ -84,7 +88,7 @@ def summarize(path):
 def main():
     force = "--force" in sys.argv
     OUT.mkdir(parents=True, exist_ok=True)
-    for name, src, res, extent_src in JOBS:
+    for name, src, res, extent_src, resample in JOBS:
         dst = OUT / name
         if not src.exists() or not extent_src.exists():
             print(f"{name}: source missing ({src.name}), skipping")
@@ -101,7 +105,7 @@ def main():
         t = time.perf_counter()
         gdal.Warp(str(dst), str(src), options=gdal.WarpOptions(
             format="COG", dstSRS=f"EPSG:{DST_EPSG}", outputBounds=te, xRes=res, yRes=res,
-            resampleAlg="bilinear", dstNodata=NODATA, outputType=gdal.GDT_Float32, multithread=True,
+            resampleAlg=resample, dstNodata=NODATA, outputType=gdal.GDT_Float32, multithread=True,
             warpOptions=["NUM_THREADS=ALL_CPUS"], creationOptions=COG_OPTS))
         print(f"  done in {time.perf_counter() - t:.1f} s")
         summarize(dst)
