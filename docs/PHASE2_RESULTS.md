@@ -139,6 +139,21 @@ On a 16 GB laptop with an NVMe SSD, the standard tools **do not stop working** a
   cost no longer depends on grid size. On-demand terrain computation is cheap: at ~25 ns per cell, slope for one
   256 × 256 tile is ~1.6 ms on one thread, so the real cost is reading the right window at the right pyramid level.
 
+## Is the baseline configured fairly?
+
+GDAL can decompress tiles in parallel (`GDAL_NUM_THREADS`, GDAL ≥ 3.6) and its block cache defaults to 5% of RAM
+(`GDAL_CACHEMAX`). We checked whether tuning these makes gdaldem faster (warm cache, slope Horn, medians of 3):
+
+| Grid | Default | `GDAL_NUM_THREADS=ALL_CPUS` | + `GDAL_CACHEMAX=4GB` |
+|---|---|---|---|
+| 8 m | 4.10 s (0.99 cores) | 4.20 s (1.99 cores) | 4.46 s |
+| 2 m real | 6.85 s (0.97 cores) | 7.15 s (2.24 cores) | 7.23 s |
+
+Parallel decoding makes gdaldem use ~2 cores but run 2–4% *slower*: decompression is only ~15% of its time and the
+thread overhead outweighs the gain; a larger cache does not help a single streaming pass. The default configuration
+is therefore also gdaldem's fastest, and all baseline numbers use it. The 0.83 GB memory plateau is the default
+`GDAL_CACHEMAX` (5% of 16 GB). (Check script: `old files/scripts_one_off_checks/gdal_numthreads_check.py`.)
+
 ## Data quality and caveats
 
 - **Repeatability:** for grids ≥ 169 M cells, most configurations repeat within 0.2–3.3% (median spread). Remaining
