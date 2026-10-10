@@ -257,7 +257,14 @@ P7                                                        ███████�
 - ✅ Results, tables and charts: **`docs/PHASE2_RESULTS.md`**. Headline: gdaldem never runs out of memory (0.83 GB at 1 m = 43 GB of data) but is single-threaded and compute-bound (73% compute, 3.5 min for slope at 1 m); without a pyramid, QGIS needs 32 s per whole-area redraw at 1 m, with one 0.09 s.
 - Next: send the progress update to the professor (draft: `docs/prof_update_phase2.md`).
 
-### Phase 3: Engine, E3 + E4 (end of Week 1 – end of Week 2) · SG (CPU, tiling), KK (GPU)
+### Phase 3: Engine, E3 + E4 (end of Week 1 – end of Week 2) · SG (CPU, tiling), KK (GPU) · in progress
+Done so far:
+- ✅ `demlab/kernels/numpy_k.py`: reference slope / aspect / hillshade (Horn, ZT), TRI (Riley, Wilson), TPI, roughness, gdaldem conventions; also runs on the GPU with CuPy (`xp=cupy`).
+- ✅ `demlab/kernels/numba_k.py`: parallel CPU kernels; slope + aspect + hillshade fused into one pass.
+- ✅ `demlab/io.py`, `demlab/engine.py`: window-by-window processing with a 1-cell halo, threaded reads, per-stage timings, any backend.
+- ✅ Correctness: `python -m pytest tests/` (60 tests) on two 1024² crops (8 m with 55% nodata, steep 2 m). With gdaldem's float32 rounding reproduced, every cell of all 10 configurations matches gdaldem; nodata masks identical; Numba = NumPy = CuPy; tiled = whole grid for windows not aligned to the tiles. Our default float64 slope is within 0.015° of gdaldem (gdaldem adds the Horn neighbours in float32).
+- First informal look (8 m grid, not yet through the harness): Numba slope incl. writing 1.6 s vs gdaldem 4.0 s; slope + aspect + hillshade in one pass 3.4 s vs ~11.3 s as three gdaldem runs. Writing is now the slowest stage (single-threaded); the CuPy array-style version is slow (3.9 s) because of temporaries and per-window transfers.
+Next: parallel / compressed writing, a CuPy raw kernel with timed transfers, the naive whole-array version (memory breaking point), then E3 / E4 through the harness.
 - `demlab/kernels/` with NumPy, Numba and CUDA versions of Horn/ZT slope, aspect, hillshade, TRI, TPI, roughness.
 - `demlab/tiling.py`: windowed read + halo + write for out-of-core runs.
 - Correctness tests against gdaldem (must pass first). Then thread scaling, tile-size sweep, GPU stage split, and the GPU crossover point.
