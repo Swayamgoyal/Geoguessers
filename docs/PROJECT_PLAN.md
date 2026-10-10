@@ -245,14 +245,17 @@ P7                                                        ███████�
 - ✅ `python datasets/prepare.py`: all four reprojected to UTM 44N on one aligned grid (origin snapped to 360 m) and written as COGs (512 tiles, ZSTD, AVERAGE overviews) to `D:\geoguessers_data\prepared\`. gdaldem slope runs on all four (90 m 0.15 s / 30 m 0.55 s / 8 m 9.7 s / 2 m 8.2 s).
 - ✅ Chamoli 2 m is re-gridded with nearest-neighbour (source is already 2 m UTM 44N, only 0.09 / 0.16 m off our grid), so its elevation values are unchanged: it stays a clean accuracy truth. 264 M cells, 93.9% valid.
 - ✅ Cross-source check: Chamoli 2 m averaged to 8 m vs the independent HMA 8 m tile: median difference −0.7 m, NMAD 5.1 m. The two share the same vertical reference, and the 8 m tile is consistent with the 2 m truth.
-- Decision: **no extra 4 m / 16 m datasets.** The real ladder is 2 / 8 / 30 / 90 m; intermediate levels come from the COG overviews. One large synthetic grid (cubic, timing only) is made in Phase 2 only if needed to reach the 16 GB RAM limit.
+- Decision: **no extra 4 m / 16 m datasets.** The real ladder is 2 / 8 / 30 / 90 m; intermediate levels come from the COG overviews.
+- ✅ Synthetic timing grids: `python datasets/prepare.py --synthetic` built 2 m (2.7 B cells) and 1 m (10.8 B cells, 43 GB as float32, past the 16 GB RAM) by cubic upsampling of the 8 m tile, in `D:\geoguessers_data\synthetic\`. Timing only.
 - Optional: geoid-correct the 8 m tile to EGM2008 (only needed for E7).
 
-### Phase 2: Baseline benchmark, E1 + E2 (end of Week 1 – middle of Week 2) · SC (harness by SG)
-- `bench/harness.py`: subprocess runner, psutil sampler, cache flush, CSV writer.
-- Run `gdaldem` for all ops × sizes × cold/warm, with spot checks through QGIS tools.
-- Find and document the break point. Run the format/compression sweep.
-- **Milestone, middle of Week 2: baseline curves done. Send a progress update to the professor.**
+### Phase 2: Baseline benchmark, E1 + E2 (end of Week 1 – middle of Week 2) · SC (harness by SG) · ✅ done
+- ✅ Harness (`bench/harness.py`, `bench/sweep.py`): exact per-process time / peak memory / CPU / bytes, cold-cache flush, pinning to performance cores, run-condition snapshots, resumable sweeps, waits for deleted outputs to be freed.
+- ✅ E1 (`bench/experiments/e1_baseline.py`): 10 gdaldem configs × 6 grids (90 m → 1 m) × cold / warm, plus read and copy references for the stage split. 560 runs.
+- ✅ E2 (`bench/experiments/e2_storage.py`): 7 storage layouts × 8 m and 2 m. 224 runs. Large layout copies archived to the external drive.
+- ✅ QGIS display test (`bench/experiments/e1_qgis.py`): open + draw 1920×1080, whole area / zoomed, with / without pyramid, 8 m → 1 m. 48 runs.
+- ✅ Results, tables and charts: **`docs/PHASE2_RESULTS.md`**. Headline: gdaldem never runs out of memory (0.83 GB at 1 m = 43 GB of data) but is single-threaded and compute-bound (73% compute, 3.5 min for slope at 1 m); without a pyramid, QGIS needs 32 s per whole-area redraw at 1 m, with one 0.09 s.
+- Next: send the progress update to the professor (draft: `docs/prof_update_phase2.md`).
 
 ### Phase 3: Engine, E3 + E4 (end of Week 1 – end of Week 2) · SG (CPU, tiling), KK (GPU)
 - `demlab/kernels/` with NumPy, Numba and CUDA versions of Horn/ZT slope, aspect, hillshade, TRI, TPI, roughness.

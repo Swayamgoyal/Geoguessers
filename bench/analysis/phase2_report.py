@@ -62,8 +62,9 @@ def md_table(df, floatfmt=2):
     return "\n".join([head, sep] + rows)
 
 
-def label_end(ax, x, y, text, color=INK2):
-    ax.annotate(text, (x, y), xytext=(6, 0), textcoords="offset points", va="center", color=color, fontsize=9)
+def label_end(ax, x, y, text, color=INK2, dy=0):
+    """Direct label at a line's last point; dy (points) nudges labels whose lines end close together."""
+    ax.annotate(text, (x, y), xytext=(6, dy), textcoords="offset points", va="center", color=color, fontsize=9)
 
 
 # ---------------------------------------------------------------- E1
@@ -134,15 +135,15 @@ def pinning_table(d):
 def plot_e1_scaling(d):
     e = d[d.experiment == "E1"]
     fig, ax = plt.subplots(figsize=(7.5, 4.6))
-    series = [("slope", "Horn", "t_total", "gdaldem slope", "o", "-"),
-              ("hillshade", "Horn", "t_total", "gdaldem hillshade", "s", "-"),
-              ("copy", "gtiff", "t_total", "copy (read + write)", "^", "--"),
-              ("read", "blocks", "t_internal", "read + decompress only", "D", ":")]
-    for i, (op, method, col, name, mk, ls) in enumerate(series):
+    series = [("slope", "Horn", "t_total", "gdaldem slope", "o", "-", 7),
+              ("hillshade", "Horn", "t_total", "gdaldem hillshade", "s", "-", -7),
+              ("copy", "gtiff", "t_total", "copy (read + write)", "^", "--", 0),
+              ("read", "blocks", "t_internal", "read + decompress only", "D", ":", 0)]
+    for i, (op, method, col, name, mk, ls, dy) in enumerate(series):
         g = e[(e.op == op) & (e.method == method) & (e.cache_state == "warm")]
         g = g.groupby("cells")[col].median().sort_index()
         ax.plot(g.index, g.values, marker=mk, ls=ls, color=S[i], label=name)
-        label_end(ax, g.index[-1], g.values[-1], f"{name} {g.values[-1]:.0f} s")
+        label_end(ax, g.index[-1], g.values[-1], f"{name} {g.values[-1]:.0f} s", dy=dy)
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("grid cells")
@@ -158,15 +159,16 @@ def plot_e1_memory(d):
     fig, ax = plt.subplots(figsize=(7.5, 4.2))
     e = d[(d.experiment == "E1") & (d.impl == "gdaldem")].groupby("cells").peak_rss_mb.max().sort_index()
     ax.plot(e.index, e.values, marker="o", color=S[0], label="gdaldem (any operator)")
-    label_end(ax, e.index[-1], e.values[-1], f"{e.values[-1]:.0f} MB")
+    label_end(ax, e.index[-1], e.values[-1], f"{e.values[-1]:.0f} MB", dy=-7)
     q = d[(d.experiment == "E1q") & (d.method == "full-none")]
     if len(q):
         q = q.groupby("cells").peak_rss_mb.max().sort_index()
         ax.plot(q.index, q.values, marker="s", ls="--", color=S[1], label="QGIS draw, no pyramid")
-        label_end(ax, q.index[-1], q.values[-1], f"{q.values[-1]:.0f} MB")
+        label_end(ax, q.index[-1], q.values[-1], f"{q.values[-1]:.0f} MB", dy=7)
     ram = 16 * 1024
     ax.axhline(ram, color=AXIS, lw=1)
-    ax.annotate("laptop RAM, 16 GB", (e.index[0], ram), xytext=(0, 4), textcoords="offset points", color=INK2, fontsize=9)
+    ax.annotate("laptop RAM, 16 GB", (e.index[-1] * 6, ram), xytext=(0, 4), textcoords="offset points",
+                color=INK2, fontsize=9, ha="right")
     raw = pd.Series(e.index.values * 4 / 2**20, index=e.index)
     ax.plot(raw.index, raw.values, ls=":", color=MUTED, lw=1.5, label="size of the grid itself (float32)")
     ax.set_xscale("log")
@@ -174,7 +176,7 @@ def plot_e1_memory(d):
     ax.set_xlabel("grid cells")
     ax.set_ylabel("peak memory (MB)")
     ax.set_title("E1: gdaldem memory levels off at ~0.8 GB, whatever the grid size")
-    ax.legend(loc="upper left")
+    ax.legend(loc="lower right")
     ax.set_xlim(right=ax.get_xlim()[1] * 6)
     fig.savefig(PLOTS / "e1_memory.png")
     plt.close(fig)
@@ -197,8 +199,7 @@ def plot_e1_stages(d):
     ax.set_xlabel("share of gdaldem slope time, warm cache (%)")
     ax.set_title("E1: most of the time is computation, not disk")
     ax.grid(axis="y", visible=False)
-    ax.legend(loc="lower center", bbox_to_anchor=(0.5, 1.02), ncol=3)
-    ax.title.set_position((0, 1.18))
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.22), ncol=3)
     fig.savefig(PLOTS / "e1_stages.png")
     plt.close(fig)
 
@@ -295,7 +296,10 @@ def plot_e1q(d):
         g = e[(e.method == method) & (e.cache_state == "cold")].groupby("cells").t_internal.median().sort_index()
         if len(g):
             ax.plot(g.index, g.values, marker=mk, ls=ls, color=S[i], label=name)
-            label_end(ax, g.index[-1], g.values[-1], f"{g.values[-1]:.2f} s")
+            if method == "zoom-none":
+                label_end(ax, g.index[-1], g.values[-1], f"zoomed in (both) {g.values[-1]:.2f} s", dy=8)
+            elif method != "zoom-use":  # the two zoomed lines overlap; one shared label
+                label_end(ax, g.index[-1], g.values[-1], f"{g.values[-1]:.2f} s", dy=-6 if method == "full-use" else 0)
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("grid cells")

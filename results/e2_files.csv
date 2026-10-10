@@ -7,3 +7,9 @@ tile571_8m,tile512_deflate,326445110
 tile571_8m,tile512_zstd,323524126
 tile571_8m,tile256_zstd,323638535
 tile571_2m_cubic,strip_none,10785928118
+tile571_2m_cubic,tile256_none,10854831874
+tile571_2m_cubic,tile512_none,10908461502
+tile571_2m_cubic,tile512_lzw,5026660515
+tile571_2m_cubic,tile512_deflate,3877446667
+tile571_2m_cubic,tile512_zstd,3767191475
+tile571_2m_cubic,tile256_zstd,3827899922
