@@ -9,6 +9,7 @@ memory, CPU, bytes). Variants (CSV column `variant`):
   numpy_tiled_slope    same tiled pipeline with the single-threaded NumPy reference kernel
   naive_slope          whole grid in memory, NumPy, no tiling: the memory-hungry approach (15 min time limit)
   threads_<n>          thread scaling: slope + write with n threads, pinned to the performance cores
+  window_<n>           window (tile) size n x n cells instead of 2048; otherwise as engine_perf_slope
 <ops> is slope, aspect, hillshade, or 3prod (slope+aspect+hillshade in one fused pass).
 
 Repeats: real grids 3-5 cold + warm; synthetic grids fewer (see PLAN below); thread sweep warm only.
@@ -32,6 +33,8 @@ SYN2, SYN1 = "tile571_2m_cubic", "tile571_1m_cubic"
 THREE = "slope,aspect,hillshade"
 FULL, SHORT, ONE = (range(1, 6), range(0, 6)), (range(1, 4), range(1, 2)), (range(1, 2), range(0))
 WARM3 = (range(0), range(0, 4))
+TILE = (range(1, 4), range(0, 4))
+WINDOWS = (512, 1024, 4096, 8192)  # 2048 is the default, measured by engine_perf_slope
 TIMEOUT_NAIVE = 900
 
 # variant: (impl, ops, cpus, threads, extra cli args, output bytes per cell)
@@ -46,6 +49,7 @@ VARIANTS = {
     "numpy_tiled_slope": ("numpy", "slope", "perf", 1, [], 4),
     "naive_slope": ("naive", "slope", "perf", 1, [], 4),
     **{f"threads_{n}": ("numba", "slope", "perf", n, [], 4) for n in (1, 2, 4, 8)},
+    **{f"window_{n}": ("numba", "slope", "perf", 12, ["--window", str(n)], 4) for n in WINDOWS},
 }
 # which variants run on which grids, with which (cold reps, warm reps)
 PLAN = {
@@ -53,14 +57,16 @@ PLAN = {
                                         "engine_all_3prod", "engine_perf_slope", "engine_all_slope_nowrite",
                                         "engine_all_slope_zstd1")},
                    "numpy_tiled_slope": SHORT, "naive_slope": SHORT,
-                   **{f"threads_{n}": WARM3 for n in (1, 2, 4, 8)}},
+                   **{f"threads_{n}": WARM3 for n in (1, 2, 4, 8)},
+                   **{f"window_{n}": TILE for n in WINDOWS}},
 }
 PLAN["chamoli_2m"] = dict(PLAN["tile571_8m"])
 PLAN[SYN2] = {**{v: SHORT for v in ("engine_all_slope", "engine_all_aspect", "engine_all_hillshade",
                                     "engine_all_3prod", "engine_perf_slope", "engine_all_slope_nowrite",
                                     "engine_all_slope_zstd1")},
               "numpy_tiled_slope": ONE, "naive_slope": ONE,
-              **{f"threads_{n}": WARM3 for n in (1, 2, 4, 8)}}
+              **{f"threads_{n}": WARM3 for n in (1, 2, 4, 8)},
+              **{f"window_{n}": TILE for n in WINDOWS}}
 PLAN[SYN1] = {"engine_all_slope": SHORT, "engine_perf_slope": SHORT, "engine_all_slope_nowrite": SHORT,
               "engine_all_3prod": (range(1, 2), range(1, 2)), "naive_slope": ONE}
 
