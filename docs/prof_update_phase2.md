@@ -3,7 +3,7 @@ Dear Sir,
 Here is a short update on our large-DEM project. The data preparation and the baseline benchmarks are complete.
 
 **Data.** We work on one Himalayan study area (Uttarakhand, Nanda Devi; about 100 × 100 km) at several resolutions:
-real 90 m and 30 m (Copernicus), 8 m (NASA High Mountain Asia DEM) and 2 m for the Chamoli valley (Shean et al.).
+real 90 m and 30 m (Copernicus), 8 m (NASA High Mountain Asia DEM) and 2 m for the Chamoli valley (Bhushan and Shean, 2021).
 To go beyond the laptop's 16 GB of RAM we also made 2 m and 1 m versions of the whole area by upsampling; these
 are used only for timing, never for accuracy. The largest grid has 10.8 billion cells (43 GB as float32).
 

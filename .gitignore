@@ -30,3 +30,13 @@ Thumbs.db
 
 # safeguard folder of earlier scripts, files and logs: kept locally, never committed
 old files/
+
+# LaTeX build files (the .tex sources and final PDFs are committed)
+report/**/*.aux
+report/**/*.log
+report/**/*.out
+report/**/*.toc
+report/**/*.fls
+report/**/*.fdb_latexmk
+report/**/*.synctex.gz
+
