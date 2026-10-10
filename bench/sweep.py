@@ -40,7 +40,7 @@ def impl_of(op):
 
 
 def cleanup():
-    for p in OUT_DIR.glob("out.*"):
+    for p in OUT_DIR.glob("out*.tif*"):  # out.tif (gdaldem) and out_<op>.tif (demlab.cli)
         p.unlink()
 
 
@@ -60,7 +60,10 @@ def wait_for_space(free_before, timeout=900):
 
 
 def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=False, snapshot=True):
-    """jobs: dicts with the CSV metadata plus '_src' (input path) and optional '_cmd' (prebuilt command).
+    """jobs: dicts with the CSV metadata plus '_src' (input path) and optional private keys:
+    _cmd (prebuilt command), _cpus ("all" = every logical CPU; default the performance cores), _timeout (s),
+    _out_bpc (output bytes per cell, for the free-space check; default 4), _scratch (writes into OUT_DIR and
+    must wait for the deleted output to be released; default: no _cmd).
     snapshot: record the run conditions (results/env); callers that run one sweep in parts pass it once."""
     rec = Recorder(csv_path)
     todo = [j for j in jobs if not rec.is_done(j)]
@@ -82,13 +85,14 @@ def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=Fals
     t_start = time.perf_counter()
     try:
         for i, job in enumerate(todo, 1):
-            if shutil.disk_usage(OUT_DIR).free < job["cells"] * 4 * 1.1 + 5 * 2**30:
+            if shutil.disk_usage(OUT_DIR).free < job["cells"] * job.get("_out_bpc", 4) * 1.1 + 5 * 2**30:
                 raise SystemExit(f"Not enough free space on {OUT_DIR} for {job['dataset']} output")
             cmd = job.get("_cmd") or command(job["op"], job["method"], job["_src"], OUT_DIR / "out.tif")
             free_before = shutil.disk_usage(OUT_DIR).free
-            res = measure(cmd, job["cache_state"], cpus)
+            job_cpus = list(range(os.cpu_count())) if job.get("_cpus") == "all" else cpus
+            res = measure(cmd, job["cache_state"], job_cpus, timeout=job.get("_timeout"))
             cleanup()
-            if not job.get("_cmd") and not wait_for_space(free_before):
+            if job.get("_scratch", not job.get("_cmd")) and not wait_for_space(free_before):
                 raise SystemExit(f"Deleted output was not released within 15 min ({OUT_DIR}); stopping before "
                                  f"the disk fills. A restart frees it.")
             rec.write({k: v for k, v in job.items() if not k.startswith("_")}, res, cmd)

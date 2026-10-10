@@ -149,10 +149,18 @@ def _final_counters(handle):
     return mem.PeakWorkingSetSize, cpu, io.ReadTransferCount, io.WriteTransferCount
 
 
-def measure(cmd, cache_state, cpus=None, env=None):
+def cpu_set_label(cpus):
+    if not cpus:
+        return ""
+    return f"{len(cpus)} perf" if sorted(cpus) == performance_cpus() else f"{len(cpus)} all"
+
+
+def measure(cmd, cache_state, cpus=None, env=None, timeout=None):
     """Run cmd once and return its measurements. cache_state 'cold' empties the file cache first.
     cpus: logical CPUs to pin the process to (None = let Windows choose). If the command prints a
-    JSON object as its last stdout line, its "t_internal" goes to t_internal and the rest to extra."""
+    JSON object as its last stdout line, its "t_internal" goes to t_internal and the rest to extra.
+    timeout (s): kill the process if it runs longer; recorded as ok=False, error="timeout after N s"
+    (a failure is a result, e.g. a whole-array program swapping to disk)."""
     if cache_state == "cold":
         flush()
     disk0 = _disk_read_bytes()
@@ -163,7 +171,13 @@ def measure(cmd, cache_state, cpus=None, env=None):
             psutil.Process(proc.pid).cpu_affinity(cpus)
         except psutil.NoSuchProcess:
             pass
-    out, err = proc.communicate()
+    timed_out = False
+    try:
+        out, err = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        proc.kill()
+        out, err = proc.communicate()
     wall = time.perf_counter() - t0
     disk = _disk_read_bytes() - disk0
     peak, cpu, rd, wr = _final_counters(int(proc._handle))  # handle stays open until proc is deleted
@@ -182,11 +196,17 @@ def measure(cmd, cache_state, cpus=None, env=None):
         "proc_read_mb": round(rd / 2**20, 1),
         "proc_write_mb": round(wr / 2**20, 1),
         "disk_read_mb": round(disk / 2**20, 1),
-        "cpu_set": "" if not cpus else f"{len(cpus)} perf",
-        "ok": proc.returncode == 0,
-        "error": "" if proc.returncode == 0 else err.decode(errors="ignore").strip()[-300:],
+        "cpu_set": cpu_set_label(cpus),
+        "ok": proc.returncode == 0 and not timed_out,
+        "error": f"timeout after {timeout} s" if timed_out else
+                 ("" if proc.returncode == 0 else err.decode(errors="ignore").strip()[-300:]),
         "extra": json.dumps(extra) if extra else "",
     }
+
+
+def expected_failure(error):
+    """Failures that are results (out of memory, timeout): recorded once, not retried on a restart."""
+    return error.startswith("timeout after") or "MemoryError" in error or "Unable to allocate" in error
 
 
 class Recorder:
@@ -202,7 +222,7 @@ class Recorder:
                     raise SystemExit(f"{self.path} has an older column layout; move it aside first")
                 for row in reader:
                     self.next_id = max(self.next_id, int(row["run_id"]) + 1)
-                    if row["ok"] == "True":
+                    if row["ok"] == "True" or expected_failure(row["error"]):
                         self.done.add(tuple(row[k] for k in KEY))
         else:
             with self.path.open("w", newline="") as f:
@@ -218,7 +238,7 @@ class Recorder:
         with self.path.open("a", newline="") as f:
             csv.DictWriter(f, FIELDS, extrasaction="ignore").writerow(row)
         self.next_id += 1
-        if result["ok"]:
+        if result["ok"] or expected_failure(result["error"]):
             self.done.add(tuple(str(meta[k]) for k in KEY))
 
 
