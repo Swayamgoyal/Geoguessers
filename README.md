@@ -70,6 +70,23 @@ python -m bench.analysis.phase2_report           # tables (results/phase2_tables
 ```
 Or all three sweeps unattended: `powershell -ExecutionPolicy Bypass -File bench\run_phase2.ps1`
 (progress in `D:\geoguessers_data\phase2_log.txt`).
+Results: [docs/PHASE2_RESULTS.md](docs/PHASE2_RESULTS.md).
+
+## Our engine and its benchmark (Phase 3, CPU)
+
+The engine processes a DEM window by window (reader threads → parallel Numba kernel → one writer thread), so its
+memory stays around 1.3 GB whatever the grid size. It reproduces gdaldem's ten operator configurations.
+```
+python -m demlab.cli in.tif --ops slope,aspect,hillshade --out-dir OUT [--method Horn] [--threads 12]
+python -m pytest tests/ -q                       # correctness vs gdaldem on 1024² crops (60 tests)
+python -m tests.check_full_grid                  # engine vs gdaldem on the full 8 m and 2 m real grids
+python -m bench.experiments.e3_cpu --plan        # E3: engine vs gdaldem; drop --plan to run
+python -m bench.analysis.phase3_report           # tables (results/phase3_tables.md) + plots (results/plots/e3_*)
+```
+`--impl numpy` runs the single-threaded NumPy reference kernel in the same pipeline, and `--impl naive` loads the
+whole grid into memory (it runs out of memory on the big grids, as intended).
+Unattended: `powershell -ExecutionPolicy Bypass -File bench\run_e3.ps1` (progress in `logs\e3_log.txt`).
+Results: [docs/PHASE3_RESULTS.md](docs/PHASE3_RESULTS.md).
 
 ## Layout
 

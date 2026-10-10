@@ -5,9 +5,9 @@ All numbers come from the E3 rows of `results/runs.csv` and are reproduced by
 `results/plots/e3_*.png`. Values are medians over the measured repeats. The gdaldem numbers are the E1 runs from
 Phase 2 (`docs/PHASE2_RESULTS.md`): same machine, same grids, same harness.
 
-**What was run:** 347 E3 runs on four grids (8 m and 2 m real, 2 m and 1 m synthetic): 17 variants,
-5 cold + 5 warm repeats on the real grids, fewer on the big synthetic ones. Two runs failed, both expected: the
-whole-grid NumPy version running out of memory.
+**What was run:** 501 E3 runs on four grids (8 m and 2 m real, 2 m and 1 m synthetic): 24 variants,
+including all 10 gdaldem operator configurations of E1. Repeats are 5 cold + 5 warm on the real grids and fewer on
+the big synthetic ones. Two runs failed, both expected: the whole-grid NumPy version running out of memory.
 Every run is a separate `python -m demlab.cli` process, measured exactly like gdaldem (wall time including Python
 start-up, peak memory, CPU, bytes). Cold runs flush the file cache first. Output is written to the internal SSD
 and deleted after each run.
@@ -16,8 +16,8 @@ and deleted after each run.
 with a 1-cell halo, as a three-stage pipeline: 4 reader threads (each with its own GDAL handle, at most 6 windows in
 flight), a compiled parallel Numba kernel, and one writer thread (GDAL's multi-threading docs warn against writing
 from several threads). Slope, aspect and hillshade can be computed in one fused pass. Output is a tiled,
-uncompressed GeoTIFF. The values match gdaldem (60 tests in `tests/`; with gdaldem's float32 rounding reproduced,
-every cell is identical).
+uncompressed GeoTIFF. The values match gdaldem, on 1024² crops (60 tests in `tests/`) and on the full grids (see
+"Correctness on the full grids" below).
 
 **Variants:** `engine_all` = all 22 logical CPUs, 22 threads; `engine_perf` = the 12 performance-core threads
 gdaldem was pinned to, 12 threads; `numpy_tiled` = same pipeline with the single-threaded NumPy reference kernel;
@@ -31,23 +31,26 @@ gdaldem was pinned to, 12 threads; `numpy_tiled` = same pipeline with the single
    about 1 s of every run is fixed cost (Python start-up 0.6 s, loading the compiled kernel 0.45 s).
 2. **Memory stays flat at about 1.3 GB for every size**, including the 1 m grid (10.8 billion cells, 43 GB as
    float32). gdaldem stays at 0.83 GB. The whole-grid NumPy version needs about 23 bytes per cell: 3.9 GB at 8 m,
-   6.1 GB at 2 m real, and it **fails at 2 m synthetic** (asked for 19 GB) and **at 1 m** (refused at the first
-   40 GB allocation). Out-of-core tiling is required past roughly 0.5–0.7 billion cells on this laptop.
-3. **Three products in one pass cost little more than one.** Slope + aspect + hillshade: 3.3 s vs 11.3 s for three
+   6.1 GB at 2 m real, and it **fails at 2 m synthetic** (needed about 20 GB) and **at 1 m** (its first
+   allocation, 40.2 GiB = 43 GB for the input alone, was refused). Out-of-core tiling is required past roughly 0.5–0.7 billion cells on this laptop.
+3. **Every gdaldem operator is faster in our engine:** all 10 configurations of E1 (Horn and Zevenbergen–Thorne
+   slope / aspect / hillshade, TRI Riley and Wilson, TPI, roughness) run 1.3–2.0× faster at 8 m and 1.7–2.6×
+   faster at 2 m real. On these small grids the engine's time is the same for every operator (fixed cost + I/O).
+4. **Three products in one pass cost little more than one.** Slope + aspect + hillshade: 3.3 s vs 11.3 s for three
    gdaldem runs at 8 m (3.4×) and 4.4 s vs 18.5 s at 2 m real (4.2×). At 1 m the fused pass takes 135 s, while
    gdaldem needs 367 s for only slope + hillshade.
-4. **With computation parallel, the bottleneck has moved to moving data.** At 1 m (slope, 22 threads, 67.7 s) the
+5. **With computation parallel, the bottleneck has moved to moving data.** At 1 m (slope, 22 threads, 67.7 s) the
    kernel needs 31 s; the writer thread is busy for 65 s writing 41 GB (about 0.64 GB/s), so the run is
    **write-bound**. Without writing it is **read-bound**: 22 s of waiting for windows to be decompressed, partly
    because the 1-cell halo makes neighbouring compressed tiles get decoded again (2.25× the tiles at the 2048 window).
    gdaldem was 73% computation; our engine is mostly I/O.
 6. **A 2048 × 2048 window is the best size.** 512 is up to 2.2× slower (halo re-decoding), and 8192 needs 7 GB
    for no gain.
-5. **More threads stop helping early.** Inside the pipeline the kernel speeds up only 2.2–2.8× from 1 to 22
+7. **More threads stop helping early.** Inside the pipeline the kernel speeds up only 2.2–2.8× from 1 to 22
    threads. On its own, in memory, the same kernel scales 4.7× at 12 threads and 5.7× at 16. In the pipeline it
    shares the cores with decompression and writing. The 8 efficiency and 2 low-power cores make it slower, not
    faster: **12 performance-core threads beat all 22** (1 m: 60 s vs 68 s).
-7. **Cold vs warm file cache changes almost nothing** (1 m: 67 s cold, 68 s warm). gdaldem's E1 numbers showed the
+8. **Cold vs warm file cache changes almost nothing** (1 m: 67 s cold, 68 s warm). gdaldem's E1 numbers showed the
    same thing. Reading is limited by decompression, not by the disk.
 
 ## Slope: engine vs gdaldem
@@ -89,6 +92,34 @@ The writer thread works in parallel; "writer busy" is its own working time.
 - The "compute" column includes about 0.45 s of one-off cost in each process (loading the cached compiled kernel,
   starting the thread pool). That is half of the 8 m number.
 
+## Every gdaldem operator
+
+![every operator](../results/plots/e3_operators.png)
+
+All 10 configurations from E1, engine with 22 threads, warm.
+
+| Operator | 8 m gdaldem | 8 m engine | Speed-up | 2 m real gdaldem | 2 m real engine | Speed-up |
+|---|---|---|---|---|---|---|
+| slope Horn | 4.02 s | 2.28 s | 1.8× | 6.63 s | 2.72 s | 2.4× |
+| slope Zevenbergen–Thorne | 3.86 s | 2.22 s | 1.7× | 6.35 s | 2.78 s | 2.3× |
+| aspect Horn | 4.34 s | 2.19 s | 2.0× | 7.12 s | 2.78 s | 2.6× |
+| aspect Zevenbergen–Thorne | 4.22 s | 2.32 s | 1.8× | 6.72 s | 2.82 s | 2.4× |
+| hillshade Horn | 2.96 s | 2.08 s | 1.4× | 4.74 s | 2.42 s | 2.0× |
+| hillshade Zevenbergen–Thorne | 2.92 s | 1.99 s | 1.5× | 4.76 s | 2.43 s | 2.0× |
+| TRI Riley | 3.13 s | 2.17 s | 1.4× | 5.04 s | 2.72 s | 1.8× |
+| TRI Wilson | 3.01 s | 2.21 s | 1.4× | 4.84 s | 2.75 s | 1.8× |
+| TPI | 2.85 s | 2.20 s | 1.3× | 4.61 s | 2.70 s | 1.7× |
+| roughness | 3.02 s | 2.20 s | 1.4× | 4.94 s | 2.72 s | 1.8× |
+
+- **The engine takes the same time for every operator** on a given grid (2.0–2.3 s at 8 m, 2.4–2.8 s at 2 m real).
+  On grids this small, about 1 s is fixed per-process cost (Python start-up, loading the compiled kernel) and the
+  rest is reading and writing. The operator's own arithmetic hardly shows.
+- gdaldem's cost does depend on the operator: slope and aspect, which need `atan`, are its slowest (23–27 ns per
+  cell), and hillshade, TRI, TPI and roughness are 17–19 ns. So our speed-up is largest where gdaldem is slowest.
+- Larger grids (as with slope and hillshade on 2 m synthetic: 3.3× and 2.8×) can be expected to give every operator
+  a larger speed-up, because the fixed cost is spread over more cells. On the synthetic grids E1 measured only
+  slope and hillshade, so the other operators are compared on the real grids only.
+
 ## Slope + aspect + hillshade
 
 ![three products](../results/plots/e3_products.png)
@@ -128,6 +159,7 @@ So the kernel itself scales to about 16 threads. In the full pipeline it gets 2�
 - the fixed 0.45 s load cost sits inside the compute time;
 - the work is split evenly across threads, so with all 22 threads the slower efficiency and low-power cores hold
   the others up.
+
 Beyond 4–8 threads the total time hardly changes, because reading and writing are the limit.
 
 ## Window (tile) size
@@ -174,13 +206,34 @@ somewhere around 0.5–0.7 billion cells, between our 2 m real and 2 m synthetic
 the simple approach break" point for G1. gdaldem never reaches it because it works line by line, and our engine
 never reaches it because it works window by window.
 
+## Correctness on the full grids
+
+`python -m tests.check_full_grid` runs gdaldem and the engine on the **whole** 8 m and 2 m real grids, for all 10
+configurations, and compares every cell (`results/e3_fullgrid_check.md`; 134 M and 247 M valid cells).
+
+| Configuration | Nodata mask | Max difference (8 m / 2 m real) | Cells beyond test tolerance |
+|---|---|---|---|
+| slope ZT, aspect ZT | identical | ≤ 0.00003° | 0 |
+| TRI Riley, TRI Wilson, roughness | identical | 0 (Wilson 8 m: 0.00003 m) | 0 |
+| TPI | identical | 0.0013 m | 0 |
+| hillshade Horn, ZT | identical | 1 grey level (in 0.001% of cells) | 0 |
+| slope Horn | identical | 0.0055° / 0.022° | 0 / 1 cell (tolerance 0.02°) |
+| aspect Horn | identical / 1 cell differs | 11° / 79° | 31 k (0.02%) / 188 k (0.08%) beyond 0.1° |
+
+The Horn differences come only from rounding. gdaldem adds the eight Horn neighbour values in float32; we use
+float64. On nearly flat cells the gradient is tiny, so this rounding can turn the aspect by many degrees (aspect is
+barely defined there). The one mask difference is a cell that is exactly flat in float32 but not in float64. **With
+gdaldem's float32 sums reproduced (the NumPy reference with `gdal_rounding=True`), Horn slope and aspect match on
+every cell of both full grids:** no mask differences, maximum differences of 0.000008° and 0.00003°. Our float64
+default is the more accurate of the two, so it was kept.
+
 ## Run quality
 
-- 347 runs, 2 failures (the two expected out-of-memory runs above). Same protocol as Phase 2: pinned core sets,
+- 501 runs, 2 failures (the two expected out-of-memory runs above). Same protocol as Phase 2: pinned core sets,
   cold cache flushed before cold runs, Defender excluding only the scratch folder, waiting for freed disk space
   between runs. Output was written to the internal SSD and deleted after every run; D: never held more than one
   run's output.
-- Median run-to-run spread per configuration: 8 m 4.3%, 2 m real 3.6%, 2 m synthetic 1.2%, 1 m 0.0%. 9 of 95
+- Median run-to-run spread per configuration: 8 m 4.4%, 2 m real 4.2%, 2 m synthetic 1.2%, 1 m 0.0%. 9 of 123
   configurations spread more than 10%. Almost all are 2–3 s runs, where 0.3 s of jitter is already 10%. The
   largest are naive NumPy cold on 2 m real (11.8–15.1 s) and one 1 m cold slope run at 75.7 s against 66.9 and
   67.2 s. Medians are used throughout, so single outliers do not move the results.
