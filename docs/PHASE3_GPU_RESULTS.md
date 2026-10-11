@@ -232,5 +232,5 @@ almost twice the memory).
   full-resolution products at all, writing them compressed with spare CPU, or writing to a faster disk.
 - **For on-demand display (Phases 4–5):** computation is cheap on both devices. A 512² tile takes 0.5 ms (slope) or 1.3 ms
   (three products) on the 12-thread CPU, and 0.4–0.5 ms on the GPU including copies.
-  The tile server can use the CPU for small tiles and the GPU for large views, but tile latency will be set by
-  reading and decoding the elevation data, which is what the pyramid and a decoded-tile cache address.
+  The box-zoom viewer (Phase 5) can use the CPU for small views and the GPU for large ones, but the time per view will be set by
+  reading and decoding the elevation data, which is what the pyramid and a cache of decoded data address.

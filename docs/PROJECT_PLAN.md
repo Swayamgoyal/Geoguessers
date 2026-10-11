@@ -115,37 +115,52 @@ Test: a 4000 × 4000 crop (16 M cells) of the real 8 m tile, compared with an 8 
 
 We **do not modify GDAL's C++ internals**. We build our own small engine (`demlab`) and plug it into the existing ecosystem, as the meeting suggested: integrate with GDAL/QGIS rather than recreate a GIS.
 
+**Interaction (team decision, after Phase 4): zoom by bounding box.** The viewer does not stream pyramid tiles
+while the user pans and scrolls. The whole map is shown first, from a coarse pyramid level. The user drags a box
+on it, and only that box is computed and shown, at the resolution that fits the screen. To go deeper, the user drags
+a second box inside the current view, then a third, and so on, down to full resolution. One zoom step = one
+computation, of one box, at one level. This keeps resolution handling explicit and every step measurable.
+
 ```
  DEM (GeoTIFF)
    │ gdal_translate / gdaladdo
    ▼
  Cloud-Optimized GeoTIFF (tiled 512, ZSTD) + internal overviews  ← the pyramid
-   │ windowed reads via GDAL / rasterio (only the tiles in view)
+   │ windowed read of ONLY the selected box (+1-cell halo), from the level chosen for it
    ▼
  demlab engine
-   • tile + 1-pixel halo (so 3×3 kernels are exact at tile edges)
-   • cell size = base_res × 2^level (slope must use the level's true cell size)
-   • kernels: NumPy (naive) │ Numba parallel CPU │ CuPy / Numba-CUDA GPU
-   • ops: slope (Horn, ZT), aspect, hillshade, TRI, TPI, roughness, (curvature)
-   • LRU tile cache
+   • level for a box: k = floor(log2(box width in fine cells / view width in pixels)), clamped to the pyramid
+     → one level cell ≈ one screen pixel (E5: error per level is known and shown to the user)
+   • "exact" toggle: read the box at full resolution, compute, average to the view's cells
+     (E5's full-resolution route: exact, slower for big boxes)
+   • kernels: Numba parallel CPU │ CUDA GPU (E3 / E4); ops: slope, aspect, hillshade, TRI, TPI, roughness
+   • cache of computed views (box, op, mode, device)
    │
    ▼
- FastAPI tile server   /tiles/{op}/{z}/{x}/{y}.png   /heightmap/{z}/{x}/{y}
-   │                                   │
-   ▼                                   ▼
- QGIS (XYZ tile layer)        CesiumJS globe
-                              (UrlTemplateImageryProvider for the overlay,
-                               CustomHeightmapTerrainProvider for elevation)
+ FastAPI box server   GET /overview?op=…   POST /view {bbox, op, mode, device, width, height}
+                      → PNG + JSON (level, cell size, per-stage timings, expected error from E5)
+   │                                        │
+   ▼                                        ▼
+ Web viewer (browser, native UTM)        QGIS plugin (map tool)
+ whole map → drag box → computed view,   drag a rectangle on the QGIS canvas → the computed
+ breadcrumb of boxes, back button,       box is added as a georeferenced layer
+ op / mode / CPU-GPU switches
+                                         CesiumJS globe: stretch only (Phase 5, if time allows)
 ```
 
-**Flow for one request:** user zooms → zoom level selects the pyramid level → read only that window (+halo) from the COG → compute the op on CPU or GPU → colour-map → PNG → cache.
+**Flow for one zoom step:** user drags a box → snap it to the view's aspect ratio and clip it to the data → choose
+the pyramid level (or full resolution in exact mode) → read only that window (+halo) from the COG → compute the op
+on CPU or GPU → colour-map → PNG → cache → display.
 
 **GDAL integration options** (a is required; b and c are stretch):
 - (a) The engine reads and writes through GDAL/rasterio, so it works on any GDAL-readable DEM.
 - (b) GDAL VRT **Python pixel function**: a `.vrt` whose "slope" band is computed on read, so `gdalinfo`, `gdal_translate` and QGIS all see an on-the-fly slope layer.
 - (c) A QGIS Processing provider that wraps `demlab`.
 
-**Projection note:** compute derivatives in UTM (true metres), then warp the result tile to Web Mercator for display. Do not compute slope directly on Mercator pixels without a latitude scale correction.
+**Projection note:** compute derivatives in UTM (true metres). The web viewer displays in the DEM's own UTM
+coordinates (no reprojection); the QGIS plugin returns georeferenced UTM rasters and QGIS reprojects on the fly.
+Only the Cesium stretch item would need WGS84. Never compute slope on Mercator pixels without a latitude scale
+correction.
 
 ---
 
@@ -158,7 +173,7 @@ We **do not modify GDAL's C++ internals**. We build our own small engine (`demla
 | **E3** CPU engine | How much do tiling and parallelism help? | naive NumPy vs Numba with 1 → 22 threads; tile size | time, speedup, RSS | G1 |
 | **E4** GPU | When does the GPU actually help? | size × tile size; **H2D / kernel / D2H timed separately**; 8 GB VRAM limit | GPU-vs-CPU crossover size; share of time spent on transfer | G1 |
 | **E5** Pyramid on demand | How wrong is slope from a coarse level, and how much time does it save? | pyramid levels built from **real** data (Chamoli 2 m → 4–64 m; tile-571 8 m → 16–128 m); slope-from-level vs full-res slope aggregated to the same grid; secondary: vs independent HMA 8 m and Copernicus 30/90 m | RMSE, bias, % cells with error > 5°, split by slope class; time per level | **G2** |
-| **E6** Interactive | Can on-the-fly computation keep up with pan and zoom? | precomputed tiles vs on-the-fly CPU vs GPU; cache on/off | tile latency p50/p95, cache hit rate, Cesium FPS | G1, G2 |
+| **E6** Interactive (box zoom) | Can box-based on-demand zoom deliver every zoom step interactively, at any depth, and at what accuracy? | zoom depth (whole map → full resolution); box size; op (slope / aspect / hillshade / 3 products); mode auto vs exact vs precomputed slope pyramid; CPU vs GPU; cold vs warm; result cache hit vs miss; baseline: QGIS drawing the same box with / without pyramid | time per zoom step split by stage (read, compute, colour map + PNG, transfer + display), p50 / p95 over random nested boxes; expected slope error per step (from E5) | G1, G2 |
 | E7 *(stretch)* Viewshed | Speed and accuracy of approximate visibility | R3 vs XDraw vs `gdal_viewshed`; DEM size, observer height | time, % cells misclassified vs R3 | G3 |
 | E8 *(stretch)* Terrain distance | How much does the A* heuristic save? | Dijkstra vs A*; grid size | time, nodes expanded, path equality | G3 |
 
@@ -202,7 +217,7 @@ ok, error, extra, cmd
 2. Stacked bars of stage times (read / compute / transfer / write) per size.
 3. Peak memory vs size.
 4. **E5:** slope error vs speedup per pyramid level.
-5. **E6:** tile latency CDF.
+5. **E6:** time per zoom step by zoom depth (stacked stages, p50 / p95), and its CDF.
 
 ---
 
@@ -278,10 +293,25 @@ Done so far:
 - ✅ Timing (`bench/experiments/e5_timing.py`, launcher `bench/run_e5.ps1`): one 512² display tile and the whole grid at every level, on demand vs full resolution + averaging vs a precomputed slope pyramid, cold / warm; cost and size of the precomputed pyramid.
 - ✅ Results: **`docs/PHASE4_RESULTS.md`** (tables `results/e5_tables.md`, charts `results/plots/e5_*.png`). Headline: an on-demand 512² slope tile costs 5–8 ms at every level, 8–450× less than computing it at full resolution (1–4 levels up). The price is a systematic slope underestimate: RMSE 2.3° (4 m) → 6.4° (32 m) → 10° (128 m) on Chamoli, bias −0.5° → −7.3°, worst on steep ground. Error depends on levels up, not metres. Aspect holds up (median 2–8°). A pyramid level of the 2 m data beats HMA 8 m / Copernicus 30 / 90 m. A precomputed slope pyramid is exact but costs 10.6 s and 1.0 GB per derivative.
 
-### Phase 5: Tile server and visualisation, E6 (end of Week 2 – middle of Week 3) · SG (server), KK (Cesium, QGIS)
-- FastAPI server: zoom → level → windowed read → kernel → colour map → PNG, with LRU cache.
-- QGIS XYZ layer; CesiumJS page with terrain + slope/aspect/hillshade overlay and an op switcher.
-- Measure tile latency: precomputed vs on-the-fly CPU vs GPU.
+### Phase 5: Box-zoom viewer and visualisation, E6 (end of Week 2 – middle of Week 3) · SG (server, web viewer), KK (QGIS plugin; Cesium stretch)
+Decided by the team after Phase 4: zoom by **bounding boxes** instead of streaming tiles while panning (§4).
+Resolution: automatic pyramid level (one level cell ≈ one screen pixel) with an **exact** toggle; both a web viewer
+and a QGIS plugin; the XYZ tile server is dropped and Cesium becomes a stretch item.
+- `demlab/view.py`: box → view logic (snap to the view's aspect ratio, clip to the data, choose the level, map to
+  the level's window with a halo using `demlab/pyramid.py`), auto / exact routes, CPU / GPU kernels, colour maps for
+  slope / aspect / hillshade, PNG encoding, per-stage timings; result cache.
+- `server/app.py` (FastAPI): `GET /overview`, `POST /view` (box, op, mode, device, view size) → PNG + JSON
+  (level, cell size, timings, expected error from E5), `GET /info` (extent, levels, resolutions).
+- `viz/web/`: browser viewer in UTM: whole map → drag a box with the mouse → computed view; breadcrumb of boxes and
+  a back button; switches for op, auto / exact, CPU / GPU; shows level, cell size, time and expected error.
+- `qgis_plugin/`: QGIS map tool: drag a rectangle on the canvas → the box is computed (through the server) and
+  added as a georeferenced layer; nested boxes give deeper layers.
+- E6 (`bench/experiments/e6_view.py`): scripted sequences of random nested boxes from the whole map to full
+  resolution, through the server API, timing every stage; CPU vs GPU, auto vs exact vs precomputed, cold vs warm,
+  cache hit vs miss; a few end-to-end timings in the browser; QGIS drawing the same boxes as the baseline.
+- Tests: box → level mapping, view geometry, exact mode equal to the full-resolution route, georeferencing of the
+  QGIS output.
+- Stretch: Cesium globe showing the selected box draped on terrain.
 - Record a demo video as a backup for the live demo.
 
 ### Phase 6 (stretch): Viewshed and distance, E7 + E8 · SC
@@ -298,8 +328,8 @@ Only if Phases 2–5 are on track by the **start of Week 3**. R3 vs XDraw vs `gd
 | End of Week 1 | All datasets downloaded and in the manifest |
 | Middle of Week 2 | E1/E2 curves done; update sent to the professor |
 | End of Week 2 | Engine passes correctness tests; E3/E4 results in CSV |
-| Middle of Week 3 | E5 results done; tile server serves slope tiles |
-| Late Week 3 | Cesium/QGIS demo works; E6 measured |
+| Middle of Week 3 | E5 results done; box server returns computed views |
+| Late Week 3 | Web viewer + QGIS plugin demo works; E6 measured |
 | End of Week 3 (deadline) | Report, slides, code submitted |
 
 ---
@@ -310,7 +340,8 @@ Only if Phases 2–5 are on track by the **start of Week 3**. R3 vs XDraw vs `gd
 |---|---|
 | Gaps in the 8 m tile (9.6% nodata) bias E5 | Report error only on cells whose full 3×3 neighbourhood is valid at every level; optionally restrict E5 to the gap-free northern part of the tile |
 | CuPy kernels misbehave on Windows | Numba-CUDA kernels (CuPy itself is installed and working) |
-| Cesium terrain provider too fiddly | Slope overlay on Cesium World Terrain; QGIS becomes the main demo |
+| Cesium (stretch) too fiddly | Skip it; the web viewer and the QGIS plugin are the demo |
+| QGIS plugin API takes longer than planned | The web viewer is the main demo and measurement tool; QGIS gets the computed boxes as GeoTIFFs loaded by a small script |
 | 1 m runs too slow to repeat 5 times | 3 cold + 1 warm on synthetic 2 m / 1 m (adopted), stated in the report |
 | Behind schedule | Drop Phase 6 entirely (the meeting marked these "if possible") |
 
@@ -324,9 +355,11 @@ Geoguessers/
   datasets/        real rasters (gitignored), fixtures, manifest.csv, download_cop.py
                    (generated 4/2/1 m grids in D:\geoguessers_data, outside the repo)
   demlab/          io.py, tiling.py, pyramid.py, ops.py, kernels/{numpy_k,numba_k,cuda_k}.py
-  bench/           harness.py, sampler.py, machine_info.py, experiments/e1_baseline.py … e6_tiles.py
-  server/          app.py (FastAPI tile server)
-  viz/cesium/      Vite + CesiumJS client
+  bench/           harness.py, sampler.py, machine_info.py, experiments/e1_baseline.py … e6_view.py
+  server/          app.py (FastAPI box server)
+  viz/web/         browser viewer (whole map → drag a box → computed view)
+  qgis_plugin/     QGIS map tool for box zoom
+  viz/cesium/      Vite + CesiumJS client (stretch)
   tests/           test_kernels_vs_gdaldem.py
   results/         runs.csv, machine.json, plots/
   report/          final report + slides
@@ -341,13 +374,13 @@ Geoguessers/
 |---|---|
 | 1. Systems approach, laptop-only | §2 machine, all experiments on one laptop |
 | 2. Real DEMs, 1 m → 30 m, push to the limit | §3 datasets, E1 size ladder |
-| 3. Render only the required subset | §4 windowed COG reads, tile server |
+| 3. Render only the required subset | §4 windowed COG reads of only the selected box, box server |
 | 4. Pyramid / multi-resolution | §4 COG overviews, E5 |
 | 5. On-the-fly slope/aspect (+ hillshade, LOS, viewshed, distance) | demlab ops, E6; E7/E8 stretch |
 | 6. Find the real bottleneck | §6 per-stage timing, E1–E4 |
 | 7. CPU vs GPU split | E3, E4 (crossover, transfer share) |
-| 8. Resolution follows the view | zoom → level mapping in the tile server |
+| 8. Resolution follows the view | box size → pyramid level (§4): large box = coarse level, each nested box = finer level |
 | 9. Limits of existing algorithms | E1 break point for gdaldem / QGIS |
 | 10. Integrate with GDAL / QGIS | §4 integration options (a)–(c) |
-| 11. QGIS, Cesium, browser globe | Phase 5 |
+| 11. QGIS, Cesium, browser globe | Phase 5: web viewer + QGIS plugin; Cesium globe as stretch |
 | 12. Main direction | §1 goal |

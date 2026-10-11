@@ -122,8 +122,8 @@ Run variability for every experiment (median, quartiles and IQR of every configu
 |---|---|
 | `demlab/` | Processing engine: tiled IO, pyramid, CPU/GPU kernels |
 | `bench/` | Benchmark harness and experiment scripts (E1–E8) |
-| `server/` | On-the-fly tile server |
-| `viz/cesium/` | Cesium web client |
+| `server/` | Box server: computes only the selected box at the right pyramid level (Phase 5) |
+| `viz/web/`, `qgis_plugin/` | Box-zoom viewers: browser page and QGIS plugin (Phase 5); `viz/cesium/` Cesium globe (stretch) |
 | `tests/` | Correctness tests against gdaldem |
 | `results/` | `runs.csv`, `machine.json`, plots |
 | `report/` | Final report and slides |

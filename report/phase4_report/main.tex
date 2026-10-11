@@ -92,8 +92,8 @@ whose centres fall inside it), and repeats every measurement on an exact power-o
   against the same truth, next to the 2\,m data averaged to the same resolution.
 \end{itemize}
 
-\paragraph{Time.} Three ways to serve a view at level $k$, measured in one long-running process (as a tile server
-would be), on the 12 performance-core threads:
+\paragraph{Time.} Three ways to serve a view at level $k$, measured in one long-running process (as the viewer's
+server would be), on the 12 performance-core threads:
 \begin{itemize}
   \item \textbf{On demand:} read the view from DEM level $k$ (plus a one-cell halo) and compute slope.
   \item \textbf{Full resolution:} read the same ground at full resolution, compute slope, average to level $k$: the
@@ -151,7 +151,7 @@ by more than 5$^\circ$ by true-slope class (Chamoli): steep terrain loses the mo
   for the same number of levels up (within 0.5$^\circ$ up to four levels): about 2.5$^\circ$ RMSE one level up, then on
   average about 1.5$^\circ$ more per further level.
   \item \textbf{GDAL's overviews behave like an exact pyramid}: within 0.2$^\circ$ RMSE at every level, although
-  their cells are not exactly $2^k$ fine cells. A tile server can use COG overviews as they are.
+  their cells are not exactly $2^k$ fine cells. A viewer can use COG overviews as they are.
 \end{itemize}
 
 \begin{figure}[!htbp]
@@ -254,8 +254,8 @@ trade-off: slope RMSE against the time saved per tile, one point per pyramid lev
   takes 13\,ms against 4.7\,s.
   \item \textbf{Cold vs warm hardly matters} on this NVMe SSD: at most 1.5\,ms per tile for on demand.
   \item \textbf{Precomputed is about 1--3\,ms faster per tile} (it skips the slope kernel, about 0.5\,ms, and the
-  window preparation). On demand and precomputed both stay far below the $\sim$100\,ms at which panning and zooming
-  start to feel slow; the full-resolution route exceeds it from two levels up.
+  window preparation). On demand and precomputed both stay far below the $\sim$100\,ms at which an interaction
+  starts to feel slow; the full-resolution route exceeds it from two levels up.
 \end{itemize}
 
 \paragraph{The cost of precomputing.} A slope pyramid built in advance is exact and slightly faster per tile, but it
@@ -290,9 +290,12 @@ underestimate is systematic, so a per-level correction factor could remove most 
 this was not tested.
 
 \section{Next step}
-\textbf{Interactive viewer (E6):} a tile server that computes slope, aspect and hillshade tiles on the fly from the
-pyramid level matching the zoom, with a decoded-tile cache, serving QGIS and a Cesium globe; tile latency for
-precomputed vs on-the-fly CPU vs GPU.
+\textbf{Box-zoom viewer (E6).} Instead of streaming pyramid tiles while the user pans and scrolls, the viewer shows
+the whole map and lets the user drag a box on it; only that box is computed (slope, aspect or hillshade) at the
+pyramid level where one cell is about one screen pixel, with the expected error from this report shown next to it,
+or exactly from full resolution on request. A second box inside the view zooms deeper, and so on down to full
+resolution. A web viewer and a QGIS plugin will share one server, and E6 will measure the time per zoom step by stage
+(read, compute, colour map, display), CPU vs GPU, at every zoom depth.
 
 \begin{thebibliography}{9}\small
 \bibitem{chamoli} Bhushan, S., \& Shean, D. (2021). Chamoli Disaster Pre-event 2-m DEM Composite: September 2015.

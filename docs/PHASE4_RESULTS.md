@@ -91,7 +91,7 @@ RMSE one level up, growing by about 1.5° per further level on average, worst on
   - **Precomputed:** read the view from a slope pyramid built in advance.
 - **Views:** one 512 × 512-cell display tile at 8 random places per level (each ≥ 90% valid), and the whole grid
   at each level.
-- **Protocol:** measured inside one long-running process, as a tile server would be, pinned to the 12
+- **Protocol:** measured inside one long-running process, as a viewer's server would be, pinned to the 12
   performance-core threads, with GDAL decoding on all threads for every route.
   - *Cold:* the Windows file cache is emptied before each measurement.
   - *Warm:* the median of 3, with the file already in the OS cache.
@@ -277,7 +277,7 @@ edges (a one-off test, `old files/scripts_one_off_checks/overview_footprint.py`:
 "centres inside" footprint best, but not exactly). So its values differ from our whole-cell footprint mean by a
 few decimetres to metres. The effect on slope error is at most 0.2° RMSE. For the same reason, the precomputed
 slope pyramid scores 0.3–1.0° RMSE instead of 0 at those levels: that is our footprint approximation, not slope
-error. A tile server can use COG overviews as they are. Padding grids to a multiple of 2^k would make them exact,
+error. A viewer can use COG overviews as they are. Padding grids to a multiple of 2^k would make them exact,
 but it is not needed.
 
 ## Limitations
@@ -300,13 +300,17 @@ but it is not needed.
   levels on Chamoli, 8–190× on tile-571). It costs about 2.5° slope RMSE for the first level and about 1.5° more per
   further level on average, as a systematic underestimate that is largest on steep ground. Aspect costs much
   less (median 2–8°).
-- **For Phase 5 (tile server, E6):**
-  - Pick the pyramid level so that one level cell ≈ one screen pixel. Then the on-demand value is close to what
-    that pixel should show, and every tile costs 5–8 ms (about 0.5 ms of it the slope kernel).
+- **For Phase 5 (box-zoom viewer, E6):** the team decided to zoom by bounding boxes. The whole map is shown
+  first; the user drags a box, only that box is computed, then nested boxes go deeper (plan §4). These results
+  set its design:
+  - For each box, pick the pyramid level so that one level cell ≈ one screen pixel. Then the on-demand value is
+    close to what that pixel should show, and the cost does not depend on the zoom depth. A 512² block costs
+    5–8 ms here, and a full-screen 1920 × 1080 view is about eight blocks' worth.
+  - Offer an "exact" toggle (the full-resolution route) for analysis, and show the expected error of the chosen
+    level (the table above) next to each view.
   - Precompute only the one or two most-used products (slope), if storage allows; compute everything else on
     demand (other operators, any hillshade sun angle).
-  - Add a tile cache: re-reading the same compressed blocks for every view is the main cost, not the kernel
-    (E3 / E4).
+  - Cache computed views: re-reading the same compressed blocks is the main cost, not the kernel (E3 / E4).
 - **For analysis rather than display:** never threshold slope computed from a coarse level. Compute the view at full
   resolution (the full-resolution route: 0.05–2.9 s per tile here), or read a precomputed slope pyramid.
 - **Possible improvement (not done):** the underestimate is systematic (mean slope shown = 0.99 … 0.81 × true
