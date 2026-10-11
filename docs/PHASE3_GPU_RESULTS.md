@@ -2,10 +2,13 @@
 
 All numbers come from the E4 rows of `results/runs.csv` and from `results/e4_crossover.csv`, and are reproduced by
 `python -m bench.analysis.e4_report` (tables `results/e4_tables.md`, charts `results/plots/e4_*.png`). Values are
-medians over the measured repeats, warm cache unless stated. CPU engine numbers are from E3
-(`docs/PHASE3_RESULTS.md`) and gdaldem numbers from E1 (`docs/PHASE2_RESULTS.md`): same machine, grids and harness.
+medians over the measured repeats, warm cache unless stated; the spread of every configuration (median and IQR) is
+in `results/run_stats.md` (E4: median IQR 1.2% of the median, none above 4%). On the 2 m and 1 m synthetic grids a
+"warm" value is often a single run (1 m always). CPU engine numbers are from E3 (`docs/PHASE3_RESULTS.md`) and gdaldem numbers
+from E1 (`docs/PHASE2_RESULTS.md`): same machine, grids and harness. Sizes: MB = 10^6 bytes, GB = 10^9 bytes,
+except GPU memory, given in MiB / GiB as the driver reports it.
 
-**GPU:** NVIDIA RTX 4060 Laptop, 8 GB, 24 SMs, PCIe 4.0 ×8, driver 610.60, CuPy 14.2 / CUDA 12.9.
+**GPU:** NVIDIA RTX 4060 Laptop, 8 GiB, 24 SMs, PCIe 4.0 ×8, driver 610.60, CuPy 14.2 / CUDA 12.9.
 
 **What was run:**
 - **E4 sweep** (`bench/experiments/e4_gpu.py`, launcher `bench/run_e4.ps1`): 484 runs, no failures, on the same
@@ -29,7 +32,8 @@ the Horn neighbour values in float32, and laptop GPUs run float64 at 1/64 of the
 
 1. **The GPU computes 50× faster than the 12-thread CPU kernel, but the whole run is only 1.0–1.4× faster.**
    Slope at 1 m: 43.8 s on the GPU vs 60.3 s for the CPU engine vs 208 s for gdaldem (4.75× faster than
-   gdaldem). The GPU kernel needs 1.1 s for the whole 10.8-billion-cell grid, where the CPU kernel needed 31 s.
+   gdaldem). The GPU kernel needs 1.1 s for the whole 10.8-billion-cell grid, where the 12-thread CPU engine's kernel
+   needed 34 s.
    The rest of the run is moving data.
 2. **Copying is 95% of the GPU's own time.** For a 2048² window, the kernel takes 0.18 ms and kernel plus copies
    3.85 ms (data in RAM). Crossing PCIe, not computing, is the GPU's cost.
@@ -39,9 +43,9 @@ the Horn neighbour values in float32, and laptop GPUs run float64 at 1/64 of the
    3.6–3.7× for three products.
 4. **After the GPU, the bottleneck moves twice.** At 1 m the main thread spends 25.7 s waiting for input to be
    decompressed and 7.8 s on the GPU. With 8 reader threads instead of 4 the read wait falls to 3.2 s, but the
-   writer then becomes the limit (writing 41 GB, wait 30.6 s), and the total only goes from 43.8 to 42.6 s.
+   writer then becomes the limit (writing 43 GB, wait 30.6 s), and the total only goes from 43.8 to 42.6 s.
    **Computation → reading → writing:** each fix exposes the next stage, and on this laptop the end of the chain is
-   the disk write (about 1 GB/s from one writer thread).
+   the disk write (about 1.1 GB/s from one writer thread).
 5. **Three products gain the most.** Slope + aspect + hillshade in one pass: 81 s at 1 m vs 135 s for the CPU
    engine (1.7×); at 2 m real 3.1 s vs 18.5 s for three gdaldem runs (5.9×). The fused kernel does three times
    the arithmetic for almost the same copies in.
@@ -49,11 +53,12 @@ the Horn neighbour values in float32, and laptop GPUs run float64 at 1/64 of the
    code run through CuPy arrays) takes 17.0 s, *slower* than the CPU engine (16.3 s). Our own kernel brings it to
    12.6 s, and pinned buffers to 11.1 s. Each step roughly halves the GPU stage (14.5 → 7.6 → 3.7 → 2.0 s with 2
    streams), but the total stops improving once reading and writing dominate.
-7. **float64 costs 17–19× in the kernel but nothing in the total.** At 2048² the float64 kernel takes 3.07 ms
-   instead of 0.18 ms, almost as long as the copies. Whole runs take the same time (11.5 vs 11.3 s) because the
+7. **float64 makes the kernel 8–24× slower but costs nothing in the total.** In the crossover test the float64
+   slope kernel is 12–19× slower from 1024² up (at 2048²: 3.07 ms instead of 0.18 ms, almost as long as the copies),
+   and the three-product kernel 16–24× slower (21–24× from 2048²). Inside whole runs it is 8–12× slower. Whole runs take the same time (11.5 vs 11.3 s) because the
    kernel is not the limit. float32 already matches gdaldem's Horn rounding, so float32 stays the default.
 8. **The GPU was never stressed.** Over all 484 runs the GPU was at most 63 °C after a run (median 58 °C), our
-   memory pool used at most 2 GB of the 8 GB, and no run failed. Before every run the harness waited until the GPU
+   memory pool used at most 2.0 GiB of the card's 8 GiB, and no run failed. Before every run the harness waited until the GPU
    was below 75 °C (it never had to wait) and would have stopped the sweep at 85 °C. No clock, power-limit, fan or
    driver setting was changed.
 
@@ -68,25 +73,40 @@ the Horn neighbour values in float32, and laptop GPUs run float64 at 1/64 of the
 | 2 m synthetic | 2.7 B | 53.7 s | 16.3 s | **11.3 s** | 1.4× | 4.7× | 9.3 s | 11.9 s |
 | 1 m synthetic | 10.8 B | 208.4 s | 60.3 s | **43.8 s** | 1.4× | **4.75×** | 33.9 s | 43.6 s |
 
-Peak RAM stays flat at 1.5–1.6 GB, and GPU memory at 128 MB (two 2048² windows in flight), whatever the grid
+**The 8 GiB GPU memory limit (an E4 variable in the plan) is never reached**, because the engine sends the grid to
+the GPU window by window: even with 8192² windows it uses at most 2.0 GiB. Sending a whole grid at once would need
+4 bytes per cell for the input plus 4 per float32 output: about 1.4 GB for 8 m, 2.1 GB for 2 m real, but 22 GB for
+2 m synthetic and 86 GB for 1 m, far beyond 8 GiB. As on the CPU (naive NumPy), only tiling scales.
+
+Peak RAM stays flat at 1.6–1.7 GB, and GPU memory at 128 MiB (two 2048² windows in flight), whatever the grid
 size. On the small grids about 0.6 s of every run is fixed start-up: Python 0.5 s, GPU initialisation 0.1 s.
 
 ## Where the GPU engine's time goes
+
+![where the time goes](../results/plots/e4_stages.png)
+
+The bottleneck moves, from gdaldem to our CPU engine to the GPU engine. gdaldem's time is mostly single-threaded
+computation (orange). The CPU engine shrinks that, and at large sizes waiting for input grows to about half of its compute time. The GPU
+engine almost removes computation (green), leaving reading, copying (yellow) and writing. For gdaldem the stages come
+from the Phase 2 stage split and run one after the other. For our engines they show how the main thread spends the
+run: the writer thread works in parallel, so only the time spent *waiting* for it appears (table:
+`results/e4_tables.md`, "Stage split").
 
 Slope, warm. The three GPU stages run in parallel with each other (2 streams), so their sum can exceed the GPU
 part.
 
 | Grid | Total | Start-up + GPU init | Wait for read | GPU part | Copy in / kernel / copy out | Wait for writer | Writer busy | Written |
 |---|---|---|---|---|---|---|---|---|
-| 8 m | 1.90 s | 0.61 s | 0.44 s | 0.16 s | 0.06 / 0.013 / 0.07 s | 0.11 s | 0.57 s | 0.7 GB |
-| 2 m real | 2.18 s | 0.57 s | 0.64 s | 0.23 s | 0.10 / 0.017 / 0.11 s | 0.14 s | 0.86 s | 1.0 GB |
-| 2 m synthetic | 11.3 s | 0.66 s | 4.9 s | 2.0 s | 1.04 / 0.23 / 0.95 s | 3.0 s | 9.5 s | 10.4 GB |
-| 1 m synthetic | 43.8 s | 0.66 s | **25.7 s** | 7.8 s | 4.5 / **1.1** / 4.1 s | 8.8 s | **39.2 s** | 41.4 GB |
-| 1 m, 8 readers | 42.6 s | | 3.2 s | 7.2 s | 4.7 / 1.1 / 4.4 s | **30.6 s** | | 41.4 GB |
+| 8 m | 1.90 s | 0.61 s | 0.44 s | 0.16 s | 0.06 / 0.013 / 0.07 s | 0.11 s | 0.57 s | 0.71 GB |
+| 2 m real | 2.18 s | 0.57 s | 0.64 s | 0.23 s | 0.10 / 0.017 / 0.11 s | 0.14 s | 0.86 s | 1.10 GB |
+| 2 m synthetic | 11.3 s | 0.66 s | 4.9 s | 2.0 s | 1.04 / 0.23 / 0.95 s | 3.0 s | 9.5 s | 10.9 GB |
+| 1 m synthetic | 43.8 s | 0.66 s | **25.7 s** | 7.8 s | 4.5 / **1.1** / 4.1 s | 8.8 s | **39.2 s** | 43.4 GB |
+| 1 m, 8 readers | 42.6 s | | 3.2 s | 7.2 s | 4.7 / 1.1 / 4.4 s | **30.6 s** | | 43.4 GB |
 | 1 m, no output | 33.9 s | 0.64 s | 25.7 s | 6.5 s | 4.2 / 1.0 / 3.8 s | 0 | 0 | 0 |
 
-Compared with the CPU engine at 1 m: computation drops from 31 s to 1.1 s of kernel time. The writer thread also
-gets faster (39 s instead of 65 s for the same 41 GB), because the CPU cores are no longer busy computing.
+Compared with the CPU engine at 1 m: computation drops from 34 s (12 threads; 33 s with 22) to 1.1 s of kernel
+time. The writer thread also gets faster (39 s instead of 65 s with the 22-thread CPU engine, for the same 43 GB),
+because the CPU cores are no longer busy computing.
 
 ## GPU versions: the optimisation steps
 
@@ -162,10 +182,10 @@ operator: start-up and I/O, not arithmetic.
 
 | Slope + aspect + hillshade | gdaldem, 3 runs | CPU engine, fused | GPU engine, fused | GPU writer busy | Written |
 |---|---|---|---|---|---|
-| 8 m | 11.3 s | 3.33 s | **2.56 s** | 1.2 s | 1.5 GB |
-| 2 m real | 18.5 s | 4.44 s | **3.13 s** | 1.8 s | 2.3 GB |
-| 2 m synthetic | – | 34.4 s | **21.0 s** | 18.8 s | 22.7 GB |
-| 1 m synthetic | – | 134.8 s | **81.4 s** | 76.5 s | 90.2 GB |
+| 8 m | 11.3 s | 3.33 s | **2.56 s** | 1.2 s | 1.6 GB |
+| 2 m real | 18.5 s | 4.44 s | **3.13 s** | 1.8 s | 2.5 GB |
+| 2 m synthetic | – | 34.4 s | **21.0 s** | 18.8 s | 24.4 GB |
+| 1 m synthetic | – | 134.8 s | **81.4 s** | 76.5 s | 96.8 GB |
 
 At 2 m synthetic and 1 m the fused GPU run is write-bound: the writer is busy for 90–94% of the run.
 
@@ -173,10 +193,10 @@ At 2 m synthetic and 1 m the fused GPU run is write-bound: the writer is busy fo
 
 | Window | 8 m | 2 m real | 2 m synthetic | Peak RAM (2 m synthetic) | GPU memory (2 m synthetic) |
 |---|---|---|---|---|---|
-| 1024 | 1.98 s | 2.40 s | 13.8 s | 1.3 GB | 32 MB |
-| **2048** (default) | **1.90 s** | **2.18 s** | 11.3 s | 1.6 GB | 128 MB |
-| 4096 | 2.09 s | 2.34 s | **11.1 s** | 2.9 GB | 512 MB |
-| 8192 | 2.57 s | 2.98 s | 13.0 s | 7.6 GB | 2.0 GB |
+| 1024 | 1.98 s | 2.40 s | 13.8 s | 1.4 GB | 32 MiB |
+| **2048** (default) | **1.90 s** | **2.18 s** | 11.3 s | 1.7 GB | 128 MiB |
+| 4096 | 2.09 s | 2.34 s | **11.1 s** | 3.0 GB | 512 MiB |
+| 8192 | 2.57 s | 2.98 s | 13.0 s | 8.0 GB | 2.0 GiB |
 
 The same picture as on the CPU, for the same reason: small windows decompress the neighbouring tiles again for
 the halo, and large windows hold too much in flight. 2048 stays the default (4096 is 2% faster on one grid, at
@@ -184,19 +204,20 @@ almost twice the memory).
 
 ## Correctness
 
-- **Unit tests** (`python -m pytest tests/`, now 108): the float32 GPU kernel against gdaldem on the two 1024²
+- **Unit tests** (`python -m pytest tests/`): the float32 GPU kernel against gdaldem on the two 1024²
   crops for all 10 configurations, held to the tight tolerances of the exact-parity tests. The float64 GPU kernel
   is compared against the CPU engine, and the GPU pipeline with every copy and overlap mode against the whole-grid
   result, for windows that are not aligned to the tiles.
 - **Full grids** (`python -m tests.check_full_grid`, `results/e3_fullgrid_check.md`): the GPU engine against
-  gdaldem on every cell of the whole 8 m and 2 m real grids (134 M and 247 M valid cells), all 10 configurations.
-  **Identical nodata masks and no cell beyond tolerance in any configuration.** Horn slope and aspect are within
-  0.000008° and 0.00003°, TRI / TPI within 0.0013 m, roughness and TRI Wilson identical.
-  Hillshade differs by 1 grey level on 0.15% (8 m) and 0.43% (2 m real) of cells: float32 rounding at the .5
-  boundary.
-- Because the float32 kernel adds the Horn neighbours exactly as gdaldem does, the GPU engine matches gdaldem
-  *more* closely than the float64 CPU engine. That one had 31 k / 188 k near-flat cells with Horn aspect more than
-  0.1° away; see `docs/PHASE3_RESULTS.md`.
+  gdaldem on every cell of the whole 90 m, 30 m, 8 m and 2 m real grids (1.3 M, 12 M, 134 M and 247 M valid
+  cells), all 10 configurations. **Identical nodata masks and no cell beyond tolerance in any configuration on
+  any grid.** On 8 m and 2 m: Horn slope and aspect are within 0.000008° and 0.00003°, TRI / TPI within 0.0013 m,
+  roughness and TRI Wilson identical. Horn hillshade differs by 1 grey level on 0.15% (8 m) and 0.43% (2 m real) of
+  cells (float32 rounding at the .5 boundary); Zevenbergen–Thorne hillshade on about 0.001%.
+- For **Horn slope and aspect** the GPU engine matches gdaldem *more* closely than the float64 CPU engine, because
+  the float32 kernel adds the Horn neighbours exactly as gdaldem does. The CPU engine had 31 k / 188 k near-flat
+  cells with Horn aspect more than 0.1° away (`docs/PHASE3_RESULTS.md`). For Horn hillshade and TRI Riley it is
+  the other way round, by tiny margins: one grey level on 0.15–0.43% of cells, and 0.0001 m.
 
 ## What it means
 
@@ -207,8 +228,9 @@ almost twice the memory).
   adding only where computation is still a large share: several products at once, heavier operators, or results
   that are not written to disk.
 - **For batch processing of whole grids:** use the GPU when available, fused products, 2048 windows, float32
-  (1.4–1.7× over the CPU engine at 1–2 m). Beyond that, the next gains have to come from the I/O: not writing
+  (1.4–1.7× over the CPU engine on the 2 m and 1 m synthetic grids, 1.2–1.4× on the 2 m real grid). Beyond that, the next gains have to come from the I/O: not writing
   full-resolution products at all, writing them compressed with spare CPU, or writing to a faster disk.
-- **For on-demand display (Phases 4–5):** computation is cheap on both devices (well under 1 ms per 512² tile).
+- **For on-demand display (Phases 4–5):** computation is cheap on both devices. A 512² tile takes 0.5 ms (slope) or 1.3 ms
+  (three products) on the 12-thread CPU, and 0.4–0.5 ms on the GPU including copies.
   The tile server can use the CPU for small tiles and the GPU for large views, but tile latency will be set by
   reading and decoding the elevation data, which is what the pyramid and a decoded-tile cache address.

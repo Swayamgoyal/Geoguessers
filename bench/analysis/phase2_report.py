@@ -87,9 +87,9 @@ def e1_tables(d):
             "hillshade warm s": m("hillshade", "Horn", "warm"),
             "read warm s": m("read", "blocks", "warm", "t_internal"), "copy warm s": m("copy", "gtiff", "warm"),
             "slope ns/cell": slope_w / cells * 1e9,
-            "peak MB (gdaldem)": g[g.impl == "gdaldem"].peak_rss_mb.max(),
+            "peak MiB (gdaldem)": g[g.impl == "gdaldem"].peak_rss_mb.max(),
             "CPU cores": g[(g.op == "slope") & (g.method == "Horn")].avg_cores.median(),
-            "slope disk read MB (warm)": m("slope", "Horn", "warm", "disk_read_mb"),
+            "slope disk read MiB (warm)": m("slope", "Horn", "warm", "disk_read_mb"),
         })
     return pd.DataFrame(rows)
 
@@ -159,12 +159,12 @@ def plot_e1_memory(d):
     fig, ax = plt.subplots(figsize=(7.5, 4.2))
     e = d[(d.experiment == "E1") & (d.impl == "gdaldem")].groupby("cells").peak_rss_mb.max().sort_index()
     ax.plot(e.index, e.values, marker="o", color=S[0], label="gdaldem (any operator)")
-    label_end(ax, e.index[-1], e.values[-1], f"{e.values[-1]:.0f} MB", dy=-7)
+    label_end(ax, e.index[-1], e.values[-1], f"{e.values[-1]:.0f} MiB", dy=-7)
     q = d[(d.experiment == "E1q") & (d.method == "full-none")]
     if len(q):
         q = q.groupby("cells").peak_rss_mb.max().sort_index()
         ax.plot(q.index, q.values, marker="s", ls="--", color=S[1], label="QGIS draw, no pyramid")
-        label_end(ax, q.index[-1], q.values[-1], f"{q.values[-1]:.0f} MB", dy=7)
+        label_end(ax, q.index[-1], q.values[-1], f"{q.values[-1]:.0f} MiB", dy=7)
     ram = 16 * 1024
     ax.axhline(ram, color=AXIS, lw=1)
     ax.annotate("laptop RAM, 16 GB", (e.index[-1] * 6, ram), xytext=(0, 4), textcoords="offset points",
@@ -174,8 +174,8 @@ def plot_e1_memory(d):
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("grid cells")
-    ax.set_ylabel("peak memory (MB)")
-    ax.set_title("E1: gdaldem memory levels off at ~0.8 GB, whatever the grid size")
+    ax.set_ylabel("peak memory (MiB)")
+    ax.set_title("E1: gdaldem memory levels off at ~830 MiB (0.87 GB), whatever the grid size")
     ax.legend(loc="lower right")
     ax.set_xlim(right=ax.get_xlim()[1] * 6)
     fig.savefig(PLOTS / "e1_memory.png")
@@ -237,7 +237,7 @@ def e2_table(d):
             def m(op, cache, col="t_total"):
                 s = g[(g.op == op) & (g.cache_state == cache)][col]
                 return s.median() if len(s) else float("nan")
-            rows.append({"grid": LABEL[ds], "layout": v, "file MB": size / 2**20,
+            rows.append({"grid": LABEL[ds], "layout": v, "file MiB": size / 2**20,
                          "create s": m("create", "warm"), "read cold s": m("read", "cold", "t_internal"),
                          "read warm s": m("read", "warm", "t_internal"), "slope cold s": m("slope", "cold"),
                          "slope warm s": m("slope", "warm")})
@@ -252,7 +252,7 @@ def plot_e2(d):
     if t.empty:
         return
     fig, axes = plt.subplots(1, 3, figsize=(10, 3.6), sharey=True)
-    for ax, (col, title, color) in zip(axes, [("file MB", "file size (MB)", S[0]), ("read cold s", "read, cold (s)", S[1]),
+    for ax, (col, title, color) in zip(axes, [("file MiB", "file size (MiB)", S[0]), ("read cold s", "read, cold (s)", S[1]),
                                                ("slope cold s", "gdaldem slope, cold (s)", S[2])]):
         ax.barh(t.layout, t[col], color=color, height=0.6)
         for y, v in enumerate(t[col]):
@@ -280,7 +280,7 @@ def e1q_table(d):
                      "open cold s": g[g.cache_state == "cold"].t_open.median(),
                      "draw cold s": g[g.cache_state == "cold"].t_internal.median(),
                      "draw warm s": g[g.cache_state == "warm"].t_internal.median(),
-                     "peak MB": g.peak_rss_mb.max(), "filled": g.filled.median(), "_o": ORDER.index(ds)})
+                     "peak MiB": g.peak_rss_mb.max(), "filled": g.filled.median(), "_o": ORDER.index(ds)})
     return pd.DataFrame(rows).sort_values(["_o", "view-pyramid"]).drop(columns="_o")
 
 

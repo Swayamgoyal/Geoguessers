@@ -1,5 +1,6 @@
-"""Full-grid correctness: our engine (Numba, float64, tiled) against gdaldem on the WHOLE 8 m and 2 m real grids,
-for all 10 configurations of E1. The unit tests (tests/test_kernels.py) only use 1024 x 1024 crops.
+"""Full-grid correctness: our engine (Numba, float64, tiled) against gdaldem on the WHOLE real grids (90 m and
+30 m Copernicus, the plan's correctness gate; 8 m HMA; 2 m Chamoli), for all 10 configurations of E1. The unit
+tests (tests/test_kernels.py) only use 1024 x 1024 crops.
 
 For each grid and configuration: run gdaldem (default options) and the engine, compare window by window, delete
 both outputs. Reported: cells compared, nodata-mask mismatches, max / mean |difference| over cells valid in both,
@@ -30,7 +31,9 @@ from demlab.kernels import numpy_k
 from tests.fixtures import OPS
 from tests.test_kernels import TOL
 
-GRIDS = {"tile571_8m": DATA / "prepared" / "tile571_8m.tif", "chamoli_2m": DATA / "prepared" / "chamoli_2m.tif"}
+GRIDS = {"tile571_90m": DATA / "prepared" / "tile571_90m.tif",  # the plan's correctness gate: 90 m and 30 m
+         "tile571_30m": DATA / "prepared" / "tile571_30m.tif",
+         "tile571_8m": DATA / "prepared" / "tile571_8m.tif", "chamoli_2m": DATA / "prepared" / "chamoli_2m.tif"}
 PARITY_TOL = {"slope": 1e-4, "aspect": 1e-3}  # as test_numpy_matches_gdaldem
 RES = Path(__file__).resolve().parents[1] / "results"
 

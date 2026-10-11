@@ -62,8 +62,8 @@ def headline(d):
         rows.append({"grid": LABEL[ds], "gdaldem s": g, "CPU engine (12 P-thr) s": c, "GPU engine s": w,
                      "GPU cold s": e4(d, ds, "gpu_slope", "cold"), "GPU, 8 readers s": e4(d, ds, "gpu_slope_r8"),
                      "GPU, no write s": e4(d, ds, "gpu_slope_nowrite"), "GPU vs CPU engine": c / w,
-                     "GPU vs gdaldem": g / w, "GPU peak RAM MB": e4(d, ds, "gpu_slope", None, "peak_rss_mb"),
-                     "GPU peak VRAM MB": e4(d, ds, "gpu_slope", None, "peak_vram_mb")})
+                     "GPU vs gdaldem": g / w, "GPU peak RAM MiB": e4(d, ds, "gpu_slope", None, "peak_rss_mb"),
+                     "GPU peak VRAM MiB": e4(d, ds, "gpu_slope", None, "peak_vram_mb")})
     return pd.DataFrame(rows)
 
 
@@ -93,7 +93,7 @@ def stages(d):
             rows.append({"grid": LABEL[ds], "variant": v, "total s": m.t_total, "python start-up s": m.t_imports,
                          "GPU init s": m.gpu_init, "wait for read s": m.read, "GPU part s": m.compute,
                          "of which: copy in / kernel / copy out s": f"{m.gpu_h2d:.2f} / {m.gpu_kernel:.3f} / {m.gpu_d2h:.2f}",
-                         "wait for writer s": m.write, "writer busy s": m.writer_busy, "written MB": m.proc_write_mb})
+                         "wait for writer s": m.write, "writer busy s": m.writer_busy, "written GB": m.proc_write_mb * 2**20 / 1e9})
     return pd.DataFrame(rows)
 
 
@@ -121,7 +121,7 @@ def products(d):
         rows.append({"grid": LABEL[ds], "gdaldem 3 runs s": sum(g) if not any(np.isnan(g)) else np.nan,
                      "CPU engine fused s": e3(d, ds, "engine_all_3prod"), "GPU engine fused s": w,
                      "GPU writer busy s": e4(d, ds, "gpu_3prod", col="writer_busy"),
-                     "written GB": e4(d, ds, "gpu_3prod", col="proc_write_mb") / 1024})
+                     "written GB": e4(d, ds, "gpu_3prod", col="proc_write_mb") * 2**20 / 1e9})
     return pd.DataFrame(rows)
 
 
@@ -134,8 +134,8 @@ def windows_table(d):
             if np.isnan(t):
                 continue
             rows.append({"grid": LABEL[ds], "window": n, "warm s": t, "cold s": e4(d, ds, v, "cold"),
-                         "wait for read s": e4(d, ds, v, col="read"), "peak RAM MB": e4(d, ds, v, None, "peak_rss_mb"),
-                         "peak VRAM MB": e4(d, ds, v, None, "peak_vram_mb")})
+                         "wait for read s": e4(d, ds, v, col="read"), "peak RAM MiB": e4(d, ds, v, None, "peak_rss_mb"),
+                         "peak VRAM MiB": e4(d, ds, v, None, "peak_vram_mb")})
     return pd.DataFrame(rows)
 
 
@@ -160,7 +160,7 @@ def safety(d):
                           "max GPU temp before a run C": q.gpu_temp_before.max(),
                           "max GPU temp after a run C": q.gpu_temp_after.max(),
                           "median GPU temp after a run C": q.gpu_temp_after.median(),
-                          "max VRAM used by our pool MB": q.peak_vram_mb.max()}])
+                          "max VRAM used by our pool MiB": q.peak_vram_mb.max()}])
 
 
 # ---------------------------------------------------------------- charts
@@ -229,12 +229,82 @@ def chart_crossover():
     fig.savefig(PLOTS / "e4_crossover.png"), plt.close(fig)
 
 
+STAGE_COLORS = {"start-up": "#c3c2b7", "read + decompress / wait for input": S[0], "compute (CPU)": S[1],
+                "GPU copies": S[3], "GPU kernel": S[2], "write / wait for output": S[4],
+                "other (process start, library imports, closing files)": "#e1e0d9"}
+
+
+def stage_rows(d):
+    """Seconds per stage (warm, slope Horn) for gdaldem, the CPU engine (12 threads) and the GPU engine.
+    gdaldem: E1 stage split (read / write / compute from the read and copy references). Engines: how the main
+    thread spends the run (start-up, waiting for input, computing or driving the GPU, waiting for the writer);
+    the GPU part is split into copies and kernel in proportion to their CUDA-event times."""
+    from bench.analysis import phase2_report
+    e1 = phase2_report.e1_stage_split(phase2_report.load()).set_index("grid")
+    rows = []
+    for ds in GRIDS:
+        g = LABEL[ds]
+        if g in e1.index:
+            r = e1.loc[g]
+            rows.append({"grid": g, "tool": "gdaldem", "read + decompress / wait for input": r["read"],
+                         "compute (CPU)": r["compute"], "write / wait for output": r["write + tool overhead"]})
+        for tool, exp, v in (("CPU engine", "E3", "engine_perf_slope"), ("GPU engine", "E4", "gpu_slope")):
+            q = d[(d.experiment == exp) & (d.dataset == ds) & (d.variant == v) & d.ok & (d.rep >= 1) &
+                  (d.cache_state == "warm")]
+            if q.empty:
+                continue
+            m = q[["t_total", "t_imports", "gpu_init", "read", "compute", "write", "gpu_h2d", "gpu_kernel",
+                   "gpu_d2h"]].median()
+            row = {"grid": g, "tool": tool, "start-up": m.t_imports + (m.gpu_init if exp == "E4" else 0),
+                   "read + decompress / wait for input": m.read, "write / wait for output": m.write}
+            if exp == "E4":
+                ev = m.gpu_h2d + m.gpu_kernel + m.gpu_d2h
+                row["GPU copies"] = m.compute * (m.gpu_h2d + m.gpu_d2h) / ev
+                row["GPU kernel"] = m.compute * m.gpu_kernel / ev
+            else:
+                row["compute (CPU)"] = m.compute
+            row["other (process start, library imports, closing files)"] = max(m.t_total - sum(v for k, v in row.items() if k not in ("grid", "tool")), 0)
+            rows.append(row)
+    return pd.DataFrame(rows).fillna(0)
+
+
+def chart_stages(st):
+    if st.empty:
+        return
+    grids = list(dict.fromkeys(st.grid))
+    fig, axes = plt.subplots(len(grids), 1, figsize=(8.4, 1.45 * len(grids) + 1.0), squeeze=False)
+    for ax, g in zip(axes[:, 0], grids):
+        q = st[st.grid == g].iloc[::-1]
+        y = np.arange(len(q))
+        left = np.zeros(len(q))
+        for stage, color in STAGE_COLORS.items():
+            if stage in q:
+                vals = q[stage].to_numpy()
+                ax.barh(y, vals, left=left, color=color, height=0.62, edgecolor="#fcfcfb", linewidth=1,
+                        label=stage if g == grids[0] else None)
+                left += vals
+        for yi, tot in zip(y, left):
+            ax.annotate(f"{tot:.1f} s", (tot, yi), xytext=(4, 0), textcoords="offset points", va="center",
+                        fontsize=8, color=INK2)
+        ax.set_yticks(y, q.tool)
+        ax.set_xlim(0, left.max() * 1.12)
+        ax.set_title(g, fontsize=10)
+        ax.grid(axis="y", visible=False)
+    axes[-1, 0].set_xlabel("seconds (slope, warm cache); each panel has its own scale")
+    fig.legend(loc="lower center", ncol=4, fontsize=8, frameon=False, bbox_to_anchor=(0.5, -0.01))
+    fig.suptitle("Where the time goes: gdaldem vs our CPU and GPU engines", x=0.01, ha="left", fontsize=12,
+                 fontweight="bold")
+    fig.tight_layout(rect=(0, 0.06, 1, 0.97))
+    fig.savefig(PLOTS / "e4_stages.png"), plt.close(fig)
+
+
 def main():
     d = load()
     h, lad, st, o, p, w, c, s = (headline(d), ladder(d), stages(d), operators(d), products(d), windows_table(d),
                                  crossover(), safety(d))
     PLOTS.mkdir(parents=True, exist_ok=True)
-    chart_scaling(d), chart_ladder(lad, d), chart_crossover()
+    sr = stage_rows(d)
+    chart_scaling(d), chart_ladder(lad, d), chart_crossover(), chart_stages(sr)
     out = ["# E4 (GPU) result tables", "",
            "Generated by `python -m bench.analysis.e4_report` from `results/runs.csv` and `results/e4_crossover.csv`. "
            "Medians over measured repeats, warm cache unless stated. GPU runs pinned to the 12 performance-core "
@@ -242,6 +312,7 @@ def main():
            "## Slope: GPU vs CPU engine vs gdaldem", "", md_table(h), "",
            "## GPU versions (optimisation ladder, slope)", "", md_table(lad), "",
            "## Where the GPU engine's time goes", "", md_table(st), "",
+           "## Stage split: gdaldem vs CPU engine vs GPU engine (slope, warm, seconds)", "", md_table(sr), "",
            "## Every gdaldem configuration", "", md_table(o), "",
            "## Slope + aspect + hillshade in one pass", "", md_table(p), "",
            "## Window size (GPU, slope)", "", md_table(w), "",

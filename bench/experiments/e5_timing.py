@@ -133,7 +133,7 @@ def precompute(writer_rows):
                "dem_pyramid_mb": Path(path).stat().st_size / 2**20}
         writer_rows.append(row)
         print(f"{name}: slope {t1 - t0:.1f} s + COG/overviews {t2 - t1:.1f} s, "
-              f"{row['slope_pyramid_mb']:.0f} MB (DEM COG {row['dem_pyramid_mb']:.0f} MB)", flush=True)
+              f"{row['slope_pyramid_mb']:.0f} MiB (DEM COG {row['dem_pyramid_mb']:.0f} MiB)", flush=True)
 
 
 def main():

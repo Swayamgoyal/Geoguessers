@@ -52,7 +52,7 @@ def headline(d):
         rows.append({"grid": LABEL[ds], "gdaldem cold s": g_c, "gdaldem warm s": g_w,
                      "engine (22 thr) cold s": e_c, "engine (22 thr) warm s": e_w,
                      "engine (12 P-thr) warm s": p_w, "speed-up warm": g_w / e_w,
-                     "engine peak MB": eng(d, ds, "engine_all_slope", None, "peak_rss_mb"),
+                     "engine peak MiB": eng(d, ds, "engine_all_slope", None, "peak_rss_mb"),
                      "engine cores": eng(d, ds, "engine_all_slope", None, "avg_cores")})
     return pd.DataFrame(rows)
 
@@ -115,13 +115,14 @@ def stages(d):
     rows = []
     for ds in GRIDS:
         for v in ("engine_all_slope", "engine_all_slope_nowrite", "engine_all_slope_zstd1", "engine_all_3prod"):
-            q = d[(d.experiment == "E3") & (d.dataset == ds) & (d.variant == v) & d.ok & (d.rep >= 1)]
+            q = d[(d.experiment == "E3") & (d.dataset == ds) & (d.variant == v) & d.ok & (d.rep >= 1) &
+                  (d.cache_state == "warm")]
             if q.empty:
                 continue
             rows.append({"grid": LABEL[ds], "variant": v, "total s": q.t_total.median(),
                          "python start-up s": q.t_imports.median(), "wait for read s": q.read.median(),
                          "compute s": q.compute.median(), "wait for writer s": q.write.median(),
-                         "writer busy s": q.writer_busy.median(), "written MB": q.proc_write_mb.median()})
+                         "writer busy s": q.writer_busy.median(), "written GB": q.proc_write_mb.median() * 2**20 / 1e9})
     return pd.DataFrame(rows)
 
 
@@ -151,7 +152,7 @@ def window_sizes(d):
                 continue
             q = d[(d.experiment == "E3") & (d.dataset == ds) & (d.variant == v) & d.ok]
             rows.append({"grid": LABEL[ds], "window": n, "cold s": eng(d, ds, v, "cold"), "warm s": w,
-                         "peak MB": q.peak_rss_mb.median(), "wait for read s": eng(d, ds, v, col="read"),
+                         "peak MiB": q.peak_rss_mb.median(), "wait for read s": eng(d, ds, v, col="read"),
                          "compute s": eng(d, ds, v, col="compute"), "wait for writer s": eng(d, ds, v, col="write")})
     return pd.DataFrame(rows)
 
@@ -165,7 +166,7 @@ def whole_array(d):
         ok = q[q.ok]
         rows.append({"grid": LABEL[ds], "cells (M)": q.cells.iloc[0] / 1e6, "runs": len(q), "succeeded": len(ok),
                      "time s": ok.t_total.median() if len(ok) else q.t_total.median(),
-                     "peak MB": q.peak_rss_mb.max(),
+                     "peak MiB": q.peak_rss_mb.max(),
                      "outcome": "ok" if len(ok) == len(q) else "out of memory: " + (
                          q[~q.ok].error.str.extract(r"(Unable to allocate [\d.]+ GiB)")[0].iloc[0] or "see error")})
     return pd.DataFrame(rows)
@@ -232,7 +233,7 @@ def chart_memory(d):
     ax.annotate("laptop RAM, 16 GB", (max(cells.values()), 16 * 1024), xytext=(0, 4), textcoords="offset points",
                 ha="right", color=INK2, fontsize=9)
     ax.set_xscale("log"), ax.set_yscale("log")
-    ax.set_xlabel("grid cells"), ax.set_ylabel("peak memory (MB)")
+    ax.set_xlabel("grid cells"), ax.set_ylabel("peak memory (MiB)")
     ax.set_title("E3: streaming stays flat; the whole-grid approach hits the RAM limit")
     ax.legend(loc="center right")
     fig.savefig(PLOTS / "e3_memory.png"), plt.close(fig)
@@ -264,7 +265,7 @@ def chart_window(ws):
             continue
         base = q.set_index("window")["warm s"].get(2048, np.nan)
         a1.plot(q.window, q["warm s"] / base, marker="o", color=S[i], label=g)
-        a2.plot(q.window, q["peak MB"], marker="o", color=S[i], label=g)
+        a2.plot(q.window, q["peak MiB"], marker="o", color=S[i], label=g)
     for a in (a1, a2):
         a.set_xscale("log", base=2)
         a.set_xticks([512, 1024, 2048, 4096, 8192], ["512", "1024", "2048", "4096", "8192"])
@@ -272,7 +273,7 @@ def chart_window(ws):
     a1.axhline(1, color=AXIS, lw=1)
     a1.set_ylabel("time vs 2048 window (warm)")
     a1.set_title("E3: time")
-    a2.set_ylabel("peak memory (MB)")
+    a2.set_ylabel("peak memory (MiB)")
     a2.set_title("E3: memory")
     a1.legend(loc="upper center")
     fig.savefig(PLOTS / "e3_window.png"), plt.close(fig)

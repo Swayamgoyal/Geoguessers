@@ -11,24 +11,26 @@ computation would show for the same screen cell? And how much time does it save,
 resolution and averaging, or with a slope pyramid built in advance?
 
 Everything here is reproduced by the scripts listed at the end. Numbers come from `results/e5_*.csv`, tables from
-`results/e5_tables.md` and charts from `results/plots/e5_*.png`.
+`results/e5_tables.md` and charts from `results/plots/e5_*.png`; the median and IQR of every timing are in
+`results/run_stats.md`. Sizes: MB = 10^6 bytes, GB = 10^9 bytes.
 
 ## Key findings
 
-1. **On demand, one display tile costs the same at every zoom level.** A 512 × 512 slope tile computed from the DEM
-   pyramid takes **6–7 ms**, cold or warm, at every level. The exact alternative (read the same ground area at full
-   resolution, compute slope, average it) grows about 4× per level: 56 ms at 4 m, 0.19 s at 8 m, 0.62 s at 16 m,
-   **2.9 s at 32 m**. On demand therefore saves **8× (one level up) to 450× (four levels up)** per tile. For the
-   whole Chamoli area at 32 m it takes 13 ms, against 4.7 s.
+1. **On demand, one display tile costs about the same at every zoom level.** A 512 × 512 slope tile computed from
+   the DEM pyramid takes **5–8 ms** (median per level, cold or warm: 4.9–7.6 ms). The exact alternative (read the
+   same ground area at full resolution, compute slope, average it) grows 2–5× per level: on Chamoli 56 ms at 4 m,
+   0.19 s at 8 m, 0.62 s at 16 m, **2.9 s at 32 m**. On demand therefore saves **8× (one level up) to 450× (four
+   levels up)** per tile on Chamoli, and 8× to 190× on tile-571. For the whole Chamoli area at 32 m it takes
+   13 ms, against 4.7 s.
 2. **The price is slope that is too low, and more so the coarser the level.** On the 2 m Chamoli data the RMSE
    against the truth is 2.3° at 4 m, 4.4° at 8 m, 5.6° at 16 m, 6.4° at 32 m, 7.9° at 64 m and 10.0° at 128 m.
    The error is almost all an underestimate: the bias goes from −0.5° to −7.3°, and the mean slope shown drops
    from 99% to 81% of the true mean. The share of cells off by more than 5° rises from 4% to 58%. Averaging the
    DEM smooths the terrain before slope is computed, and that removes steepness.
-3. **What matters is how many levels up you go, not the cell size in metres.** The 2 m and 8 m datasets give
-   nearly the same error for the same number of levels up: one level 2.3° / 2.6°, two 4.4° / 4.0°, three 5.6° /
-   5.3°, four 6.4° / 6.9°, five 7.9° / 9.0°. A useful rule of thumb: **about 2.5° RMSE one level up, then roughly
-   1.5° more for each further level**.
+3. **What matters is how many levels up you go, not the cell size in metres.** The 2 m and 8 m datasets give a
+   similar error for the same number of levels up (within 0.5° up to four levels, 1.1° at five): one level 2.3° /
+   2.6°, two 4.4° / 4.0°, three 5.6° / 5.3°, four 6.4° / 6.9°, five 7.9° / 9.0°. A useful rule of thumb: **about
+   2.5° RMSE one level up, then on average about 1.5° more for each further level** (single steps 0.8–2.1°).
 4. **Steep terrain loses the most, and slope thresholds shift.** At 32 m (Chamoli) the bias is −0.9° on 0–10°
    ground but −4.0° on 40–50° ground, and 36% of the 40–50° cells are off by more than 5°. The share of terrain
    at or above 45° drops from 29.3% (truth) to 21.9% at 32 m, and from 27.4% to 10.1% at 128 m. A hazard or
@@ -38,10 +40,11 @@ Everything here is reproduced by the scripts listed at the end. Numbers come fro
    one 16-point compass sector.
 6. **A pyramid level of good data beats a coarse DEM from another source.** Over Chamoli, the 2 m data averaged
    to 8 m gives 4.5° slope RMSE against the truth; the independent HMA 8 m DEM gives 8.6°. At 30 m it is 6.3° vs
-   9.4° for Copernicus 30 m, and at 90 m 8.7° vs 9.9° for Copernicus 90 m. The difference between data sources is
-   larger than the pyramid error. When a high-resolution DEM exists, its pyramid is the better coarse product.
-7. **A precomputed slope pyramid is exact and fastest per tile (4–5 ms), but it costs a full pass and storage for
-   every derivative.** For Chamoli: 10.6 s to build (1.6 s slope + 9.0 s compression and overviews) and **958 MB,
+   9.4° for Copernicus 30 m, and at 90 m 8.7° vs 9.9° for Copernicus 90 m. When a high-resolution DEM exists, its
+   pyramid is the better coarse product. (At 8 m the difference between the two sources is larger than what the
+   pyramid loses; at 90 m the sources agree well and the loss of resolution itself dominates.)
+7. **A precomputed slope pyramid is exact (apart from a footprint detail, see the GDAL check) and fastest per tile
+   (3–6 ms), but it costs a full pass and storage for every derivative.** For Chamoli: 10.6 s to build (1.6 s slope + 9.0 s compression and overviews) and **1.0 GB,
    1.5× the DEM pyramid itself**. For the 10 gdaldem configurations that would be about 10 GB, rebuilt whenever a
    parameter changes (sun angle, z-factor, method).
 8. **GDAL's overviews work as a pyramid even when the grid size is not a power of two.** Our grids are not
@@ -50,9 +53,9 @@ Everything here is reproduced by the scripts listed at the end. Numbers come fro
    within 0.1°).
 
 **In one sentence:** computing derivatives on demand from the pyramid makes every view cost the same few
-milliseconds whatever the zoom. That is 8–450× cheaper than computing at full resolution, and needs none of the
-storage of precomputed products. The cost is a systematic underestimate of slope: about 2.5° RMSE one level up,
-growing by roughly 1.5° per further level, worst on the steepest ground.
+milliseconds whatever the zoom. That is 8–450× cheaper than computing at full resolution (1–4 levels up), and
+needs none of the storage of precomputed products. The cost is a systematic underestimate of slope: about 2.5°
+RMSE one level up, growing by about 1.5° per further level on average, worst on the steepest ground.
 
 ## How it was measured
 
@@ -107,7 +110,7 @@ growing by roughly 1.5° per further level, worst on the steepest ground.
 | Chamoli 2 m | 4 | 32 m | **6.4°** | −3.3° | 30.5% | 10.3% | 0.91 | 6.4° |
 | Chamoli 2 m | 5 | 64 m | **7.9°** | −5.0° | 43.1% | 17.1% | 0.87 | 7.8° |
 | Chamoli 2 m | 6 | 128 m | **10.0°** | −7.3° | 57.8% | 28.2% | 0.81 | 9.9° |
-| Tile-571 8 m | 1 | 16 m | **2.6°** | −0.7° | 6.6% | 0.9% | 0.98 | 2.5° |
+| Tile-571 8 m | 1 | 16 m | **2.6°** | −0.7° | 6.6% | 0.9% | 0.98 | 2.4° |
 | Tile-571 8 m | 2 | 32 m | **4.0°** | −1.6° | 15.6% | 3.0% | 0.95 | 3.9° |
 | Tile-571 8 m | 3 | 64 m | **5.3°** | −2.9° | 26.3% | 6.9% | 0.90 | 5.3° |
 | Tile-571 8 m | 4 | 128 m | **6.9°** | −4.5° | 40.5% | 13.3% | 0.83 | 6.9° |
@@ -122,8 +125,8 @@ The mean true slope on Chamoli is 38–39°: this is steep Himalayan terrain. Ce
 
 The on-demand map keeps every valley, ridge and landslide scar of the truth, but it is lighter (lower slope)
 almost everywhere. The error map is mostly blue (on demand lower), strongest on rough, broken slopes and narrow
-ridges. Those are the features that averaging the DEM smooths away. The thin orange lines are valley floors,
-where averaging blends in the steep valley walls, so on demand reads slightly steeper there.
+ridges. Those are the features that averaging the DEM smooths away. A minority of cells read steeper than the
+truth (thin orange lines along the drainage and ridge network); where and why exactly was not analysed further.
 
 ## Which terrain loses the most
 
@@ -138,7 +141,7 @@ Bias by true slope class (Chamoli; tile-571 is in `results/e5_tables.md`):
 | 16 m | −0.5° | −0.8° | −1.4° | −2.0° | −2.8° | −3.0° |
 | 32 m | −0.9° | −1.5° | −2.6° | −3.3° | −4.0° | −3.9° |
 | 64 m | −0.7° | −1.9° | −3.5° | −5.1° | −6.0° | −5.9° |
-| 128 m | −0.8° | −2.4° | −4.3° | −7.3° | −8.9° | −8.9° |
+| 128 m | −0.8° | −2.4° | −4.3° | −7.3° | −8.8° | −8.9° |
 
 Steep cells are also off by more than 5° much more often: at 32 m, 10% of the 0–10° cells but 36% of the 40–50°
 cells; at 128 m, 14% vs 68%.
@@ -150,10 +153,10 @@ build". The share of cells on the steep side:
 |---|---|---|---|---|---|---|
 | 4 m | 72.7% | 72.1% | 97.0% | 33.2% | 32.1% | 96.9% |
 | 8 m | 73.4% | 71.0% | 93.4% | 32.3% | 29.2% | 93.3% |
-| 16 m | 75.0% | 69.2% | 90.5% | 30.8% | 25.7% | 90.9% |
+| 16 m | 75.0% | 69.2% | 90.4% | 30.8% | 25.7% | 90.9% |
 | 32 m | 76.8% | 66.6% | 87.5% | 29.3% | 21.9% | 89.3% |
 | 64 m | 78.2% | 62.0% | 82.2% | 28.4% | 16.5% | 86.0% |
-| 128 m | 79.4% | 54.6% | 74.1% | 27.4% | **10.1%** | 81.7% |
+| 128 m | 79.4% | 54.6% | 74.0% | 27.4% | **10.1%** | 81.7% |
 
 One level up, a threshold map is still 97% the same. Four levels up, a quarter of the ≥ 45° terrain has
 disappeared. For display this is acceptable; for analysis that uses thresholds it is not.
@@ -187,7 +190,9 @@ Over the Chamoli footprint, against the same truth (2 m slope averaged to each s
 
 At every size, the pyramid of the 2 m data is closer to the truth than a DEM measured natively at that size by
 another sensor. The other sensors differ in date (HMA 2017, Copernicus 2011–2015, Chamoli 2015), method and
-co-registration, and those differences are larger than what the pyramid loses. The constant ~26 m elevation
+co-registration. At 8 m that source difference (7.3° RMSE between HMA and the averaged 2 m) is larger than what
+the pyramid loses (4.5°). At 30 m the two are about equal (6.4° vs 6.3°). At 90 m the sources agree well (3.3°),
+and most of the error of both is simply the coarse resolution (8.7° vs 9.9°). The constant ~26 m elevation
 offset of Copernicus is the known ellipsoid / geoid datum difference (plan §3.4); a constant offset does not
 change slope.
 
@@ -220,12 +225,15 @@ Whole grid at each level (s, warm):
 | Tile-571 | 0 (8 m) | 0.95 | – | 0.25 |
 | Tile-571 | 3 (64 m) | 0.034 | 3.2 | 0.014 |
 
-- **On demand is flat** because a 512² tile is always 514² cells read plus under 1 ms of kernel, whatever the
-  level. The full-resolution route reads 4× more ground per level.
-- **Cold vs warm hardly matters** (at most 1–2 ms per tile) on this NVMe SSD. A tile touches only a few compressed
-  512² blocks.
-- **Precomputed is 2–3 ms faster per tile** (no computation), the same order as on demand. Both are far below the
-  ~100 ms at which a pan or zoom starts to feel slow.
+- **On demand is flat** because a 512² tile always means reading 514² cells and running the kernel on them, whatever
+  the level. The full-resolution route reads 4× more ground per level.
+- **Cold vs warm hardly matters** on this NVMe SSD: at most 1.5 ms per tile for on demand and 1.7 ms for
+  precomputed, and within 10% (in both directions; mostly within 2%) for the full-resolution route. A tile touches only a few
+  compressed 512² blocks.
+- **Precomputed is 2–3 ms faster per tile** (1.3–3.0 ms at levels 1–4; 0.8–1.5 ms at level 0), the same order as on demand. It skips the slope kernel,
+  which takes about 0.5 ms for 512² cells with 12 threads (E4 crossover test). The rest of the gap is preparing the
+  window for the kernel (halo, padding, conversion to float64), which was not timed separately. Both routes are far
+  below the ~100 ms at which a pan or zoom starts to feel slow.
 
 ## Error against time saved (the G2 trade-off)
 
@@ -238,14 +246,15 @@ Whole grid at each level (s, warm):
 | 3 (16 m) | 94× | 5.6° | −2.2° | 23% | 5.4° |
 | 4 (32 m) | 447× | 6.4° | −3.3° | 30% | 6.3° |
 
-Each level up saves roughly 4× more time (4× fewer cells) and costs roughly 1.5–2° more slope RMSE.
+Per tile, on demand always reads 514² cells, while the full-resolution route reads 4× more ground per level. On Chamoli the time saved grows 3–5× per level (tile-571: 2–4×),
+and the slope RMSE grows 0.8–2.1° per level (Chamoli 2.1°, 1.2°, 0.8° for levels 1→4).
 
 ## What a precomputed slope pyramid costs
 
 | Data | Full-res slope | Compress + build overviews | Total, once | Slope pyramid size | DEM pyramid size |
 |---|---|---|---|---|---|
-| Chamoli 2 m | 1.6 s | 9.0 s | **10.6 s** | **958 MB** | 620 MB |
-| Tile-571 8 m | 1.0 s | 5.9 s | **7.0 s** | **561 MB** | 422 MB |
+| Chamoli 2 m | 1.6 s | 9.0 s | **10.6 s** | **1005 MB** | 650 MB |
+| Tile-571 8 m | 1.0 s | 5.9 s | **7.0 s** | **589 MB** | 443 MB |
 
 Slope compresses worse than elevation (it is rougher), so one derivative pyramid is larger than the DEM pyramid
 itself. This is per derivative and per parameter set: slope Horn, slope ZT, aspect, a hillshade per sun position,
@@ -287,18 +296,19 @@ but it is not needed.
 
 ## What it means
 
-- **For G2:** answered with numbers. Each pyramid level up saves about 4× in time per view (8–450× per tile for 1–4
-  levels) and costs about 1.5–2.5° slope RMSE, as a systematic underestimate that is largest on steep ground. Aspect
-  costs much less (median 2–8°).
+- **For G2:** answered with numbers. Each pyramid level up saves 2–5× in time per view (8–450× per tile for 1–4
+  levels on Chamoli, 8–190× on tile-571). It costs about 2.5° slope RMSE for the first level and about 1.5° more per
+  further level on average, as a systematic underestimate that is largest on steep ground. Aspect costs much
+  less (median 2–8°).
 - **For Phase 5 (tile server, E6):**
   - Pick the pyramid level so that one level cell ≈ one screen pixel. Then the on-demand value is close to what
-    that pixel should show, and every tile costs ~7 ms (under 1 ms of it computing).
+    that pixel should show, and every tile costs 5–8 ms (about 0.5 ms of it the slope kernel).
   - Precompute only the one or two most-used products (slope), if storage allows; compute everything else on
     demand (other operators, any hillshade sun angle).
   - Add a tile cache: re-reading the same compressed blocks for every view is the main cost, not the kernel
     (E3 / E4).
 - **For analysis rather than display:** never threshold slope computed from a coarse level. Compute the view at full
-  resolution (the full-resolution route: 0.06–3 s per tile here), or read a precomputed slope pyramid.
+  resolution (the full-resolution route: 0.05–2.9 s per tile here), or read a precomputed slope pyramid.
 - **Possible improvement (not done):** the underestimate is systematic (mean slope shown = 0.99 … 0.81 × true
   mean), so a per-level correction factor could remove most of the bias, but not the spread.
 

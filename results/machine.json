@@ -1,6 +1,6 @@
 {
   "machine_id": "Baracuda",
-  "captured_at": "2026-10-09T12:51:22",
+  "captured_at": "2026-10-11T23:55:02",
   "os": "Windows-11-10.0.26200-SP0",
   "cpu": "Intel(R) Core(TM) Ultra 9 185H",
   "cores_physical": 16,
@@ -10,7 +10,7 @@
     {
       "name": "NVIDIA GeForce RTX 4060 Laptop GPU",
       "memory_total": "8188 MiB",
-      "driver": "596.08"
+      "driver": "610.60"
     }
   ],
   "python": "3.12.15",

@@ -75,7 +75,7 @@ Results: [docs/PHASE2_RESULTS.md](docs/PHASE2_RESULTS.md).
 ## Our engine and its benchmark (Phase 3, CPU)
 
 The engine processes a DEM window by window (reader threads → parallel Numba kernel → one writer thread), so its
-memory stays around 1.3 GB whatever the grid size. It reproduces gdaldem's ten operator configurations.
+memory stays around 1.4 GB whatever the grid size. It reproduces gdaldem's ten operator configurations.
 ```
 python -m demlab.cli in.tif --ops slope,aspect,hillshade --out-dir OUT [--method Horn] [--threads 12]
 python -m pytest tests/ -q                       # correctness vs gdaldem on 1024² crops (119 tests, CPU + GPU + pyramid)
@@ -112,6 +112,9 @@ python -m bench.analysis.e5_report                   # tables (results/e5_tables
 ```
 Unattended timing: `powershell -ExecutionPolicy Bypass -File bench\run_e5.ps1` (progress in `logs\e5_timing_log.txt`).
 Results: [docs/PHASE4_RESULTS.md](docs/PHASE4_RESULTS.md).
+
+Run variability for every experiment (median, quartiles and IQR of every configuration):
+`python -m bench.analysis.run_stats` → `results/run_stats.md`.
 
 ## Layout
 
