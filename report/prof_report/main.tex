@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper]{article}
+﻿\documentclass[11pt,a4paper]{article}
 \usepackage[margin=2.2cm]{geometry}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern,microtype}
@@ -24,11 +24,11 @@ Yakkala Viswanadha Kartikeya (2024111033)}
 We investigate how far large, high-resolution Digital Elevation Models (DEMs) can be processed and visualised on a
 single laptop, and where the actual bottleneck lies. On one Himalayan study area (Uttarakhand, $\sim$100\,km
 $\times$ 100\,km) we prepared real DEMs at 90, 30, 8 and 2\,m and synthetic 2\,m and 1\,m grids (up to 10.8 billion
-cells, 43\,GB as float32, 2.7$\times$ the laptop's RAM). With a purpose-built benchmark harness that measures exact
+cells, 43\,GB as float32, 2.6$\times$ the laptop's RAM). With a purpose-built benchmark harness that measures exact
 per-process time, memory, CPU and I/O under controlled cold- and warm-cache conditions, we ran 832 measured runs of
 GDAL's \texttt{gdaldem} (10 operator/method configurations), seven storage layouts, and QGIS rendering. Three findings
-stand out. (1) \texttt{gdaldem} never runs out of memory: it streams the grid and peaks at 0.83\,GB even at 1\,m; it
-only slows down linearly, at 20--25\,ns per cell (3.5\,min for one slope pass at 1\,m). (2) The bottleneck is
+stand out. (1) \texttt{gdaldem} never runs out of memory: it streams the grid and peaks at 0.87\,GB even at 1\,m; it
+only slows down linearly, at 19--25\,ns per cell (3.5\,min for one slope pass at 1\,m). (2) The bottleneck is
 single-threaded computation ($\sim$73\% of run time, 1 of 22 threads used), not disk (14\%) or memory; the file-cache
 state changes run time by $\le$2\%. (3) For display, the bottleneck is reading full-resolution data: without a
 pyramid, a whole-area QGIS redraw takes 32\,s at 1\,m, with one it takes 0.09\,s at every resolution. These results
@@ -89,7 +89,7 @@ compresses 26\% better than real terrain and would distort read times).
 
 \section{Benchmark methodology}
 \paragraph{Machine.} Intel Core Ultra 9 185H (6 performance, 8 efficiency and 2 low-power cores; 22 threads), 16\,GB
-RAM, NVMe SSD ($\sim$2\,GB/s reads), NVIDIA RTX 4060 Laptop GPU (8\,GB, not used by these tools), Windows 11,
+RAM, NVMe SSD (cold reads measured at 2.7--3.3\,GB/s), NVIDIA RTX 4060 Laptop GPU (8\,GiB, not used by these tools), Windows 11,
 GDAL 3.13.3, QGIS 3.44.14.
 
 \paragraph{Harness.} Each measurement runs one tool as a separate process. For every run we record wall time and,
@@ -131,30 +131,30 @@ of the 8\,m and 2\,m grids: write, read and slope (224 runs). \textbf{QGIS displ
 \toprule
 Grid & Cells & Slope cold & Slope warm & Hillshade & ns/cell & Peak memory \\
 \midrule
-90\,m & 1.3\,M & 0.08\,s & 0.07\,s & 0.06\,s & (start-up) & 41\,MB \\
-30\,m & 12\,M & 0.29\,s & 0.28\,s & 0.13\,s & 23.1 & 91\,MB \\
-8\,m & 169\,M & 4.10\,s & 4.02\,s & 2.96\,s & 23.8 & 710\,MB \\
-2\,m real & 264\,M & 6.67\,s & 6.63\,s & 4.74\,s & 25.1 & 828\,MB \\
-2\,m synthetic & 2.7\,B & 54.2\,s & 53.7\,s & 41.0\,s & 19.9 & 830\,MB \\
-1\,m synthetic & 10.8\,B & 208.3\,s & 208.4\,s & 158.9\,s & 19.3 & 832\,MB \\
+90\,m & 1.3\,M & 0.08\,s & 0.07\,s & 0.06\,s & (start-up) & 42\,MB \\
+30\,m & 12\,M & 0.29\,s & 0.28\,s & 0.13\,s & 23.1 & 96\,MB \\
+8\,m & 169\,M & 4.10\,s & 4.02\,s & 2.96\,s & 23.8 & 745\,MB \\
+2\,m real & 264\,M & 6.67\,s & 6.63\,s & 4.74\,s & 25.1 & 868\,MB \\
+2\,m synthetic & 2.7\,B & 54.2\,s & 53.7\,s & 41.0\,s & 19.9 & 870\,MB \\
+1\,m synthetic & 10.8\,B & 208.3\,s & 208.4\,s & 158.9\,s & 19.3 & 872\,MB \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \begin{itemize}
-  \item \textbf{No memory limit:} \texttt{gdaldem} streams the grid and processes 43\,GB of data with 0.83\,GB.
-  \item \textbf{Linear time:} 20--25\,ns per cell once start-up stops mattering; 3.5\,min for slope at 1\,m.
+  \item \textbf{No memory limit:} \texttt{gdaldem} streams the grid and processes 43\,GB of data with 0.87\,GB.
+  \item \textbf{Linear time:} 19--25\,ns per cell once start-up stops mattering; 3.5\,min for slope at 1\,m.
   \item \textbf{Single-threaded:} 0.99 of 22 threads used at every size.
-  \item \textbf{Cache does not matter:} cold vs warm differ by $\le$2\%. At 2\,m/1\,m the file exceeds what the
-  cache can hold, so even warm runs read 3.6/13.6\,GB from disk and take the same time.
+  \item \textbf{Cache does not matter:} cold vs warm differ by $\le$2\%. At 2\,m/1\,m even warm runs read 3.8/14.2\,GB
+  from disk (at 1\,m the file exceeds the cache; at 2\,m \texttt{gdaldem}'s own $\sim$11\,GB output pushes it out) and take the same time.
 \end{itemize}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.49\linewidth]{e1_scaling.png}\hfill
 \includegraphics[width=0.49\linewidth]{e1_memory.png}
-\caption{Left: run time grows linearly with the number of cells. Right: peak memory levels off at $\sim$0.83\,GB
-(GDAL's block cache), far below the size of the grid, which exceeds the 16\,GB RAM at 1\,m.}
+\caption{Left: run time grows linearly with the number of cells. Right: peak memory levels off at $\sim$0.87\,GB
+(GDAL's block cache plus the program), far below the size of the grid, which exceeds the 16\,GB RAM at 1\,m.}
 \label{fig:e1}
 \end{figure}
 
@@ -180,21 +180,21 @@ hillshade 0\%). Hillshade is cheaper than slope partly because it writes 1-byte 
 \toprule
 Layout & File size & Write & Read + decompress & \texttt{gdaldem} slope \\
 \midrule
-Strips, uncompressed (GDAL default) & 10.3\,GB & 13.9\,s & 4.0\,s & \textbf{47.1\,s} \\
-Tiles 256, uncompressed & 10.4\,GB & 13.5\,s & 4.0\,s & 51.8\,s \\
-Tiles 512, uncompressed & 10.4\,GB & 13.3\,s & 3.3\,s & 49.1\,s \\
-Tiles 512, LZW & 4.8\,GB & 88.9\,s & 20.1\,s & 65.7\,s \\
-Tiles 512, DEFLATE & 3.7\,GB & 113.4\,s & 11.4\,s & 57.0\,s \\
-\textbf{Tiles 512, ZSTD} (our pyramids) & \textbf{3.6\,GB} & 123.9\,s & \textbf{7.8\,s} & 53.7\,s \\
-Tiles 256, ZSTD & 3.7\,GB & 121.0\,s & 8.6\,s & 55.3\,s \\
+Strips, uncompressed (GDAL default) & 10.8\,GB & 13.9\,s & 4.0\,s & \textbf{47.1\,s} \\
+Tiles 256, uncompressed & 10.9\,GB & 13.5\,s & 4.0\,s & 51.8\,s \\
+Tiles 512, uncompressed & 10.9\,GB & 13.3\,s & 3.3\,s & 49.1\,s \\
+Tiles 512, LZW & 5.0\,GB & 88.9\,s & 20.1\,s & 65.7\,s \\
+Tiles 512, DEFLATE & 3.9\,GB & 113.4\,s & 11.4\,s & 57.0\,s \\
+\textbf{Tiles 512, ZSTD} (our pyramids) & \textbf{3.8\,GB} & 123.9\,s & \textbf{7.8\,s} & 53.7\,s \\
+Tiles 256, ZSTD & 3.8\,GB & 121.0\,s & 8.6\,s & 55.3\,s \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 Layout changes \texttt{gdaldem} time by up to 40\%, because decompression runs inside the single thread: LZW is 39\%
 slower than uncompressed strips, ZSTD only 14\%. ZSTD is the best compressed format (2.9$\times$ smaller than
-uncompressed and decoding 2.6$\times$ faster than LZW); LZW, a common default, is worst on speed and nearly worst on
-size. Writing compressed files is $\sim$9$\times$ slower, a one-time cost when the pyramid is built. The real 8\,m
+uncompressed and decoding 2.6$\times$ faster than LZW); LZW, a common default, is the slowest layout and the largest
+compressed one. Writing compressed files is 6--9$\times$ slower, a one-time cost when the pyramid is built. The real 8\,m
 grid shows the same pattern (slope 3.42\,s uncompressed, 3.94\,s ZSTD, 4.78\,s LZW).
 
 \begin{figure}[H]
@@ -213,9 +213,9 @@ grid shows the same pattern (slope 3.42\,s uncompressed, 3.94\,s ZSTD, 4.78\,s L
 \toprule
 Grid & Whole area, pyramid & Whole area, no pyramid & Zoomed in (either) & Peak memory (pyramid / none) \\
 \midrule
-8\,m & 0.09\,s & 0.79\,s & 0.10\,s & 199 / 862\,MB \\
-2\,m synthetic & 0.09\,s & 8.82\,s & 0.10\,s & 200 / 979\,MB \\
-1\,m synthetic & 0.09\,s & \textbf{31.9\,s} & 0.11\,s & 200 / 980\,MB \\
+8\,m & 0.09\,s & 0.79\,s & 0.10\,s & 209 / 904\,MB \\
+2\,m synthetic & 0.09\,s & 8.82\,s & 0.10\,s & 210 / 1027\,MB \\
+1\,m synthetic & 0.09\,s & \textbf{31.9\,s} & 0.11\,s & 210 / 1028\,MB \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -228,8 +228,8 @@ pyramid, and for zoomed-in views, the cost stays constant.}
 \end{figure}
 
 Opening a layer takes 0.02--0.03\,s in all cases. Only zoomed-out views need the pyramid: a zoomed-in view reads just
-its window. Without a pyramid, each whole-area redraw of the 1\,m grid reads the entire 16.6\,GB file
-(350$\times$ slower than with the pyramid), which makes interactive use impossible.
+its window. Without a pyramid, each whole-area redraw of the 1\,m grid reads its whole full-resolution
+level, about 12.7\,GB (360$\times$ slower than with the pyramid), which makes interactive use impossible.
 
 \section{Discussion}
 \paragraph{Where standard tools stop being practical (G1).} On a 16\,GB laptop with an NVMe SSD the standard tools
@@ -245,13 +245,14 @@ agree with the pyramid-based approaches of Losasso and Hoppe \cite{clipmaps} and
 
 \paragraph{Implications.} (1) The largest gain for processing should come from parallel computation across the
 22 threads; decompression must also be parallel, since reading and decompressing the 1\,m grid alone takes 29\,s on
-one thread while the SSD could deliver it in $\sim$8\,s. (2) Computing several derivatives in one pass avoids
+one thread while the SSD could deliver it in about 4--5\,s. (2) Computing several derivatives in one pass avoids
 re-reading and re-writing the grid ($\sim$27\% of each \texttt{gdaldem} run). (3) On-demand computation is cheap:
 slope for one 256$\times$256 tile costs $\sim$1.6\,ms on one thread, so an interactive viewer is limited by reading
 the right window at the right pyramid level.
 
-\paragraph{Validity.} Most configurations repeat within 0.2--3.3\% (median spread); medians absorb the few single
-slow runs. Runs below $\sim$10 million cells are dominated by program start-up and are not used for per-cell claims.
+\paragraph{Validity.} Repeats agree closely: the median IQR per configuration is 1.4\% (E1) and 1.3\% (E2) of the
+median; medians absorb the few single slow runs. On the synthetic 2\,m/1\,m grids warm values are single runs.
+Sizes use MB = $10^6$ and GB = $10^9$ bytes. Runs below $\sim$10 million cells are dominated by program start-up and are not used for per-cell claims.
 Synthetic grids are used only for timing. Earlier, disturbed attempts (before pinning and before handling background
 scanning) are kept as evidence.
 
