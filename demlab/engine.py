@@ -3,7 +3,8 @@
     from demlab.engine import run
     run("in.tif", {"slope": "out_slope.tif", "hillshade": "out_hs.tif"}, backend="numba", method="Horn")
 
-Backends: "numpy" (reference, single thread), "numba" (parallel CPU, fused products), "cupy" (GPU).
+Backends: "numpy" (reference, single thread), "numba" (parallel CPU, fused products), "cupy" (GPU, the NumPy
+reference run through CuPy arrays: the straightforward port), "cuda" (GPU, our CUDA kernels, demlab/gpu.py).
 
 Pipeline (three stages overlap, memory stays bounded whatever the grid size):
   readers  : `readers` threads, each with its own dataset handle (GDAL datasets are not thread-safe), decode
@@ -18,8 +19,10 @@ writer (back-pressure) plus closing the files; writer_busy = time the writer thr
 import queue
 import threading
 import time
+from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 
+import numpy as np
 import rasterio
 from rasterio.windows import Window
 
@@ -57,10 +60,11 @@ def _out_profile(info, op, compress, co):
 
 
 def run(src_path, outputs, backend="numba", method="Horn", window=2048, readers=4, prefetch=6, threads=None,
-        write=True, compress=None, creation_options=None):
+        write=True, compress=None, creation_options=None, precision="fp32", pinned=True, gpu_streams=2):
     """outputs: {op: path}. method applies to slope/aspect/hillshade ("Horn"/"ZevenbergenThorne") or TRI
     ("Riley"/"Wilson"). write=False computes but discards results (to time compute without output).
-    compress: None (uncompressed) or e.g. "ZSTD" (GDAL compresses with multiple threads)."""
+    compress: None (uncompressed) or e.g. "ZSTD" (GDAL compresses with multiple threads).
+    backend "cuda" (CUDA kernels, demlab/gpu.py) takes precision ("fp32"/"fp64"), pinned and gpu_streams."""
     if threads and backend == "numba":
         import numba
         numba.set_num_threads(threads)
@@ -69,6 +73,11 @@ def run(src_path, outputs, backend="numba", method="Horn", window=2048, readers=
     with rasterio.open(src_path) as src:
         info = grid_info(src)
     wins = list(windows(info.width, info.height, window))
+    gpu = None
+    if backend == "cuda":
+        from demlab.gpu import CudaBackend
+        gpu = CudaBackend(outputs, info.res, method, info.nodata, precision, pinned, gpu_streams)
+    in_dtype = np.float32 if gpu else np.float64  # the GPU gets the file's float32 values (half the copy)
 
     local = threading.local()
     handles, handles_lock = [], threading.Lock()
@@ -78,7 +87,7 @@ def run(src_path, outputs, backend="numba", method="Horn", window=2048, readers=
             local.src = rasterio.open(src_path)
             with handles_lock:
                 handles.append(local.src)
-        return read_with_halo(local.src, win, info.nodata)
+        return read_with_halo(local.src, win, info.nodata, in_dtype)
 
     wq = queue.Queue(maxsize=prefetch)
     writer_error = []
@@ -101,12 +110,22 @@ def run(src_path, outputs, backend="numba", method="Horn", window=2048, readers=
 
     dsts = {}
     wthread = None
+
+    def emit(win, res):
+        if write:
+            if writer_error:
+                raise writer_error[0]
+            tw = time.perf_counter()
+            wq.put((win, res))
+            t["write"] += time.perf_counter() - tw
+
     try:
         if write:
             dsts = {op: rasterio.open(path, "w", **_out_profile(info, op, compress, creation_options))
                     for op, path in outputs.items()}
             wthread = threading.Thread(target=writer, args=(dsts,), daemon=True)
             wthread.start()
+        in_gpu = deque()  # (window, handle) submitted to the GPU and not yet collected
         with ThreadPoolExecutor(max_workers=readers) as pool:
             pending = [pool.submit(load, w) for w in wins[:prefetch]]
             nxt = len(pending)
@@ -119,14 +138,23 @@ def run(src_path, outputs, backend="numba", method="Horn", window=2048, readers=
                     pending.append(pool.submit(load, wins[nxt]))
                     nxt += 1
                 tc = time.perf_counter()
-                res = _compute(backend, list(outputs), z, info.res, method, info.nodata)
+                if gpu is None:
+                    res = _compute(backend, list(outputs), z, info.res, method, info.nodata)
+                    t["compute"] += time.perf_counter() - tc
+                    emit(win, res)
+                    continue
+                in_gpu.append((win, gpu.submit(z)))
+                done = in_gpu.popleft() if len(in_gpu) >= gpu.depth else None
+                res = gpu.collect(done[1]) if done else None
                 t["compute"] += time.perf_counter() - tc
-                if write:
-                    if writer_error:
-                        raise writer_error[0]
-                    tw = time.perf_counter()
-                    wq.put((win, res))
-                    t["write"] += time.perf_counter() - tw
+                if done:
+                    emit(done[0], res)
+            while in_gpu:
+                tc = time.perf_counter()
+                w0, h = in_gpu.popleft()
+                res = gpu.collect(h)
+                t["compute"] += time.perf_counter() - tc
+                emit(w0, res)
     finally:
         tw = time.perf_counter()
         if wthread is not None:
@@ -140,6 +168,8 @@ def run(src_path, outputs, backend="numba", method="Horn", window=2048, readers=
     if writer_error:
         raise writer_error[0]
     t["total"] = time.perf_counter() - t0
+    if gpu:
+        t.update(gpu.timings())
     t["cells"] = info.width * info.height
     t["windows"] = len(wins)
     return t

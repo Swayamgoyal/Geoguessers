@@ -1,25 +1,45 @@
 grid,op,method,version,cells_compared,nodata_mask_mismatch,max_abs_diff,mean_abs_diff,cells_over_tol,tol
 tile571_8m,slope,Horn,engine (float64),133595872,0,0.005509376525878906,0.00041375312471270646,0,0.02
+tile571_8m,slope,Horn,GPU engine (float32),133595872,0,7.62939453125e-06,7.153738569716033e-07,0,0.0001
 tile571_8m,slope,Horn,parity (float32 sums),133595872,0,7.62939453125e-06,9.231923935145402e-07,0,0.0001
 tile571_8m,slope,ZevenbergenThorne,engine (float64),133595872,0,7.62939453125e-06,9.264194276857303e-07,0,0.02
+tile571_8m,slope,ZevenbergenThorne,GPU engine (float32),133595872,0,7.62939453125e-06,7.163961760309914e-07,0,0.02
 tile571_8m,aspect,Horn,engine (float64),133595872,0,11.103836059570312,0.0015577552860282715,31053,0.1
+tile571_8m,aspect,Horn,GPU engine (float32),133595872,0,3.0517578125e-05,4.9441263170186105e-06,0,0.001
 tile571_8m,aspect,Horn,parity (float32 sums),133595872,0,3.0517578125e-05,3.369843207235996e-06,0,0.001
 tile571_8m,aspect,ZevenbergenThorne,engine (float64),133595872,0,3.0517578125e-05,3.3702254630642124e-06,0,0.1
+tile571_8m,aspect,ZevenbergenThorne,GPU engine (float32),133595872,0,3.0517578125e-05,4.944779562817104e-06,0,0.1
 tile571_8m,hillshade,Horn,engine (float64),133595872,0,1.0,8.637991449316638e-06,0,1
+tile571_8m,hillshade,Horn,GPU engine (float32),133595872,0,1.0,0.0014750306057360815,0,1
 tile571_8m,hillshade,ZevenbergenThorne,engine (float64),133595872,0,1.0,9.75329537128213e-06,0,1
+tile571_8m,hillshade,ZevenbergenThorne,GPU engine (float32),133595872,0,1.0,1.034463100776048e-05,0,1
 tile571_8m,TRI,Riley,engine (float64),133595872,0,0.0,0.0,0,0.001
+tile571_8m,TRI,Riley,GPU engine (float32),133595872,0,0.0001220703125,2.644297819387888e-07,0,0.001
 tile571_8m,TRI,Wilson,engine (float64),133595872,0,3.0517578125e-05,4.568640882107495e-13,0,0.001
+tile571_8m,TRI,Wilson,GPU engine (float32),133595872,0,0.0,0.0,0,0.001
 tile571_8m,TPI,,engine (float64),133595872,0,0.00115966796875,0.00014825605964643147,0,0.002
+tile571_8m,TPI,,GPU engine (float32),133595872,0,0.00115966796875,0.0001482560593037834,0,0.002
 tile571_8m,roughness,,engine (float64),133595872,0,0.0,0.0,0,0.001
+tile571_8m,roughness,,GPU engine (float32),133595872,0,0.0,0.0,0,0.001
 chamoli_2m,slope,Horn,engine (float64),247111312,0,0.02193593978881836,0.0012201051664260368,1,0.02
+chamoli_2m,slope,Horn,GPU engine (float32),247111312,0,7.62939453125e-06,7.338068260211201e-07,0,0.0001
 chamoli_2m,slope,Horn,parity (float32 sums),247111312,0,7.62939453125e-06,1.0366835330141076e-06,0,0.0001
 chamoli_2m,slope,ZevenbergenThorne,engine (float64),247111312,0,7.62939453125e-06,1.0399172985345551e-06,0,0.02
+chamoli_2m,slope,ZevenbergenThorne,GPU engine (float32),247111312,0,7.62939453125e-06,7.348412608153815e-07,0,0.02
 chamoli_2m,aspect,Horn,engine (float64),247111311,1,78.69007110595703,0.0036003081746146214,188065,0.1
+chamoli_2m,aspect,Horn,GPU engine (float32),247111311,0,3.0517578125e-05,4.815648786599584e-06,0,0.001
 chamoli_2m,aspect,Horn,parity (float32 sums),247111311,0,3.0517578125e-05,3.5578822334964385e-06,0,0.001
 chamoli_2m,aspect,ZevenbergenThorne,engine (float64),247111311,0,3.0517578125e-05,3.5587180038259335e-06,0,0.1
+chamoli_2m,aspect,ZevenbergenThorne,GPU engine (float32),247111311,0,3.0517578125e-05,4.817481501128159e-06,0,0.1
 chamoli_2m,hillshade,Horn,engine (float64),247111312,0,1.0,9.594866300576317e-06,0,1
+chamoli_2m,hillshade,Horn,GPU engine (float32),247111312,0,1.0,0.0043126273393748965,0,1
 chamoli_2m,hillshade,ZevenbergenThorne,engine (float64),247111312,0,1.0,9.250891760066411e-06,0,1
+chamoli_2m,hillshade,ZevenbergenThorne,GPU engine (float32),247111312,0,1.0,1.1221663539223167e-05,0,1
 chamoli_2m,TRI,Riley,engine (float64),247111312,0,0.0,0.0,0,0.001
+chamoli_2m,TRI,Riley,GPU engine (float32),247111312,0,6.103515625e-05,8.673895817569659e-08,0,0.001
 chamoli_2m,TRI,Wilson,engine (float64),247111312,0,0.0,0.0,0,0.001
+chamoli_2m,TRI,Wilson,GPU engine (float32),247111312,0,0.0,0.0,0,0.001
 chamoli_2m,TPI,,engine (float64),247111312,0,0.00128173828125,0.00012741238624945,0,0.002
+chamoli_2m,TPI,,GPU engine (float32),247111312,0,0.00128173828125,0.00012741238624945,0,0.002
 chamoli_2m,roughness,,engine (float64),247111312,0,0.0,0.0,0,0.001
+chamoli_2m,roughness,,GPU engine (float32),247111312,0,0.0,0.0,0,0.001

@@ -82,3 +82,30 @@ def test_cupy_matches_numpy(op, method):
     ref = numpy_k.compute(op, zp, res, method, nodata)
     ours = cp.asnumpy(numpy_k.compute(op, cp.asarray(zp), res, method, nodata, xp=cp))
     _assert_close(op, ours, ref, _nodata_of(op), tol=1e-4 if op != "hillshade" else 1)
+
+
+def _cuda(op, zp, res, method, nodata, precision):
+    cp = pytest.importorskip("cupy")
+    from demlab.kernels import cuda_k
+    zg = cp.asarray(zp, dtype=cp.float32)  # the grids are float32, so this is exact
+    return cp.asnumpy(cuda_k.compute_many([op], zg, res, method or "Horn", nodata, precision)[op])
+
+
+@pytest.mark.parametrize("name", CROPS)
+@pytest.mark.parametrize("op,method", OPS)
+def test_cuda_fp32_matches_gdaldem(name, op, method):
+    """The float32 GPU kernel adds the Horn neighbours in float32 like gdaldem: as close as the parity version."""
+    zp, res, nodata = _padded(name)
+    ref, ref_nd = gdaldem_ref(name, op, method)
+    tol = {"slope": 1e-4, "aspect": 1e-3}.get(op)
+    _assert_close(op, _cuda(op, zp, res, method, nodata, "fp32"), ref, ref_nd, tol=tol)
+
+
+@pytest.mark.parametrize("name", CROPS)
+@pytest.mark.parametrize("op,method", OPS)
+def test_cuda_fp64_matches_numba(name, op, method):
+    """The float64 GPU kernel computes like the CPU engine."""
+    zp, res, nodata = _padded(name)
+    ref = numba_k.compute_many([op], zp, res, method, nodata)[op]
+    _assert_close(op, _cuda(op, zp, res, method, nodata, "fp64"), ref, _nodata_of(op),
+                  tol=1e-4 if op != "hillshade" else 0)

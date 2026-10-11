@@ -33,6 +33,28 @@ def test_tiled_equals_whole(tmp_path, backend, window):
     assert np.abs(tiled[m] - whole[m]).max() <= 1e-4
 
 
+@pytest.mark.parametrize("pinned,streams", [(False, 1), (True, 1), (True, 2), (True, 3)])
+@pytest.mark.parametrize("window", [300, 1024])
+def test_cuda_tiled_equals_whole(tmp_path, pinned, streams, window):
+    """GPU pipeline (every copy / overlap mode): same as the whole grid computed with gdaldem's float32 sums."""
+    pytest.importorskip("cupy")
+    src = crop("8m_gaps")
+    z, res, nodata = load("8m_gaps")
+    zp = np.pad(z, 1, constant_values=nodata)
+    outs = {op: tmp_path / f"{op}.tif" for op in ("slope", "aspect", "hillshade")}
+    run(src, outs, backend="cuda", method="Horn", window=window, pinned=pinned, gpu_streams=streams)
+    for op, tol in (("slope", 1e-4), ("aspect", 1e-3), ("hillshade", 1)):
+        whole = numpy_k.compute(op, zp, res, "Horn", nodata, gdal_rounding=True)
+        tiled = _read(outs[op])
+        nd = 0 if op == "hillshade" else numpy_k.NODATA
+        assert np.array_equal(tiled == nd, whole == nd), op
+        m = tiled != nd
+        d = np.abs(tiled[m].astype(np.float64) - whole[m])
+        if op == "aspect":
+            d = np.minimum(d, 360 - d)
+        assert d.max() <= tol, op
+
+
 @pytest.mark.parametrize("op,method", [("slope", "ZevenbergenThorne"), ("TRI", "Riley"), ("roughness", "")])
 def test_engine_matches_gdaldem(tmp_path, op, method):
     out = tmp_path / "o.tif"

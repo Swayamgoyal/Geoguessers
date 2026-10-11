@@ -78,8 +78,8 @@ The engine processes a DEM window by window (reader threads → parallel Numba k
 memory stays around 1.3 GB whatever the grid size. It reproduces gdaldem's ten operator configurations.
 ```
 python -m demlab.cli in.tif --ops slope,aspect,hillshade --out-dir OUT [--method Horn] [--threads 12]
-python -m pytest tests/ -q                       # correctness vs gdaldem on 1024² crops (60 tests)
-python -m tests.check_full_grid                  # engine vs gdaldem on the full 8 m and 2 m real grids
+python -m pytest tests/ -q                       # correctness vs gdaldem on 1024² crops (108 tests, CPU + GPU)
+python -m tests.check_full_grid                  # CPU and GPU engine vs gdaldem on the full 8 m and 2 m real grids
 python -m bench.experiments.e3_cpu --plan        # E3: engine vs gdaldem; drop --plan to run
 python -m bench.analysis.phase3_report           # tables (results/phase3_tables.md) + plots (results/plots/e3_*)
 ```
@@ -87,6 +87,19 @@ python -m bench.analysis.phase3_report           # tables (results/phase3_tables
 whole grid into memory (it runs out of memory on the big grids, as intended).
 Unattended: `powershell -ExecutionPolicy Bypass -File bench\run_e3.ps1` (progress in `logs\e3_log.txt`).
 Results: [docs/PHASE3_RESULTS.md](docs/PHASE3_RESULTS.md).
+
+## GPU engine and its benchmark (Phase 3, GPU)
+
+Needs an NVIDIA GPU and CuPy. The same pipeline with our CUDA kernels; GPU memory use is capped at 4 GB, and the
+sweep waits for the GPU to cool below 75 °C before each run and stops at 85 °C.
+```
+python -m demlab.cli in.tif --ops slope --out-dir OUT --impl cuda [--precision fp32|fp64] [--no-pinned] [--gpu-streams 2]
+python -m bench.experiments.e4_gpu --plan        # E4: GPU vs CPU engine vs gdaldem; drop --plan to run
+python -m bench.experiments.e4_crossover         # from which window size the GPU beats the CPU
+python -m bench.analysis.e4_report               # tables (results/e4_tables.md) + plots (results/plots/e4_*)
+```
+Unattended: `powershell -ExecutionPolicy Bypass -File bench\run_e4.ps1` (progress in `logs\e4_log.txt`).
+Results: [docs/PHASE3_GPU_RESULTS.md](docs/PHASE3_GPU_RESULTS.md).
 
 ## Layout
 

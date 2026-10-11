@@ -258,7 +258,7 @@ P7                                                        ███████�
 - ✅ Results, tables and charts: **`docs/PHASE2_RESULTS.md`**. Headline: gdaldem never runs out of memory (0.83 GB at 1 m = 43 GB of data) but is single-threaded and compute-bound (73% compute, 3.5 min for slope at 1 m); without a pyramid, QGIS needs 32 s per whole-area redraw at 1 m, with one 0.09 s.
 - Next: send the progress update to the professor (draft: `docs/prof_update_phase2.md`).
 
-### Phase 3: Engine, E3 + E4 (end of Week 1 – end of Week 2) · SG (CPU, tiling), KK (GPU) · CPU part ✅ done, GPU part next
+### Phase 3: Engine, E3 + E4 (end of Week 1 – end of Week 2) · SG (CPU, tiling), KK (GPU) · ✅ done (CPU and GPU)
 Done so far:
 - ✅ `demlab/kernels/numpy_k.py`: reference slope / aspect / hillshade (Horn, ZT), TRI (Riley, Wilson), TPI, roughness, gdaldem conventions; also runs on the GPU with CuPy (`xp=cupy`).
 - ✅ `demlab/kernels/numba_k.py`: parallel CPU kernels; slope + aspect + hillshade fused into one pass.
@@ -268,7 +268,8 @@ Done so far:
 - ✅ E3 (`bench/experiments/e3_cpu.py`, launcher `bench/run_e3.ps1`, 501 runs): engine vs gdaldem on 8 m / 2 m real / 2 m / 1 m synthetic, all 10 gdaldem operator configurations of E1, three products separately and fused, with and without writing, compressed output, 1 → 22 threads, window size 512 → 8192, tiled NumPy and naive whole-grid NumPy. Results: **`docs/PHASE3_RESULTS.md`**. Headline: slope 2.1–3.5× faster than gdaldem on the same cores (1 m: 60 s vs 208 s); every operator 1.3–2.6× faster on the real grids; three products in one pass 3.4–4.2× faster than three gdaldem runs; the whole-grid NumPy version runs out of memory between 0.26 and 2.7 B cells; with computation parallel the engine is now limited by writing (1 m) and decompressing the input, not by computation.
 - ✅ Full-grid correctness (`python -m tests.check_full_grid`): engine vs gdaldem on every cell of the whole 8 m and 2 m real grids, all 10 configurations. Identical nodata masks and within test tolerance everywhere except Horn aspect on near-flat cells. That difference is gdaldem's float32 rounding: with it reproduced, every cell matches.
 - (Earlier informal look: the CuPy array-style version was slow, 3.9 s at 8 m, because of temporaries and per-window transfers.)
-Next (GPU part, E4): a CuPy raw kernel with timed CPU → GPU, kernel and GPU → CPU stages; find where the GPU helps given that read + write are now over half the batch time (`docs/PHASE3_RESULTS.md`, last section).
+- ✅ GPU engine: `demlab/kernels/cuda_k.py` (our CUDA kernels, all 10 configurations, float32 default / float64), `demlab/gpu.py` (pinned buffers, 2 CUDA streams, stage timing with CUDA events, 4 GB GPU-memory cap); `--impl cuda` in the CLI. 108 tests pass; the full-grid check matches gdaldem in every configuration.
+- ✅ E4 (`bench/experiments/e4_gpu.py`, launcher `bench/run_e4.ps1`, 484 runs, 0 failures; crossover test `bench/experiments/e4_crossover.py`). Results: **`docs/PHASE3_GPU_RESULTS.md`**. Headline: the GPU kernel is ~50× faster than the 12-thread CPU kernel, but copies are 95% of the GPU's time and the whole run is 1.0–1.4× faster than the CPU engine (1 m slope 43.8 s vs 60.3 s vs gdaldem 208 s), 1.7× for three fused products. The GPU beats the CPU from 512² windows (slope) / 256² (three products). After the GPU, the limit is decompressing the input and then writing the output. The naive CuPy port was no faster than the CPU. The GPU never went above 63 °C.
 
 ### Phase 4: Pyramid on demand, E5 (middle of Week 2 – middle of Week 3) · SC
 - Compute slope directly from overview level k using that level's cell size.

@@ -8,6 +8,8 @@ impl:
   numpy : tiled pipeline, NumPy reference kernel (single-threaded)
   naive : the simplest possible program: read the WHOLE grid into memory, compute with NumPy, write. No tiling.
           Expected to run out of memory once the grid no longer fits in RAM (the "memory-hungry approach").
+  cupy  : tiled pipeline, NumPy reference code run on the GPU through CuPy arrays (straightforward GPU port)
+  cuda  : tiled pipeline, our CUDA kernels [--precision fp32|fp64] [--no-pinned] [--gpu-streams N]
 Prints one JSON line at the end: {"t_internal": seconds after imports, "read": ..., "compute": ..., ...}.
 """
 import argparse
@@ -57,10 +59,14 @@ def main():
     ap.add_argument("src")
     ap.add_argument("--ops", default="slope")
     ap.add_argument("--out-dir", required=True)
-    ap.add_argument("--impl", default="numba", choices=["numba", "numpy", "naive"])
+    ap.add_argument("--impl", default="numba", choices=["numba", "numpy", "naive", "cupy", "cuda"])
+    ap.add_argument("--precision", default="fp32", choices=["fp32", "fp64"], help="cuda only")
+    ap.add_argument("--no-pinned", action="store_true", help="cuda only: copy from pageable memory")
+    ap.add_argument("--gpu-streams", type=int, default=2, help="cuda only: 1 = no overlap")
     ap.add_argument("--method", default="Horn")
     ap.add_argument("--threads", type=int)
     ap.add_argument("--window", type=int, default=2048)
+    ap.add_argument("--readers", type=int, default=4)
     ap.add_argument("--no-write", action="store_true")
     ap.add_argument("--compress")
     ap.add_argument("--zstd-level", type=int)
@@ -74,7 +80,9 @@ def main():
     else:
         co = {"zstd_level": a.zstd_level} if a.zstd_level else None
         t = run(a.src, outputs, backend=a.impl, method=a.method, window=a.window, threads=a.threads,
-                write=not a.no_write, compress=a.compress, creation_options=co)
+                readers=a.readers, prefetch=max(6, a.readers + 2),
+                write=not a.no_write, compress=a.compress, creation_options=co, precision=a.precision,
+                pinned=not a.no_pinned, gpu_streams=a.gpu_streams)
     t = {k: (round(v, 4) if isinstance(v, float) else v) for k, v in t.items()}
     print(json.dumps({"t_internal": round(time.perf_counter() - t0, 4), "t_imports": round(t_imports, 3), **t}))
 

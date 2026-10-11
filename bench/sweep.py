@@ -1,6 +1,8 @@
 """Shared pieces for the E1/E2 sweeps: commands for each operation, and the run loop."""
+import json
 import os
 import shutil
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -59,11 +61,40 @@ def wait_for_space(free_before, timeout=900):
     return True
 
 
+GPU_COOL, GPU_RESUME, GPU_STOP = 75, 65, 85  # deg C: wait before a run / resume below / stop the sweep at
+
+
+def gpu_temp():
+    """GPU temperature in deg C (nvidia-smi, read-only), or None if it cannot be read."""
+    try:
+        out = subprocess.run(["nvidia-smi", "--query-gpu=temperature.gpu", "--format=csv,noheader,nounits"],
+                             capture_output=True, text=True, timeout=20).stdout
+        return int(out.split()[0])
+    except (OSError, ValueError, IndexError, subprocess.SubprocessError):
+        return None
+
+
+def gpu_cooldown():
+    """Before a GPU run: if the card is warm, wait (outside the timed part) until it has cooled down."""
+    t = gpu_temp()
+    if t is None:
+        raise SystemExit("Cannot read the GPU temperature (nvidia-smi); not running GPU jobs blind")
+    if t >= GPU_COOL:
+        print(f"GPU at {t} C: waiting until it is below {GPU_RESUME} C", flush=True)
+        start = time.perf_counter()
+        while (t := gpu_temp()) is None or t > GPU_RESUME:
+            if time.perf_counter() - start > 900:
+                raise SystemExit("GPU did not cool down within 15 min; stopping the sweep")
+            time.sleep(10)
+    return t
+
+
 def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=False, snapshot=True):
     """jobs: dicts with the CSV metadata plus '_src' (input path) and optional private keys:
     _cmd (prebuilt command), _cpus ("all" = every logical CPU; default the performance cores), _timeout (s),
     _out_bpc (output bytes per cell, for the free-space check; default 4), _scratch (writes into OUT_DIR and
-    must wait for the deleted output to be released; default: no _cmd).
+    must wait for the deleted output to be released; default: no _cmd), _gpu (uses the GPU: wait for it to cool
+    below GPU_COOL before the run, record its temperature, stop the sweep if it reaches GPU_STOP).
     snapshot: record the run conditions (results/env); callers that run one sweep in parts pass it once."""
     rec = Recorder(csv_path)
     todo = [j for j in jobs if not rec.is_done(j)]
@@ -90,7 +121,12 @@ def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=Fals
             cmd = job.get("_cmd") or command(job["op"], job["method"], job["_src"], OUT_DIR / "out.tif")
             free_before = shutil.disk_usage(OUT_DIR).free
             job_cpus = list(range(os.cpu_count())) if job.get("_cpus") == "all" else cpus
+            gpu_before = gpu_cooldown() if job.get("_gpu") else None
             res = measure(cmd, job["cache_state"], job_cpus, timeout=job.get("_timeout"))
+            gpu_after = gpu_temp() if job.get("_gpu") else None
+            if job.get("_gpu"):
+                extra = json.loads(res["extra"]) if res["extra"] else {}
+                res["extra"] = json.dumps({**extra, "gpu_temp_before": gpu_before, "gpu_temp_after": gpu_after})
             cleanup()
             if job.get("_scratch", not job.get("_cmd")) and not wait_for_space(free_before):
                 raise SystemExit(f"Deleted output was not released within 15 min ({OUT_DIR}); stopping before "
@@ -100,7 +136,10 @@ def run_jobs(jobs, experiment, csv_path=CSV, plan_only=False, allow_battery=Fals
             print(f"[{i}/{len(todo)}] {job['dataset']} {job.get('variant', '')} {job['op']} {job['method']} "
                   f"{job['cache_state']} rep{job['rep']}: {res['t_total']:.2f} s, peak {res['peak_rss_mb']:.0f} MB, "
                   f"disk read {res['disk_read_mb']:.0f} MB{'' if res['ok'] else '  FAILED: ' + res['error']}"
+                  f"{f', GPU {gpu_before}->{gpu_after} C' if job.get('_gpu') else ''}"
                   f"  | elapsed {el / 60:.0f} min, ETA {el / i * (len(todo) - i) / 60:.0f} min", flush=True)
+            if gpu_after is not None and gpu_after >= GPU_STOP:
+                raise SystemExit(f"GPU reached {gpu_after} C (limit {GPU_STOP} C); stopping the sweep to protect it")
     finally:
         keep_awake(False)
         cleanup()
