@@ -1,0 +1,81 @@
+{
+  "experiment": "E5",
+  "captured_at": "2026-10-11T21:06:48",
+  "git_sha": "06afaff",
+  "power_scheme": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)",
+  "on_ac_power": true,
+  "defender_realtime": "True",
+  "cpu_efficiency_classes": {
+    "0": 1,
+    "1": 1,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 0,
+    "6": 0,
+    "7": 0,
+    "8": 0,
+    "9": 0,
+    "10": 1,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "14": 1,
+    "15": 1,
+    "16": 1,
+    "17": 1,
+    "18": 1,
+    "19": 1,
+    "20": 0,
+    "21": 0
+  },
+  "pinned_cpus": [
+    0,
+    1,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "ram_available_gb": 7.9,
+  "busiest_processes_cores": [
+    [
+      16.1,
+      "System Idle Process"
+    ],
+    [
+      1.11,
+      "WmiPrvSE.exe"
+    ],
+    [
+      0.62,
+      "System"
+    ],
+    [
+      0.35,
+      "python.exe"
+    ],
+    [
+      0.33,
+      "AlienFXSubAgent.exe"
+    ],
+    [
+      0.27,
+      "svchost.exe"
+    ],
+    [
+      0.25,
+      "explorer.exe"
+    ],
+    [
+      0.23,
+      "MsMpEng.exe"
+    ]
+  ]
+}

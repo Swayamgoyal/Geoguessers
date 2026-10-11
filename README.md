@@ -78,7 +78,7 @@ The engine processes a DEM window by window (reader threads → parallel Numba k
 memory stays around 1.3 GB whatever the grid size. It reproduces gdaldem's ten operator configurations.
 ```
 python -m demlab.cli in.tif --ops slope,aspect,hillshade --out-dir OUT [--method Horn] [--threads 12]
-python -m pytest tests/ -q                       # correctness vs gdaldem on 1024² crops (108 tests, CPU + GPU)
+python -m pytest tests/ -q                       # correctness vs gdaldem on 1024² crops (119 tests, CPU + GPU + pyramid)
 python -m tests.check_full_grid                  # CPU and GPU engine vs gdaldem on the full 8 m and 2 m real grids
 python -m bench.experiments.e3_cpu --plan        # E3: engine vs gdaldem; drop --plan to run
 python -m bench.analysis.phase3_report           # tables (results/phase3_tables.md) + plots (results/plots/e3_*)
@@ -100,6 +100,18 @@ python -m bench.analysis.e4_report               # tables (results/e4_tables.md)
 ```
 Unattended: `powershell -ExecutionPolicy Bypass -File bench\run_e4.ps1` (progress in `logs\e4_log.txt`).
 Results: [docs/PHASE3_GPU_RESULTS.md](docs/PHASE3_GPU_RESULTS.md).
+
+## Derivatives on demand from the pyramid (Phase 4, E5)
+
+How wrong is slope computed from a coarse pyramid level, and how much time does it save?
+```
+python -m bench.experiments.e5_timing --precompute   # once: slope pyramids to compare against (~20 s)
+python -m bench.experiments.e5_accuracy              # error per level, by slope class, aspect, other DEMs (~5 min)
+python -m bench.experiments.e5_timing                # time per tile / whole grid, three routes (~30 min)
+python -m bench.analysis.e5_report                   # tables (results/e5_tables.md) + plots (results/plots/e5_*)
+```
+Unattended timing: `powershell -ExecutionPolicy Bypass -File bench\run_e5.ps1` (progress in `logs\e5_timing_log.txt`).
+Results: [docs/PHASE4_RESULTS.md](docs/PHASE4_RESULTS.md).
 
 ## Layout
 

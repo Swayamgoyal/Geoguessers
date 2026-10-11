@@ -271,13 +271,12 @@ Done so far:
 - ✅ GPU engine: `demlab/kernels/cuda_k.py` (our CUDA kernels, all 10 configurations, float32 default / float64), `demlab/gpu.py` (pinned buffers, 2 CUDA streams, stage timing with CUDA events, 4 GB GPU-memory cap); `--impl cuda` in the CLI. 108 tests pass; the full-grid check matches gdaldem in every configuration.
 - ✅ E4 (`bench/experiments/e4_gpu.py`, launcher `bench/run_e4.ps1`, 484 runs, 0 failures; crossover test `bench/experiments/e4_crossover.py`). Results: **`docs/PHASE3_GPU_RESULTS.md`**. Headline: the GPU kernel is ~50× faster than the 12-thread CPU kernel, but copies are 95% of the GPU's time and the whole run is 1.0–1.4× faster than the CPU engine (1 m slope 43.8 s vs 60.3 s vs gdaldem 208 s), 1.7× for three fused products. The GPU beats the CPU from 512² windows (slope) / 256² (three products). After the GPU, the limit is decompressing the input and then writing the output. The naive CuPy port was no faster than the CPU. The GPU never went above 63 °C.
 
-### Phase 4: Pyramid on demand, E5 (middle of Week 2 – middle of Week 3) · SC
-- Compute slope directly from overview level k using that level's cell size.
-- Main: on the Chamoli sub-area, compare slope from levels 4, 8, 16, 32, 64 m with the real 2 m slope aggregated to the same grid.
-- Full tile: the same comparison with 8 m as truth (levels 16–128 m).
-- Cross-source: does our 8 m level from the Chamoli 2 m match the independent HMA 8 m DEM?
-- Secondary check: does slope from our 32 m / 64 m level match slope from the real Copernicus 30 m / 90 m as well as the two products match each other?
-- Error-vs-time-saved curves, split by slope class (flat / moderate / steep). **Headline result.**
+### Phase 4: Pyramid on demand, E5 (middle of Week 2 – middle of Week 3) · SC · ✅ done
+- ✅ Slope (and aspect) computed directly from each COG overview level with that level's cell size (`demlab/pyramid.py`: overview access, cell footprints, block sums; 11 tests).
+- ✅ Main: Chamoli 2 m → levels 4, 8, 16, 32, 64, 128 m against the 2 m slope averaged over each cell's footprint. Full tile: 8 m → 16–256 m. Fully-valid cells only (cell + 8 neighbours free of nodata). Cross-check against an exact power-of-two pyramid (`bench/experiments/e5_accuracy.py`).
+- ✅ Cross-source: HMA 8 m and Copernicus 30 / 90 m against the same truth, next to the 2 m data averaged to those sizes.
+- ✅ Timing (`bench/experiments/e5_timing.py`, launcher `bench/run_e5.ps1`): one 512² display tile and the whole grid at every level, on demand vs full resolution + averaging vs a precomputed slope pyramid, cold / warm; cost and size of the precomputed pyramid.
+- ✅ Results: **`docs/PHASE4_RESULTS.md`** (tables `results/e5_tables.md`, charts `results/plots/e5_*.png`). Headline: an on-demand 512² slope tile costs 6–7 ms at every level, 8–450× less than computing it at full resolution (1–4 levels up). The price is a systematic slope underestimate: RMSE 2.3° (4 m) → 6.4° (32 m) → 10° (128 m) on Chamoli, bias −0.5° → −7.3°, worst on steep ground. Error depends on levels up, not metres. Aspect holds up (median 2–8°). A pyramid level of the 2 m data beats HMA 8 m / Copernicus 30 / 90 m. A precomputed slope pyramid is exact but costs 10.6 s and 958 MB per derivative.
 
 ### Phase 5: Tile server and visualisation, E6 (end of Week 2 – middle of Week 3) · SG (server), KK (Cesium, QGIS)
 - FastAPI server: zoom → level → windowed read → kernel → colour map → PNG, with LRU cache.
