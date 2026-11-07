@@ -46,7 +46,7 @@ class TileOutcome:
 
 class TileService:
     def __init__(self, datasets, block_mb=1024, result_mb=512, fg_workers=8, bg_workers=3, bg_shared=False,
-                 bg_cap=256, bg_min_free_gb=2.5, bg_yield=True):
+                 bg_cap=256, bg_min_free_gb=1.0, bg_yield=True):
         os.environ.setdefault("GDAL_CACHEMAX", "128")  # small: each thread-local handle keeps its own copy
         self.pyramids = {name: Pyramid(p, name=name, precomputed=pre) for name, (p, pre) in datasets.items()}
         self.blocks = BlockCache(block_mb)
@@ -61,7 +61,7 @@ class TileService:
         return cls(datasets or default_datasets(), block_mb=int(e("DEMLAB_BLOCK_CACHE_MB", 1024)),
                    result_mb=int(e("DEMLAB_RESULT_CACHE_MB", 512)), fg_workers=int(e("DEMLAB_FG_WORKERS", 8)),
                    bg_workers=int(e("DEMLAB_BG_WORKERS", 3)), bg_shared=e("DEMLAB_BG_SHARED", "0") == "1",
-                   bg_min_free_gb=float(e("DEMLAB_BG_MIN_FREE_GB", 2.5)),
+                   bg_min_free_gb=float(e("DEMLAB_BG_MIN_FREE_GB", 1.0)),
                    bg_yield=e("DEMLAB_BG_YIELD", "1") == "1")
 
     # ---------------------------------------------------------------- specs

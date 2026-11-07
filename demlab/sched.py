@@ -54,7 +54,7 @@ class Ticket:
 
 class Scheduler:
     def __init__(self, run_job, fg_workers=8, bg_workers=3, fg_cpus=None, bg_cpus=None, bg_cap=256,
-                 bg_min_free_gb=2.5, bg_shared=False, bg_yield=True):
+                 bg_min_free_gb=1.0, bg_shared=False, bg_yield=True):
         """run_job(job) -> result; it may raise Cancelled (call job.token.check(stage) between stages).
         bg_yield: a bg worker does not start a new job while any fg job is queued or running (foreground strictly
         first; a running bg job is not interrupted). bg_shared: put bg workers on the performance cores (E6 variant;
@@ -229,6 +229,10 @@ class Scheduler:
         if any(j.state == "running" and j.priority == "fg" for j in self._jobs.values()):
             return True
         return any(j.state == "queued" and j.priority == "fg" for (_, _, _, j) in self._q["fg"])
+
+    def bg_paused(self):
+        """True while background work cannot start (free-memory guard): new bg requests should be refused."""
+        return self._low_memory()
 
     def _low_memory(self):
         return self.bg_min_free > 0 and psutil.virtual_memory().available < self.bg_min_free

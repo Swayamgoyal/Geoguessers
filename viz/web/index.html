@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GeoGuessers Terrain Viewer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <canvas id="map" aria-label="Terrain map: scroll or pinch to zoom, drag to pan, Shift and drag to zoom to a box"></canvas>
+
+    <aside id="panel">
+      <header>
+        <h1>GeoGuessers</h1>
+        <p class="sub">Terrain on demand from the pyramid</p>
+      </header>
+
+      <section class="controls">
+        <label>Dataset <select id="dataset"></select></label>
+        <label>Product <select id="op"></select></label>
+        <label id="method-row">Method <select id="method"></select></label>
+        <label>Resolution
+          <select id="mode">
+            <option value="auto">Auto (level fits the screen)</option>
+            <option value="exact">Exact (from full resolution)</option>
+            <option value="precomputed">Precomputed slope pyramid</option>
+          </select>
+        </label>
+        <label id="sun-row">Sun direction <span id="sun-val">315°</span>
+          <input id="azimuth" type="range" min="0" max="359" step="1" value="315">
+        </label>
+        <label class="check"><input id="prefetch" type="checkbox" checked> Prefetch neighbouring views</label>
+        <div class="row">
+          <button id="back" type="button" disabled>Back</button>
+          <button id="home" type="button">Whole map</button>
+        </div>
+      </section>
+
+      <section id="legend" aria-label="Legend"></section>
+
+      <section class="status" aria-live="polite">
+        <h2>View</h2>
+        <dl>
+          <dt>Pyramid level</dt><dd id="s-level">–</dd>
+          <dt>Cell size</dt><dd id="s-cell">–</dd>
+          <dt>Expected slope error</dt><dd id="s-error">–</dd>
+          <dt>Visible tiles</dt><dd id="s-tiles">–</dd>
+          <dt>Last tile</dt><dd id="s-last">–</dd>
+          <dt>View complete in</dt><dd id="s-complete">–</dd>
+        </dl>
+        <h2>Caches</h2>
+        <dl>
+          <dt>Browser</dt><dd id="s-client">–</dd>
+          <dt>Prefetch used</dt><dd id="s-prefetch">–</dd>
+          <dt>Server blocks</dt><dd id="s-blocks">–</dd>
+          <dt>Server tiles</dt><dd id="s-results">–</dd>
+          <dt>Server queues</dt><dd id="s-queues">–</dd>
+        </dl>
+      </section>
+
+      <footer>
+        <p class="help">Scroll or pinch to zoom · drag to pan · <kbd>Shift</kbd> + drag to zoom to a box ·
+          double-click to zoom in · <kbd>Backspace</kbd> to go back</p>
+        <p id="cursor" class="mono">–</p>
+      </footer>
+    </aside>
+  </main>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

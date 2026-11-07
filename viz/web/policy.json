@@ -1,0 +1,22 @@
+{
+  "debounceMs": 200,
+  "maxWaitMs": 0,
+  "hysteresis": 0.10,
+  "dprCap": 1,
+  "wheelZoomRate": 0.0015,
+  "maxMagnification": 8,
+  "fgOrder": "centre-out",
+  "clientCacheMiB": 256,
+  "prefetch": {
+    "enabled": true,
+    "maxInFlight": 2,
+    "recentreFraction": 0.25,
+    "recentreMinMs": 100,
+    "ringMaxTiles": 150,
+    "order": "velocity-first",
+    "backoffP95Ms": 100,
+    "backoffWindow": 20,
+    "backoffMs": 2000,
+    "requestTimeoutMs": 10000
+  }
+}

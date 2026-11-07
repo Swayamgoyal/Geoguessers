@@ -6,7 +6,8 @@ Endpoints
   GET  /tiles/{dataset}/{level}/{tx}/{ty}.png  one 512² lattice tile; query: op, method, mode, cmap, vmin, vmax,
                                                azimuth, altitude, zfactor, v (dataset version, for immutable URLs);
                                                headers: X-Session, X-Gen, X-Priority (fg|bg), X-Order
-                                               -> 200 PNG | 204 empty | 409 superseded | 499 client gone
+                                               -> 200 PNG | 204 empty | 409 superseded | 499 client gone |
+                                               503 background refused while the free-memory guard is on
   POST /session/{sid}/gen      {"gen": n, "cancel_bg": bool}   cancel the session's older work (and its prefetch)
   POST /prefetch               {"dataset", "session", "gen", "level", "tiles": [[tx, ty], ...], op, ...} -> 202
   POST /view                   {"dataset", "bbox": [xmin, ymin, xmax, ymax], "width", op, mode, ..., "format":
@@ -16,7 +17,7 @@ Endpoints
 
 Run:  python -m server            (http://127.0.0.1:8765/viewer/)
 Settings: DEMLAB_BLOCK_CACHE_MB, DEMLAB_RESULT_CACHE_MB, DEMLAB_FG_WORKERS, DEMLAB_BG_WORKERS, DEMLAB_BG_SHARED,
-DEMLAB_BG_MIN_FREE_GB (pause prefetch below this much free RAM; default 2.5), DEMLAB_BG_YIELD (1: prefetch
+DEMLAB_BG_MIN_FREE_GB (pause prefetch below this much free RAM; default 1.0), DEMLAB_BG_YIELD (1: prefetch
 waits while any foreground tile is queued or running; default 1).
 """
 import asyncio
@@ -107,6 +108,8 @@ def create_app(service=None):
         if not pyr.in_lattice(level, tx, ty):
             return Response(status_code=204)
         out = s.cached(pyr, spec)
+        if out is None and request.headers.get("x-priority") == "bg" and s.sched.bg_paused():
+            return Response(status_code=503, headers={"Retry-After": "2"})  # do not hold a connection while paused
         if out is None:
             h = request.headers
             ticket = s.submit(pyr, spec, session=h.get("x-session", ""), gen=int(h.get("x-gen", 0) or 0),

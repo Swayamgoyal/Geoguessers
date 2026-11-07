@@ -142,7 +142,8 @@ real server, Chamoli 2 m):
 - Core classes detected per thread: performance CPUs 0, 1, 10–19 (foreground), efficiency CPUs 2–9 (prefetch);
   low-power CPUs 20–21 (unused) are told apart by their separate cache, because Windows gives them the same class.
 - The free-memory guard works: with only 1.9 GB free on the laptop it paused prefetch, as designed (threshold
-  `DEMLAB_BG_MIN_FREE_GB`, default 2.5 GB).
+  `DEMLAB_BG_MIN_FREE_GB`; default lowered to 1.0 GB in Phase 3, because this laptop often runs with < 2 GB free).
+  While paused, prefetch requests get `503` at once instead of waiting.
 - Deviation from the spec's URL: tiles are `/tiles/{dataset}/{level}/{tx}/{ty}.png` (two datasets are served); `/view`
   renders boxes directly from the shared block cache (values, not cached PNGs) and can return a GeoTIFF for QGIS.
 
@@ -153,9 +154,35 @@ real server, Chamoli 2 m):
 | Settings by environment variables (cache budgets, worker counts) | `server/settings.py` | Defaults ≈ 2.2 GB server memory |
 | Tests | `tests/test_sched.py`, `tests/test_server.py` (FastAPI test client) | Pass |
 
-## Phase 3: web viewer
+## Phase 3: web viewer · ✅ done
 
 **Goal:** smooth pan and zoom in the browser with debounce, fallbacks and prefetch. Spec steps 7–9.
+
+**Result:** `viz/web/` (plain ES modules, no build step), served by the tile server at `/viewer/`
+(`python -m server`, then open http://127.0.0.1:8765/viewer/). 6 Node unit tests (`node --test tests/viewer.test.js`
+in `viz/web`: level choice matches the server on a fixture written by `tests/make_level_fixture.py`, lattice, camera,
+cache eviction, prefetch ring). Browser check: `/viewer/?selftest=1` runs scripted gestures in the page and writes the
+result into the DOM; run in headless Chrome against the real server (Chamoli 2 m, hillshade), all four checks pass:
+
+| Check | Result |
+|---|---|
+| 2 s wheel burst (120 ticks at 60 Hz) | 0 commits during the burst, exactly 1 after the 200 ms debounce (level 4 → 2); first exact frame 10 ms after the commit, view complete 1.3 s |
+| Prefetch ring after the commit | 14 neighbour tiles loaded at background priority |
+| Pan by half a view at the settled level | 0 commits; 4 new foreground requests, 4 tiles taken from the prefetch ring |
+| Shift + drag box zoom on the central quarter | 1 commit, 4× zoom, level 0 |
+
+Deviations and fixes found while testing:
+- The memory guard default is now 1.0 GB (it was 2.5 GB, which kept prefetch paused on this laptop), and paused
+  prefetch gets `503`, so the client backs off for 2 s instead of holding two connections open. Prefetch requests time
+  out after 10 s.
+- If prefetch cannot start right after a commit (backing off, hidden tab), it is marked pending and starts on a later
+  frame.
+- Animated moves (box zoom, Back, Whole map) suppress the debounce timer and commit once at the end; before this fix
+  a box zoom produced two commits.
+- The browser check uses headless Chrome (already installed) instead of Playwright; the Playwright question in Team
+  decisions only concerns E6's optional browser traces.
+- `ui.js` is folded into `main.js`; the bilinear preview during gestures is the browser's scaled `drawImage` of the
+  fallback tiles.
 
 | Task | Files | Done when |
 |---|---|---|
@@ -216,7 +243,7 @@ real server, Chamoli 2 m):
 | Browser allows 6 connections per origin | At most 2 prefetch requests in flight |
 | GDAL reads cannot be interrupted | Cancel checks between stages; worst case one block decode |
 | Exact mode and HiDPI screens multiply the work | No prefetch in exact mode; DPR cap 1 for level choice; ring shrinks to cardinals above 150 tiles |
-| Memory beside browser, QGIS and Windows | Byte budgets (~2.2 GB server, 256 MiB client); bg pauses below 2.5 GB free |
+| Memory beside browser, QGIS and Windows | Byte budgets (~2.2 GB server, 256 MiB client); bg pauses below 1.0 GB free (configurable) |
 | Pan-zoom client not finished in time | Phases 1–2 also make box zoom fast; box zoom remains the fallback demo |
 
 ## Team decisions
