@@ -17,7 +17,6 @@ Writes (rows appended as runs finish; an interrupted sweep resumes where it stop
     python -m bench.experiments.e6_view --only base --reps 1 --warmup 0     # pilot
 """
 import argparse
-import asyncio
 import csv
 import json
 import os
@@ -32,7 +31,7 @@ import psutil
 
 from bench.cache import flush
 from bench.harness import Recorder, _disk_read_bytes, check_power, keep_awake, snapshot_env
-from bench.vclient import load_policy, run_trace
+from bench.vclient import load_policy, run, run_trace
 from demlab.cpus import core_sets
 
 REPO = Path(__file__).resolve().parents[2]
@@ -202,7 +201,7 @@ def run_once(cfg, trace, sets):
 
         sampler = Sampler(srv.pid)
         sampler.start()
-        out = asyncio.run(run_trace(BASE, info, dataset, params, trace, policy=load_policy(pol_over),
+        out = run(run_trace(BASE, info, dataset, params, trace, policy=load_policy(pol_over),
                                     on_ready=ready))
         t1 = time.perf_counter()
         s1 = httpx.get(BASE + "/stats", trust_env=False).json()

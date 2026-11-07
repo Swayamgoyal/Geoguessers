@@ -13,7 +13,7 @@ AbortController in the browser. HTTP/1.1 with at most 6 connections, like a brow
 60 Hz. Bitmap decoding is not simulated: a tile counts as drawn on the first frame after its response arrives.
 
     trace = json.load(open("bench/traces/pan-line-1.json"))
-    out = asyncio.run(run_trace("http://127.0.0.1:8765", info, "chamoli_2m", {"op": "hillshade"}, trace))
+    out = run(run_trace("http://127.0.0.1:8765", info, "chamoli_2m", {"op": "hillshade"}, trace))
     out["requests"], out["frames"], out["gestures"], out["summary"]
 """
 import asyncio
@@ -34,6 +34,24 @@ TILE_BYTES = TILE * TILE * 4            # decoded RGBA bitmap, as in the browser
 PARAM_KEYS = ("op", "method", "mode", "cmap", "vmin", "vmax", "azimuth", "altitude", "zfactor")
 DIRS = [(0, 1, "N"), (0, -1, "S"), (-1, 0, "W"), (1, 0, "E"), (-1, 1, "NW"), (1, 1, "NE"), (-1, -1, "SW"),
         (1, -1, "SE")]
+
+
+class PreciseLoop(asyncio.SelectorEventLoop if sys.platform != "win32" else asyncio.ProactorEventLoop):
+    """Event loop on the high-resolution clock. On Windows with Python 3.12 the default loop clock is
+    GetTickCount64 (15.6 ms steps) and the loop runs timers up to one step early, so a 200 ms debounce could fire
+    after 185 ms. Here timers use perf_counter and 1 ms resolution (with timeBeginPeriod(1) the waits are ~1 ms)."""
+
+    def __init__(self):
+        super().__init__()
+        self._clock_resolution = 1e-3
+
+    def time(self):
+        return time.perf_counter()
+
+
+def run(coro):
+    """asyncio.run on the precise loop; use this to run run_trace()."""
+    return asyncio.run(coro, loop_factory=PreciseLoop)
 
 
 def load_policy(overrides=None):
@@ -832,7 +850,7 @@ def demo():  # pragma: no cover - manual smoke run
     base = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8765"
     trace = json.loads(Path(sys.argv[2]).read_text())
     info = httpx.get(base + "/info", trust_env=False).json()
-    out = asyncio.run(run_trace(base, info, sys.argv[3] if len(sys.argv) > 3 else "chamoli_2m",
+    out = run(run_trace(base, info, sys.argv[3] if len(sys.argv) > 3 else "chamoli_2m",
                                 {"op": "hillshade", "method": "Horn", "mode": "auto"}, trace))
     print(json.dumps(out["summary"], indent=1))
     for g in out["gestures"]:
