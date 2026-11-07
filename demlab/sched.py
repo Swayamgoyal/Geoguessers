@@ -24,7 +24,7 @@ from concurrent.futures import Future
 import psutil
 
 from demlab.cancel import Cancelled, CancelToken
-from demlab.cpus import core_sets, pin_current_thread
+from demlab.cpus import core_sets, current_processor, pin_current_thread
 
 
 class Job:
@@ -64,6 +64,7 @@ class Scheduler:
         self.bg_cpus = list(bg_cpus) if bg_cpus is not None else (p if bg_shared else (e or p))
         self.run_job, self.bg_cap, self.bg_min_free = run_job, bg_cap, bg_min_free_gb * 2**30
         self.bg_shared = bg_shared
+        self.bg_workers = bg_workers
         self.bg_yield = bg_yield or bg_shared
         self._lock = threading.Lock()
         self._cv = threading.Condition(self._lock)
@@ -75,6 +76,10 @@ class Scheduler:
                          "dropped_backpressure": 0, "cancelled_at": {}}
         self.last_cancel_wall = 0.0  # time.time() of the last job cancellation (queued jobs: when cancelled)
         self.busy_s = {"fg": 0.0, "bg": 0.0}
+        self.cpu_s = {"fg": 0.0, "bg": 0.0}          # thread CPU time spent in jobs, per pool
+        self.ran_on = {"fg": {}, "bg": {}}           # logical CPU each job finished on (checks the pinning)
+        # per pool: rendered to the end / cancelled while running / cancelled before it started
+        self.by_pool = {p: {"completed": 0, "cancelled_running": 0, "cancelled_queued": 0} for p in ("fg", "bg")}
         self._threads = []
         for pool, n, cpus in (("fg", fg_workers, self.fg_cpus), ("bg", bg_workers, self.bg_cpus)):
             for i in range(n):
@@ -167,6 +172,7 @@ class Scheduler:
             job.state = "done"
             self._forget(job)
             self.counters["cancelled"] += 1
+            self.by_pool[job.priority]["cancelled_queued"] += 1
             self.last_cancel_wall = time.time()
             stage = f"queued ({why})"
             self.counters["cancelled_at"][stage] = self.counters["cancelled_at"].get(stage, 0) + 1
@@ -200,20 +206,27 @@ class Scheduler:
                     self._cv.wait(timeout=0.05 if blocked else 0.5)
                 job.state = "running"
                 job.started_at = time.perf_counter()
+            cpu0 = time.thread_time()
             try:
                 result = self.run_job(job)
             except Cancelled as e:
-                self._finish(job, pool, exc=e, kind="cancelled", stage=str(e) or job.token.stage)
+                self._finish(job, pool, cpu0, exc=e, kind="cancelled", stage=str(e) or job.token.stage)
             except BaseException as e:  # noqa: BLE001 - surfaced to the waiting request
-                self._finish(job, pool, exc=e, kind="failed")
+                self._finish(job, pool, cpu0, exc=e, kind="failed")
             else:
-                self._finish(job, pool, result=result)
+                self._finish(job, pool, cpu0, result=result)
 
-    def _finish(self, job, pool, result=None, exc=None, kind="completed", stage=""):
+    def _finish(self, job, pool, cpu0, result=None, exc=None, kind="completed", stage=""):
+        cpu = time.thread_time() - cpu0
+        where = current_processor()
         with self._cv:
             job.state = "done"
             job.finished_at = time.perf_counter()
             self.busy_s[pool] += job.finished_at - job.started_at
+            self.cpu_s[pool] += cpu
+            if kind in ("completed", "cancelled"):
+                self.by_pool[pool]["completed" if kind == "completed" else "cancelled_running"] += 1
+            self.ran_on[pool][where] = self.ran_on[pool].get(where, 0) + 1
             self._forget(job)
             self.counters[kind] += 1
             if kind == "cancelled":
@@ -231,8 +244,8 @@ class Scheduler:
         return any(j.state == "queued" and j.priority == "fg" for (_, _, _, j) in self._q["fg"])
 
     def bg_paused(self):
-        """True while background work cannot start (free-memory guard): new bg requests should be refused."""
-        return self._low_memory()
+        """True while background work cannot start (free-memory guard, or no bg workers): refuse new bg requests."""
+        return self.bg_workers == 0 or self._low_memory()
 
     def _low_memory(self):
         return self.bg_min_free > 0 and psutil.virtual_memory().available < self.bg_min_free
@@ -244,7 +257,9 @@ class Scheduler:
                   for p, q in self._q.items()}
             running = {p: sum(1 for j in self._jobs.values() if j.state == "running" and j.priority == p)
                        for p in ("fg", "bg")}
-            return {"queued": qd, "running": running, "busy_s": dict(self.busy_s),
+            return {"queued": qd, "running": running, "busy_s": dict(self.busy_s), "cpu_s": dict(self.cpu_s),
+                    "ran_on": {p: dict(v) for p, v in self.ran_on.items()},
+                    "by_pool": {p: dict(v) for p, v in self.by_pool.items()},
                     "last_cancel_wall": self.last_cancel_wall,
                     "counters": {k: (dict(v) if isinstance(v, dict) else v) for k, v in self.counters.items()},
                     "fg_cpus": self.fg_cpus, "bg_cpus": self.bg_cpus, "bg_shared": self.bg_shared,

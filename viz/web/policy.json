@@ -14,7 +14,7 @@
     "recentreMinMs": 100,
     "ringMaxTiles": 150,
     "order": "velocity-first",
-    "backoffP95Ms": 100,
+    "backoffP95Ms": 250,
     "backoffWindow": 20,
     "backoffMs": 2000,
     "requestTimeoutMs": 10000

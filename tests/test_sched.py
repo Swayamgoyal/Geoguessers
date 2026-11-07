@@ -172,3 +172,28 @@ def test_cancel_priority_drops_session_background():
         gate.set()
     finally:
         s.shutdown()
+
+
+def test_pool_cpu_time_placement_and_no_bg_workers():
+    def run(job):
+        t = time.thread_time()
+        while time.thread_time() - t < 0.02:   # burn ~20 ms of CPU
+            pass
+        return 1
+
+    s = make(run, fg=1, bg=1)
+    try:
+        s.submit("f", None, priority="fg").future.result(timeout=5)
+        s.submit("b", None, priority="bg").future.result(timeout=5)
+        st = s.stats()
+        assert st["cpu_s"]["fg"] >= 0.015 and st["cpu_s"]["bg"] >= 0.015
+        assert sum(st["ran_on"]["fg"].values()) == 1 and sum(st["ran_on"]["bg"].values()) == 1
+        assert st["by_pool"]["fg"]["completed"] == 1 and st["by_pool"]["bg"]["completed"] == 1
+        assert not s.bg_paused()
+    finally:
+        s.shutdown()
+    s = make(run, fg=1, bg=0)
+    try:
+        assert s.bg_paused()      # no background workers: the server refuses prefetch instead of queueing it forever
+    finally:
+        s.shutdown()
