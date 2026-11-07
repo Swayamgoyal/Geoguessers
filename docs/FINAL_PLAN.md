@@ -194,9 +194,24 @@ Deviations and fixes found while testing:
 | UI: op, method, mode (auto / exact / precomputed), legend, level + cell size + expected error, breadcrumb, Shift + drag box zoom | `viz/web/index.html`, `ui.js` | Usable demo on both datasets |
 | Policy shared with E6 | `viz/web/policy.json` | Read by the browser and the virtual client |
 
-## Phase 4: QGIS plugin
+## Phase 4: QGIS plugin · ✅ done
 
 **Goal:** the meeting asked for QGIS integration; the plugin uses the same server and caches.
+
+**Result:** `qgis_plugin/geoguessers_view` ("GeoGuessers terrain"; install with `qgis_plugin\install.ps1`, notes in
+`qgis_plugin/README.md`). It adds a panel (server, dataset, product, method, values auto / exact / precomputed, cell
+size match-screen / full resolution, sun direction) and a box tool. Each box is computed in a background `QgsTask`
+with `POST /view` (GeoTIFF) and added as a styled layer, with the level, cell size and E5 expected error in its
+metadata. The map can use any CRS; boxes are reprojected to UTM 44N. A headless end-to-end check
+(`qgis_plugin/check_plugin.py`, run with QGIS 3.44's Python against the real server) passes 13/13:
+- A full-resolution slope box lands on the DEM's cell grid (whole-cell offset) and is **identical** to gdaldem's slope
+  of the full-resolution DEM (1.22 M cells, max difference 0).
+- A box drawn on a WGS 84 map is reprojected and gets exactly the level the rule gives for its width on screen.
+- Both datasets work.
+- An oversized full-resolution box and a box outside the data give messages instead of layers.
+
+New server limit: `render_box` refuses boxes over 64 M cells (`MAX_BOX_CELLS`, HTTP 400 with the reason), so one
+request cannot build a multi-GB mosaic; 1 new test (161 in total). Still to do by hand: one look in the QGIS GUI.
 
 | Task | Files | Done when |
 |---|---|---|

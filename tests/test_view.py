@@ -121,6 +121,14 @@ def test_render_box_equals_crop_of_level(pyr):
     assert gt[0] == pytest.approx(c + a * c0) and gt[3] == pytest.approx(f + e * r0)
 
 
+def test_render_box_refuses_oversized_boxes(pyr, monkeypatch):
+    import demlab.view as view
+    monkeypatch.setattr(view, "MAX_BOX_CELLS", 1000)
+    l, b, r, t = pyr.info()["bounds"]
+    with pytest.raises(ValueError, match="limit"):
+        render_box(pyr, (l, b, r, t), out_width=10_000, spec_kw={"op": "slope"}, blockcache=BlockCache(8))
+
+
 def test_level_choice_rule_and_hysteresis():
     for name in ("chamoli_2m", "tile571_8m"):
         p = Pyramid(DATA / "prepared" / f"{name}.tif")

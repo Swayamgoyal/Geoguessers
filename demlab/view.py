@@ -240,6 +240,7 @@ def _auto(pyr, spec, blockcache, token):
 
 
 EXACT_STRIP_CELLS = 16_000_000  # fine cells per strip in exact mode: bounds memory (~0.2 GB) whatever the level
+MAX_BOX_CELLS = 64 * 2**20     # largest box render_box assembles (~0.25 GB of float32 plus the tile mosaic)
 EXACT_STRIP_ROWS = 512          # ... and about one stored block row per strip: reads line up with the file's blocks
                                 # and a cancelled job stops within one strip (tens of ms)
 
@@ -324,6 +325,9 @@ def render_box(pyr, bbox, out_width, spec_kw, blockcache, token=NEVER, level=Non
     r1 = min(int(math.ceil((ymin - f) / e)), lv.height)
     if c0 >= c1 or r0 >= r1:
         return None, None, k
+    if (c1 - c0) * (r1 - r0) > MAX_BOX_CELLS:
+        raise ValueError(f"box is {c1 - c0} x {r1 - r0} cells at level {k}; the limit is {MAX_BOX_CELLS:,} cells "
+                         "(draw a smaller box or use a coarser level)")
     nod = _nodata_of(spec_kw.get("op", "slope"))
     tx0, tx1, ty0, ty1 = c0 // TILE, (c1 - 1) // TILE, r0 // TILE, (r1 - 1) // TILE
     mosaic = None

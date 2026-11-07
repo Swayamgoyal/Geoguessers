@@ -1,0 +1,15 @@
+[general]
+name=GeoGuessers terrain
+qgisMinimumVersion=3.22
+description=Drag a box on the map to compute slope, aspect, hillshade, TRI, TPI or roughness for that box from the GeoGuessers tile server.
+about=Draws a box on the canvas, sends it to the GeoGuessers tile server (POST /view) and adds the result as a georeferenced GeoTIFF layer. The server picks the pyramid level that matches the box's size on screen (or full resolution on request) and shares its caches with the web viewer. Start the server first: python -m server
+version=1.0
+author=GeoGuessers team (Swayam Goyal, Siddharth Choudhary, Yakkala Viswanadha Kartikeya)
+email=swayam.goyal@research.iiit.ac.in
+homepage=https://github.com/Swayamgoyal/Geoguessers
+repository=https://github.com/Swayamgoyal/Geoguessers
+tracker=https://github.com/Swayamgoyal/Geoguessers/issues
+category=Raster
+icon=icon.svg
+experimental=False
+deprecated=False
