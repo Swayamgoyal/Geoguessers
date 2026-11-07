@@ -157,6 +157,7 @@ export class Viewer {
     this.gen++;
     this.level = k;
     this.cache.currentLevel = k;
+    this.dirty = true;          // redraw even if every tile is cached (e.g. switching back to a product seen before)
     this.metrics.commits++;
     this.metrics.lastCommitAt = performance.now();
     this.metrics.firstFrameMs = this.metrics.completeMs = null;
