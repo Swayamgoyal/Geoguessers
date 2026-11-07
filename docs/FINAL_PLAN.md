@@ -253,7 +253,15 @@ in total.
 | Browser check (optional): 3 traces in Chrome via Playwright | `bench/e6_browser.py` | Needs Playwright installed (team's OK) |
 | Report script, charts, write-up; update `policy.json` defaults | `bench/analysis/e6_report.py`, `docs/PHASE5_RESULTS.md` | Hit rate vs pan speed, TTFF and tiles vs debounce, fg p95 by prefetch config, memory timeline |
 
-## Phase 6: final deliverables
+## Phase 6: final deliverables · ✅ done
+
+**Result:** everything below is in the repository and tagged `v1.0`.
+- Final report: `report/final_report/main.pdf` (27 pages).
+- Slides: `report/slides/main.pdf` (Beamer, 23 slides).
+- Demo video: `report/demo/geoguessers_demo.mp4` (58 s), recorded by `python -m bench.demo_video`. It is a real headless-Chrome session of the viewer plus QGIS-rendered plugin frames, silent, with captions. Recording it found a viewer bug, now fixed: switching back to a product whose tiles were all cached did not redraw.
+- Professor update: `docs/prof_update_final.md`. It is ready to send, but has not been sent.
+- Internal report: updated to cover Phases 0–5 (42 pages).
+- `README.md` and `PROJECT_PLAN.md` are updated. The drive copy is refreshed.
 
 | Task | Output |
 |---|---|
