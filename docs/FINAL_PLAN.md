@@ -98,10 +98,22 @@ What Phase 0 tells the viewer design (from the measurements, not assumptions):
 
 ---
 
-## Phase 1: tile engine core (backend only)
+## Phase 1: tile engine core (backend only) · ✅ done
 
 **Goal:** render any lattice tile fast and correctly, with decoded blocks shared between neighbouring tiles.
 Steps 1–4 of the spec; useful on their own, because they also speed up box zoom.
+
+**Result:** `demlab/view.py`, `kernels/tile_k.py`, `blockcache.py`, `resultcache.py`, `slru.py`, `colormap.py`,
+`cancel.py`; 24 new tests (`tests/test_view.py`, `tests/test_caches.py`), 143 in total, all passing.
+- Every auto-mode tile equals the existing engine's result on the whole level, cell for cell, for all 8 operator
+  configurations, on every level of a test pyramid with data gaps and partial edge tiles. Exact and precomputed modes,
+  box assembly and level choice (all Chamoli and tile-571 levels, with hysteresis) are tested.
+- Parallel gate (`python -m bench.check_tile_parallel`, Chamoli 2 m, 64 tiles, warm blocks): 8 threads **5.4× faster**
+  than 1 (8.2 ms → 1.5 ms per tile of throughput). This needed the colour quantiser compiled GIL-free and the PNG
+  written with `zlib` (run-length deflate: 2–3× faster than default deflate for 5–15% larger tiles); with NumPy
+  quantising and Pillow encoding it was 4.3×.
+- Block cache: 64 neighbouring tiles decode **100 blocks instead of up to 576**; each block decodes once, warm tiles
+  decode none.
 
 | Task | Files | Done when |
 |---|---|---|
@@ -190,10 +202,10 @@ Steps 1–4 of the spec; useful on their own, because they also speed up box zoo
 | Memory beside browser, QGIS and Windows | Byte budgets (~2.2 GB server, 256 MiB client); bg pauses below 2.5 GB free |
 | Pan-zoom client not finished in time | Phases 1–2 also make box zoom fast; box zoom remains the fallback demo |
 
-## Team decisions to confirm
+## Team decisions
 
-1. Continuous debounced pan / zoom becomes the main interaction (box zoom kept as Shift + drag and for QGIS). This
-   changes the decision recorded in `PROJECT_PLAN.md` §4.
-2. Installing Playwright (Python package + browser) for the optional in-browser E6 check.
-3. Owners (suggested): backend and server (Phases 1–2) Swayam; web viewer and prefetch (Phase 3) Kartikeya, author of
-   the spec; E6 (Phase 5) Siddharth; QGIS plugin and final deliverables shared.
+1. **Confirmed:** continuous debounced pan / zoom is the main interaction; box zoom is kept as Shift + drag and for
+   QGIS. This replaces the decision recorded in `PROJECT_PLAN.md` §4.
+2. **Confirmed owners:** backend and server (Phases 1–2) Swayam; web viewer and prefetch (Phase 3) Kartikeya, author
+   of the spec; E6 (Phase 5) Siddharth; QGIS plugin and final deliverables shared.
+3. Open (decide before Phase 5): installing Playwright (Python package + browser) for the optional in-browser E6 check.
