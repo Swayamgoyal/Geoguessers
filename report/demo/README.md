@@ -3,16 +3,16 @@
 `geoguessers_demo.mp4` (about 58 s, 1600 × 900, silent, with captions) is the fallback for the live demo. Narration
 can be added over it.
 
-| Time | Scene |
+| Time (approx.) | Scene |
 |---|---|
 | 0:00 | Whole Chamoli 2 m DEM as hillshade, from a coarse pyramid level |
 | 0:05 | Wheel zoom of three levels: cached coarser tiles stand in, then one commit 150 ms after the last tick |
-| 0:12 | Pan: the neighbouring views were prefetched, so new tiles are already there |
-| 0:18 | Product switch to slope, then aspect (computed on demand) |
-| 0:25 | Hillshade with the sun moving from 315° to 135° |
-| 0:31 | Shift + drag box zoom down to full resolution (2 m cells); the status panel shows level, cell size, expected error |
-| 0:40 | Back to the whole map; E6 headline numbers |
-| 0:40 | QGIS plugin: the same server inside QGIS; dragging a box; the full-resolution slope layer; a large box from a coarse level |
+| 0:09 | Pan: the neighbouring views were prefetched, so new tiles are already there |
+| 0:15 | Product switch to slope, then aspect (computed on demand) |
+| 0:21 | Hillshade with the sun moving from 315° to 135° |
+| 0:27 | Shift + drag box zoom down to full resolution (2 m cells); the status panel shows level, cell size, expected error |
+| 0:34 | Back to the whole map; E6 headline numbers |
+| 0:40 | QGIS plugin: the same server inside QGIS; dragging a box; the full-resolution slope layer; a large box from a coarse level (4.5 s each) |
 
 The browser part is a real headless Chrome session of the web viewer, driven by scripted viewer actions and captured
 with the Chrome DevTools screencast. The QGIS part is QGIS's own map renderer (offscreen) drawing the layers the
