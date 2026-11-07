@@ -166,9 +166,9 @@ result into the DOM; run in headless Chrome against the real server (Chamoli 2 m
 
 | Check | Result |
 |---|---|
-| 2 s wheel burst (120 ticks at 60 Hz) | 0 commits during the burst, exactly 1 after the 200 ms debounce (level 4 → 2); first exact frame 10 ms after the commit, view complete 1.3 s |
-| Prefetch ring after the commit | 14 neighbour tiles loaded at background priority |
-| Pan by half a view at the settled level | 0 commits; 4 new foreground requests, 4 tiles taken from the prefetch ring |
+| 2 s wheel burst (120 ticks at 60 Hz) | 0 commits during the burst, exactly 1 after the debounce (level 4 → 2); in real-time Chrome (`python -m bench.check_viewer`) the first exact frame comes 88 ms and the full view 161 ms after the commit |
+| Prefetch ring after the commit | 52 neighbour tiles loaded at background priority |
+| Pan by half a view at the settled level | 0 commits; every new tile (8) taken from the prefetch ring, no foreground requests |
 | Shift + drag box zoom on the central quarter | 1 commit, 4× zoom, level 0 |
 
 Deviations and fixes found while testing:
@@ -179,8 +179,8 @@ Deviations and fixes found while testing:
   frame.
 - Animated moves (box zoom, Back, Whole map) suppress the debounce timer and commit once at the end; before this fix
   a box zoom produced two commits.
-- The browser check uses headless Chrome (already installed) instead of Playwright; the Playwright question in Team
-  decisions only concerns E6's optional browser traces.
+- The browser check uses the installed Chrome in headless mode, driven in real time over the DevTools protocol
+  (`bench/check_viewer.py`). Virtual-time mode was tried first and dropped, because it distorts every network wait.
 - `ui.js` is folded into `main.js`; the bilinear preview during gestures is the browser's scaled `drawImage` of the
   fallback tiles.
 
@@ -218,9 +218,30 @@ request cannot build a multi-GB mosaic; 1 new test (161 in total). Still to do b
 | Map tool: drag a rectangle on the QGIS canvas → `POST /view` → result added as a georeferenced layer (UTM 44N); op / mode choice | `qgis_plugin/` | Works in QGIS 3.44 on both datasets; layer lines up with the DEM |
 | Install notes | `qgis_plugin/README.md` | A teammate can install it from the notes |
 
-## Phase 5: E6 benchmark, tuning and results
+## Phase 5: E6 benchmark, tuning and results · ✅ done
 
 **Goal:** measure the viewer the same way E1–E5 were measured, set the defaults from the data. Spec step 10.
+
+**Result:** `docs/PHASE5_RESULTS.md`, with tables in `results/e6_tables.md` and charts in `results/plots/e6_*.png`.
+The sweep had 24 configurations, 17 traces, and 1 warm-up + 5 measured runs each with a fresh server; 1,068 runs
+in total.
+- **Both gates pass.**
+  - Gate 1: on the box trace (the same foreground tiles with prefetch on and off), server p95 is 90 vs 95 ms. Only
+    3% of foreground tiles ever overlap a prefetch request, because prefetch stops at the first input of a
+    gesture.
+  - Gate 2: server foreground tiles per zoom gesture fall from 62 to 19 (3.3×), and the first exact tile arrives
+    63–71 ms after the debounce.
+- **Panning:** 98–100% of the tiles entering the view are already cached with prefetch on, against 0–50% with it
+  off.
+- **Policy changes from the data:**
+  - debounce 200 → **150 ms**: notched-wheel traces show 100 ms commits between notches, while 150–250 ms give
+    the same tiles;
+  - prefetch back-off threshold 100 → **250 ms**: 100 ms sat at the cold-start p95.
+- **Browser check:** real headless Chrome over the DevTools protocol (`bench/e6_browser.py`) matches the virtual
+  client on commits and requests, and is within 10% on time to complete. **Playwright was not needed**, so the open
+  question below is closed.
+- **Not done:** the QGIS box-drawing baseline listed below. The QGIS plugin uses the same server, so QGIS's own
+  rendering is covered by E1q.
 
 | Task | Files | Done when |
 |---|---|---|
@@ -267,4 +288,5 @@ request cannot build a multi-GB mosaic; 1 new test (161 in total). Still to do b
    QGIS. This replaces the decision recorded in `PROJECT_PLAN.md` §4.
 2. **Confirmed owners:** backend and server (Phases 1–2) Swayam; web viewer and prefetch (Phase 3) Kartikeya, author
    of the spec; E6 (Phase 5) Siddharth; QGIS plugin and final deliverables shared.
-3. Open (decide before Phase 5): installing Playwright (Python package + browser) for the optional in-browser E6 check.
+3. Closed: no Playwright. The in-browser checks drive the installed Chrome over the DevTools protocol with the
+   `websockets` package that the server already depends on (`bench/check_viewer.py`, `bench/e6_browser.py`).

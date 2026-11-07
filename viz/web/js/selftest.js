@@ -22,7 +22,7 @@ export async function runSelfTest(v) {
     out.checks[name] = { pass, ...detail };
     if (!pass) out.ok = false;
   };
-  // headless Chrome runs on virtual time, which inflates measured latencies: no latency back-off here
+  // the check is about commits and prefetch, not latency: keep the latency back-off out of it
   v.policy.prefetch.backoffP95Ms = 1e9;
   await waitComplete(v);
   const cam = v.camera;

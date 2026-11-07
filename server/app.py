@@ -14,6 +14,7 @@ Endpoints
                                 "png"|"tif"} -> box assembled from lattice tiles (PNG + X-Geotransform, or GeoTIFF)
   GET  /stats                  cache tiers, queues, pools, memory
   GET  /viewer/                the web viewer (viz/web)
+  GET  /traces/{name}.json      E6 traces (bench/traces), replayed by /viewer/?trace=<name>
 
 Run:  python -m server            (http://127.0.0.1:8765/viewer/)
 Settings: DEMLAB_BLOCK_CACHE_MB, DEMLAB_RESULT_CACHE_MB, DEMLAB_FG_WORKERS, DEMLAB_BG_WORKERS, DEMLAB_BG_SHARED,
@@ -37,6 +38,7 @@ from demlab.service import TileService
 from demlab.view import TileSpec, expected_error, render_box
 
 WEB = Path(__file__).resolve().parents[1] / "viz" / "web"
+TRACES = Path(__file__).resolve().parents[1] / "bench" / "traces"   # E6 traces, for the in-browser replay check
 TILE_PARAMS = ("op", "method", "mode", "cmap", "vmin", "vmax", "azimuth", "altitude", "zfactor")
 FLOATS = ("vmin", "vmax", "azimuth", "altitude", "zfactor")
 
@@ -202,6 +204,8 @@ def create_app(service=None):
 
     if WEB.exists():
         app.mount("/viewer", StaticFiles(directory=WEB, html=True), name="viewer")
+    if TRACES.exists():
+        app.mount("/traces", StaticFiles(directory=TRACES), name="traces")
     return app
 
 

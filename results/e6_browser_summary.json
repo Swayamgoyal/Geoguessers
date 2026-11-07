@@ -1,0 +1,50 @@
+{
+ "zoom-burst-in-1": {
+  "browser": {
+   "commits": 1,
+   "fg_requests": 15,
+   "ttff_ms": 247.60000002384186,
+   "complete_ms": 297.90000009536743,
+   "runs": 3
+  },
+  "virtual client (E6 base)": {
+   "commits": 2,
+   "fg_requests": 15,
+   "ttff_ms": 272.7894999552518,
+   "complete_ms": 325.22779994178563,
+   "runs": 5
+  }
+ },
+ "pan-line-1": {
+  "browser": {
+   "commits": 0,
+   "fg_requests": 0,
+   "ttff_ms": null,
+   "complete_ms": null,
+   "runs": 3
+  },
+  "virtual client (E6 base)": {
+   "commits": 1,
+   "fg_requests": 0,
+   "ttff_ms": null,
+   "complete_ms": null,
+   "runs": 5
+  }
+ },
+ "box": {
+  "browser": {
+   "commits": 3,
+   "fg_requests": 35,
+   "ttff_ms": 46.10000002384186,
+   "complete_ms": 122.80000007152557,
+   "runs": 3
+  },
+  "virtual client (E6 base)": {
+   "commits": 4,
+   "fg_requests": 35,
+   "ttff_ms": 63.92590003088117,
+   "complete_ms": 126.69040006585419,
+   "runs": 5
+  }
+ }
+}

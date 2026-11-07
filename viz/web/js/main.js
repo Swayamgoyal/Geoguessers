@@ -113,6 +113,10 @@ async function main() {
     const { runSelfTest } = await import("./selftest.js");
     runSelfTest(v);
   }
+  if (params.get("trace")) {                  // E6 browser check: replay a bench trace (bench/e6_browser.py)
+    const { runTrace } = await import("./tracerun.js");
+    runTrace(v, params.get("trace"));
+  }
   setInterval(async () => {
     try {
       const s = await api.stats();

@@ -13,7 +13,7 @@ import numpy as np
 import pandas as pd
 
 import bench.analysis.phase2_report as p2
-from bench.analysis.phase2_report import AXIS, INK2, MUTED, S, label_end, md_table, plt
+from bench.analysis.phase2_report import INK2, MUTED, S, md_table, plt
 
 RES, PLOTS = p2.RES, p2.PLOTS
 PAN = ["pan-line-0.5", "pan-line-1", "pan-line-2", "pan-reverse-0.5", "pan-reverse-1", "pan-reverse-2", "pan-walk"]
@@ -73,6 +73,46 @@ def base_table(d):
     return pd.DataFrame(rows).sort_values("trace", key=lambda s: s.map(order)).reset_index(drop=True)
 
 
+def load_requests():
+    p = RES / "e6_requests.csv"
+    if not p.exists():
+        return pd.DataFrame()
+    r = pd.read_csv(p, low_memory=False)
+    r = r[r.phase == "trace"].copy()
+    for c in ("queue", "read", "decode", "kernel", "colormap", "encode", "ms", "t_start", "t_end"):
+        r[c] = pd.to_numeric(r[c], errors="coerce")
+    for c in ("queue", "read", "decode", "kernel", "colormap", "encode"):
+        r[c] = r[c].fillna(0)
+    r["render"] = r.read + r.kernel + r.colormap + r.encode
+    r["server"] = r.queue + r.render
+    bg = {k: v for k, v in r[r.priority == "bg"][["run_id", "t_start", "t_end"]].dropna().groupby("run_id")}
+    fg = r[(r.priority == "fg") & (r.status == "ok") & r.tier.isin(["cold", "warm"])].copy()
+
+    def overlaps(row):
+        b = bg.get(row.run_id)
+        return bool(b is not None and ((b.t_start < row.t_end) & (b.t_end > row.t_start)).any())
+    fg["with_bg"] = [overlaps(x) for x in fg.itertuples()]
+    return fg
+
+
+def interference_requests(fg):
+    """Gate 1 like for like: foreground tiles the server rendered, per configuration, pooled over runs. On `box` the
+    foreground tile set is identical with prefetch on and off (same camera, new levels), so latencies compare
+    directly; on zoom-pan prefetch removes the easy tiles from the foreground, so the sets differ."""
+    rows = []
+    for traces, lab in ((["box"], "box (same tiles on and off)"), (["zoom-pan"], "zoom-pan"),
+                        (PAN, "pan traces")):
+        for cfg in ("prefetch-off", "base", "prefetch-no-backoff", "bg-no-yield", "bg-shared-pcores"):
+            q = fg[(fg.config == cfg) & fg.trace.isin(traces)]
+            if q.empty:
+                continue
+            rows.append({"traces": lab, "configuration": cfg, "fg tiles rendered": len(q),
+                         "overlapping a prefetch request": q.with_bg.mean(),
+                         "server p50 ms": q.server.median(), "server p95 ms": q.server.quantile(0.95),
+                         "kernel p95 ms": q.kernel.quantile(0.95), "client p95 ms": q.ms.quantile(0.95)})
+    return pd.DataFrame(rows)
+
+
 def interference(d):
     """Gate 1: foreground latency with prefetch on (base) vs off, per trace (median of 5 runs)."""
     rows = []
@@ -111,7 +151,7 @@ def debounce(d, traces):
             continue
         deb = {"off": 0, "200 + max 500": 200}.get(label, None)
         deb = int(label) if deb is None else deb
-        rows.append({"debounce ms": label, "runs": len(q), "commits per run": mi(q, "commits"),
+        rows.append({"debounce ms": label, "runs": len(q), "commits per run (incl. first view)": mi(q, "commits"),
                      "server fg tiles / gesture": med(q, "server_fg_tiles_per_wheel_gesture"),
                      "client fg requests / gesture": med(q, "fg_per_wheel_gesture"),
                      "fg cancelled on server / run": med(q, "fg_cancelled_running") + med(q, "fg_cancelled_queued"),
@@ -189,6 +229,22 @@ def gestures_table(g):
 
 
 # ---------------------------------------------------------------- charts
+def browser_table():
+    p = RES / "e6_browser_summary.json"
+    if not p.exists():
+        return pd.DataFrame()
+    rows = []
+    for tr, v in json.loads(p.read_text()).items():
+        b, c = v["browser"], v.get("virtual client (E6 base)", {})
+        rows.append({"trace": tr, "browser runs": b["runs"], "virtual-client runs": c.get("runs"),
+                     "commits in trace, browser": b["commits"],
+                     "commits in trace, virtual client": (c["commits"] - 1) if c.get("commits") is not None else None,
+                     "fg requests, browser": b["fg_requests"], "fg requests, virtual client": c.get("fg_requests"),
+                     "TTFF ms, browser": b["ttff_ms"], "TTFF ms, virtual client": c.get("ttff_ms"),
+                     "complete ms, browser": b["complete_ms"], "complete ms, virtual client": c.get("complete_ms")})
+    return pd.DataFrame(rows)
+
+
 def chart_hit_speed(hs):
     if hs.empty:
         return
@@ -201,14 +257,13 @@ def chart_hit_speed(hs):
         if r.empty:
             continue
         ax.plot(r["speed (views/s)"], r["pan hit rate"], marker="o", color=S[i], label=lab)
-        label_end(ax, r["speed (views/s)"].iloc[-1], r["pan hit rate"].iloc[-1], lab, dy=[-6, 6, 0, -12][i])
     ax.set_xlabel("pan speed (view widths per second)")
     ax.set_ylabel("tiles already in the browser cache when they enter the view")
     ax.set_ylim(0, 1.05)
     ax.set_xticks([0.5, 1, 2])
-    ax.set_xlim(0.4, 2.9)
+    ax.set_xlim(0.4, 2.1)
     ax.set_title("Pan hit rate against pan speed (pan-line, median of 5 runs)")
-    ax.legend(loc="lower left")
+    ax.legend(loc="center right")
     fig.savefig(PLOTS / "e6_hit_vs_speed.png"), plt.close(fig)
 
 
@@ -240,30 +295,39 @@ def chart_debounce(t2):
     fig.savefig(PLOTS / "e6_debounce.png"), plt.close(fig)
 
 
-def chart_fg_p95(d):
-    cfgs = [("prefetch-off", "prefetch off"), ("base", "defaults (E-cores, yield)"),
-            ("prefetch-no-backoff", "no client back-off"), ("bg-no-yield", "E-cores, no yield"),
-            ("bg-shared-pcores", "P-cores, yield")]
-    rows = [(lab, med(sel(d, c, PAN + ["zoom-pan"]), "fg_server_p95_ms"),
-             med(sel(d, c, PAN + ["zoom-pan"]), "fg_p95_ms")) for c, lab in cfgs if not sel(d, c).empty]
-    if not rows:
+def chart_fg_p95(it):
+    """Like-for-like foreground latency (interference_requests table): box = same 175 tiles with prefetch on and
+    off; zoom-pan = the same 180 foreground tiles in every prefetch-on configuration."""
+    if it.empty:
         return
-    labs, srv, cli = zip(*rows)
-    y = np.arange(len(labs))
-    fig, ax = plt.subplots(figsize=(7.2, 3.6))
-    ax.barh(y - 0.19, srv, height=0.36, color=S[0], label="on the server (queue + render)")
-    ax.barh(y + 0.19, cli, height=0.36, color=S[1], label="at the client (adds waiting for 1 of 6 connections)")
-    for yy, a, b in zip(y, srv, cli):
-        ax.annotate(f"{a:.0f}", (a, yy - 0.19), xytext=(3, 0), textcoords="offset points", va="center",
-                    color=INK2, fontsize=9)
-        ax.annotate(f"{b:.0f}", (b, yy + 0.19), xytext=(3, 0), textcoords="offset points", va="center",
-                    color=INK2, fontsize=9)
-    ax.set_yticks(y, labs)
-    ax.invert_yaxis()
-    ax.grid(axis="y", visible=False)
-    ax.set_xlabel("foreground tile latency p95 (ms), pan traces + zoom-pan, median of runs")
-    ax.set_title("Foreground latency by prefetch configuration")
-    ax.legend(loc="lower right", fontsize=8)
+    panels = [("box (same tiles on and off)", [("prefetch-off", "prefetch off"), ("base", "prefetch on (defaults)")],
+               "box: the same 175 foreground tiles"),
+              ("zoom-pan", [("base", "defaults: E-cores, yield"), ("prefetch-no-backoff", "no client back-off"),
+                            ("bg-no-yield", "E-cores, no yield"), ("bg-shared-pcores", "P-cores, yield")],
+               "zoom-pan: the same 180 foreground tiles")]
+    fig, axes = plt.subplots(1, 2, figsize=(10.4, 3.6), gridspec_kw={"width_ratios": [2, 4]})
+    for ax, (tr, cfgs, title) in zip(axes, panels):
+        q = it[it.traces == tr].set_index("configuration")
+        cfgs = [(c, lab) for c, lab in cfgs if c in q.index]
+        y = np.arange(len(cfgs))
+        srv = [q.loc[c, "server p95 ms"] for c, _ in cfgs]
+        cli = [q.loc[c, "client p95 ms"] for c, _ in cfgs]
+        ax.barh(y - 0.19, srv, height=0.36, color=S[0], label="on the server (queue + render)")
+        ax.barh(y + 0.19, cli, height=0.36, color=S[1], label="at the client (adds waiting for 1 of 6 connections)")
+        for yy, a_, b_ in zip(y, srv, cli):
+            ax.annotate(f"{a_:.0f}", (a_, yy - 0.19), xytext=(3, 0), textcoords="offset points", va="center",
+                        color=INK2, fontsize=9)
+            ax.annotate(f"{b_:.0f}", (b_, yy + 0.19), xytext=(3, 0), textcoords="offset points", va="center",
+                        color=INK2, fontsize=9)
+        ax.set_yticks(y, [lab for _, lab in cfgs])
+        ax.invert_yaxis()
+        ax.grid(axis="y", visible=False)
+        ax.set_xlim(0, max(cli) * 1.18)
+        ax.set_title(title, fontsize=10)
+        ax.set_xlabel("foreground tile latency p95 (ms)")
+    axes[0].legend(loc="upper left", bbox_to_anchor=(0, -0.22), ncol=2, fontsize=8)
+    fig.suptitle("Prefetch does not slow the foreground", x=0.01, ha="left", fontweight="bold", fontsize=12)
+    fig.tight_layout()
     fig.savefig(PLOTS / "e6_fg_p95.png"), plt.close(fig)
 
 
@@ -298,13 +362,14 @@ def chart_timeline(fr, g):
                     label="preview from another cached level")
     gq = g[(g.run_id == run)] if not g.empty else g
     for _, r in gq.iterrows():
-        ax.axvspan(r.t_first, r.t_last, color=AXIS, alpha=0.35, lw=0)
-    ax.set_ylim(0, 1.02)
+        ax.fill_between([r.t_first, r.t_last], 1.03, 1.09, color=INK2, lw=0)
+    ax.set_ylim(0, 1.1)
+    ax.set_yticks([0, 0.25, 0.5, 0.75, 1.0])
     ax.set_xlim(q.t.min(), q.t.max())
-    ax.set_xlabel("seconds (grey bands: wheel bursts; the rest is panning)")
+    ax.set_xlabel("seconds (dark marks above the plot: wheel bursts; between them the view pans)")
     ax.set_ylabel("share of the view")
     ax.set_title("What the viewer draws during zoom-pan (defaults, rep 1, 60 Hz frames)")
-    ax.legend(loc="lower left", fontsize=8)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.2), ncol=2, fontsize=8)
     fig.savefig(PLOTS / "e6_timeline.png"), plt.close(fig)
 
 
@@ -325,8 +390,12 @@ def main():
     t_base, t_int = base_table(d), interference(d)
     t_deb = debounce(d, BURSTS)
     t_deb_zp = debounce(d, ["zoom-pan"])
+    t_deb_notch = debounce(d, ["zoom-notched"])
+    t_deb_slow = debounce(d, ["zoom-notched-slow"])
+    fgreq = load_requests()
+    t_int_req = interference_requests(fgreq) if not fgreq.empty else pd.DataFrame()
     hs = hit_by_speed(d, ["prefetch-off", "base", "prefetch-no-backoff", "backoff-100", "ring-fixed-order"])
-    chart_hit_speed(hs), chart_debounce(t_deb), chart_fg_p95(d), chart_memory(mem), chart_timeline(fr, g)
+    chart_hit_speed(hs), chart_debounce(t_deb), chart_fg_p95(t_int_req), chart_memory(mem), chart_timeline(fr, g)
     pf = ["prefetch-off", "base", "backoff-100", "prefetch-no-backoff", "ring-fixed-order"]
     place = ["base", "bg-no-yield", "bg-shared-pcores", "bg-workers-2", "bg-workers-4"]
     work = ["base", "fg-workers-4", "fg-workers-6", "block-cache-0", "block-cache-256", "result-cache-off",
@@ -339,8 +408,13 @@ def main():
            "a single number. fg = foreground (visible tiles), bg = prefetch. Client latency includes waiting for one "
            "of the browser's 6 connections; server latency is queue + render from `Server-Timing`.", "",
            "## Defaults, every trace", "", md_table(t_base), "",
-           "## Gate 1: prefetch must not raise foreground p95 by more than 10%", "", md_table(t_int, 1), "",
-           "## Gate 2: debounce, zoom bursts (all six)", "", md_table(t_deb, 1), "",
+           "## Gate 1: prefetch must not raise foreground p95 by more than 10% (per tile, like for like)", "",
+           md_table(t_int_req, 2), "",
+           "## Foreground latency per trace with prefetch on and off (different tile sets: prefetch serves most "
+           "pan tiles)", "", md_table(t_int, 1), "",
+           "## Gate 2: debounce, zoom bursts (all six; 60 Hz ticks)", "", md_table(t_deb, 1), "",
+           "## Debounce, notched wheel (10 ticks 30-150 ms apart)", "", md_table(t_deb_notch, 1), "",
+           "## Debounce, slow notched wheel (10 ticks 120-300 ms apart)", "", md_table(t_deb_slow, 1), "",
            "## Debounce, zoom-pan", "", md_table(t_deb_zp, 1), "",
            "## Client foreground requests per burst trace, by debounce", "", md_table(gestures_table(g), 1), "",
            "## Prefetch policy, pan traces + zoom-pan", "", md_table(compare(d, pf, PAN + ["zoom-pan"], PREFETCH_COLS)), "",
@@ -349,7 +423,9 @@ def main():
            md_table(compare(d, place, PAN + ["zoom-pan"], SERVER_COLS)), "",
            "## Workers, caches, product, mode, dataset, OS cache (mixed traces)", "",
            md_table(compare(d, work, mix, WORK_COLS)), "",
-           "## Where jobs ran (core class at the end of each job, all runs)", "", md_table(pinning(d), 1), ""]
+           "## Where jobs ran (core class at the end of each job, all runs)", "", md_table(pinning(d), 1), "",
+           "## Browser check: the same traces in headless Chrome (bench/e6_browser.py) vs the virtual client", "",
+           md_table(browser_table(), 0), ""]
     (RES / "e6_tables.md").write_text("\n".join(out), encoding="utf-8")
     print("wrote", RES / "e6_tables.md", sorted(p.name for p in PLOTS.glob("e6_*.png")))
 
