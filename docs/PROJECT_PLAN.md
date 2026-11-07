@@ -293,6 +293,8 @@ Done so far:
 - ✅ Timing (`bench/experiments/e5_timing.py`, launcher `bench/run_e5.ps1`): one 512² display tile and the whole grid at every level, on demand vs full resolution + averaging vs a precomputed slope pyramid, cold / warm; cost and size of the precomputed pyramid.
 - ✅ Results: **`docs/PHASE4_RESULTS.md`** (tables `results/e5_tables.md`, charts `results/plots/e5_*.png`). Headline: an on-demand 512² slope tile costs 5–8 ms at every level, 8–450× less than computing it at full resolution (1–4 levels up). The price is a systematic slope underestimate: RMSE 2.3° (4 m) → 6.4° (32 m) → 10° (128 m) on Chamoli, bias −0.5° → −7.3°, worst on steep ground. Error depends on levels up, not metres. Aspect holds up (median 2–8°). A pyramid level of the 2 m data beats HMA 8 m / Copernicus 30 / 90 m. A precomputed slope pyramid is exact but costs 10.6 s and 1.0 GB per derivative.
 
+> **Status:** the viewer was built and measured as final-plan Phases 1–5 (tile engine, scheduler and server, web viewer, QGIS plugin, E6), all ✅ done; results in **`docs/PHASE5_RESULTS.md`**, final deliverables in `report/`. G3 (viewshed, distance; Phase 6 below) was not done and is future work.
+>
 > **Superseded:** the remaining work (this Phase 5, Phase 6 stretch and Phase 7) is now planned in **`docs/FINAL_PLAN.md`**. After the professor's input the team's Phase 5 spec (`docs/PHASE5_DEBOUNCED_ZOOM_SPEC.md`) makes continuous, debounced pan / zoom over a 512² tile lattice with neighbour prefetch the main interaction; box zoom stays as Shift + drag and for the QGIS plugin. The text below is kept as the earlier version.
 
 ### Phase 5: Box-zoom viewer and visualisation, E6 (end of Week 2 – middle of Week 3) · SG (server, web viewer), KK (QGIS plugin; Cesium stretch)

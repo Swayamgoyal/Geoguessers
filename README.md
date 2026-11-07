@@ -2,7 +2,7 @@
 
 Spatial Informatics course project. We investigate how far large, high-resolution DEMs can be processed and visualised on a single laptop, using pyramids, on-demand terrain derivatives (slope, aspect, hillshade, ...) and CPU/GPU processing chosen by measured bottlenecks.
 
-- Plan and timeline: [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md)
+- Plan and timeline: [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md); final phase-wise plan: [docs/FINAL_PLAN.md](docs/FINAL_PLAN.md)
 - Meeting notes: [project_mom.md](project_mom.md)
 - Literature review: [GeoGuessers_lit_review.pdf](GeoGuessers_lit_review.pdf)
 
@@ -78,7 +78,7 @@ The engine processes a DEM window by window (reader threads → parallel Numba k
 memory stays around 1.4 GB whatever the grid size. It reproduces gdaldem's ten operator configurations.
 ```
 python -m demlab.cli in.tif --ops slope,aspect,hillshade --out-dir OUT [--method Horn] [--threads 12]
-python -m pytest tests/ -q                       # correctness vs gdaldem on 1024² crops (119 tests, CPU + GPU + pyramid)
+python -m pytest tests/ -q                       # correctness vs gdaldem, tile engine, scheduler, server (162 tests)
 python -m tests.check_full_grid                  # CPU and GPU engine vs gdaldem on the full 8 m and 2 m real grids
 python -m bench.experiments.e3_cpu --plan        # E3: engine vs gdaldem; drop --plan to run
 python -m bench.analysis.phase3_report           # tables (results/phase3_tables.md) + plots (results/plots/e3_*)
@@ -113,6 +113,24 @@ python -m bench.analysis.e5_report                   # tables (results/e5_tables
 Unattended timing: `powershell -ExecutionPolicy Bypass -File bench\run_e5.ps1` (progress in `logs\e5_timing_log.txt`).
 Results: [docs/PHASE4_RESULTS.md](docs/PHASE4_RESULTS.md).
 
+## Interactive viewer (Phase 5, E6)
+
+A tile server computes the visible tiles on demand from the pyramid (foreground workers on the performance cores,
+prefetch on the efficiency cores, block and tile caches, cancellation). The browser viewer pans and zooms
+continuously, commits a zoom 150 ms after the last wheel tick, and prefetches the neighbouring views; the QGIS plugin
+computes any dragged box.
+```
+python -m server                                 # then open http://127.0.0.1:8765/viewer/
+powershell -ExecutionPolicy Bypass -File qgis_plugin\install.ps1   # QGIS plugin (see qgis_plugin/README.md)
+python -m bench.check_viewer                     # the viewer's in-browser checks (headless Chrome)
+python -m bench.check_server                     # server gates: prefetch isolation, cancellation
+python -m bench.experiments.e6_view              # E6 sweep, ~2.5 h (or bench\run_e6.ps1; log in logs\e6_log.txt)
+python -m bench.e6_browser                       # the same traces in real Chrome vs the virtual client
+python -m bench.analysis.e6_report               # tables (results/e6_tables.md) + plots (results/plots/e6_*)
+python -m bench.demo_video                       # demo video -> report/demo/geoguessers_demo.mp4
+```
+Results: [docs/PHASE5_RESULTS.md](docs/PHASE5_RESULTS.md); plan and design decisions: [docs/FINAL_PLAN.md](docs/FINAL_PLAN.md).
+
 Run variability for every experiment (median, quartiles and IQR of every configuration):
 `python -m bench.analysis.run_stats` → `results/run_stats.md`.
 
@@ -122,11 +140,12 @@ Run variability for every experiment (median, quartiles and IQR of every configu
 |---|---|
 | `demlab/` | Processing engine: tiled IO, pyramid, CPU/GPU kernels |
 | `bench/` | Benchmark harness and experiment scripts (E1–E8) |
-| `server/` | Box server: computes only the selected box at the right pyramid level (Phase 5) |
-| `viz/web/`, `qgis_plugin/` | Box-zoom viewers: browser page and QGIS plugin (Phase 5); `viz/cesium/` Cesium globe (stretch) |
+| `server/` | Tile server (FastAPI): on-demand tiles, `/view` boxes, sessions, stats (Phase 5) |
+| `viz/web/` | Web viewer: debounced pan/zoom, prefetch, box zoom; `policy.json` holds its settings (Phase 5) |
+| `qgis_plugin/` | QGIS plugin: drag a box, get a styled GeoTIFF layer from the server (Phase 5) |
 | `tests/` | Correctness tests against gdaldem |
 | `results/` | `runs.csv`, `machine.json`, plots |
-| `report/` | Final report and slides |
+| `report/` | Progress reports per phase, internal report, final report, slides, demo video |
 
 ## Team
 
