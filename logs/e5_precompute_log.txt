@@ -1,0 +1,2 @@
+﻿chamoli_2m: slope 1.6 s + COG/overviews 9.0 s, 958 MB (DEM COG 620 MB)
+tile571_8m: slope 1.0 s + COG/overviews 5.9 s, 561 MB (DEM COG 422 MB)

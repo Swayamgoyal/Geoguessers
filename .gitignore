@@ -2,13 +2,14 @@
 # large finished run files on K:\spatial project
 *.tif
 *.tiff
+# small Copernicus downloads are committed (under GitHub's 100 MB file limit); see datasets/README.md
+!datasets/cop30_tile571.tif
+!datasets/cop90_tile571.tif
 *.vrt
 *.aux.xml
 datasets/**/*.png
 *.properties
 
-# sweep logs (one line per run)
-logs/
 
 # generated results (runs.csv and machine.json are committed)
 results/raw/

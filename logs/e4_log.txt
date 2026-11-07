@@ -1,0 +1,488 @@
+﻿[04:32:20] starting e4_gpu
+484 runs planned, 0 already in C:\Users\swayam goyal\Desktop\spatial info\Geoguessers\results\runs.csv, 484 to run
+pinned to [0, 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]; power: Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)
+[1/484] tile571_8m gpu_cupy_slope slope Horn cold rep1: 3.05 s, peak 1548 MB, disk read 500 MB, GPU 49->53 C  | elapsed 0 min, ETA 44 min
+[2/484] tile571_8m gpu_cupy_slope slope Horn cold rep2: 3.02 s, peak 1544 MB, disk read 486 MB, GPU 53->55 C  | elapsed 0 min, ETA 43 min
+[3/484] tile571_8m gpu_cupy_slope slope Horn cold rep3: 3.10 s, peak 1549 MB, disk read 486 MB, GPU 55->56 C  | elapsed 0 min, ETA 43 min
+[4/484] tile571_8m gpu_cupy_slope slope Horn cold rep4: 2.99 s, peak 1552 MB, disk read 487 MB, GPU 56->56 C  | elapsed 0 min, ETA 43 min
+[5/484] tile571_8m gpu_cupy_slope slope Horn cold rep5: 2.93 s, peak 1547 MB, disk read 485 MB, GPU 56->57 C  | elapsed 0 min, ETA 43 min
+[6/484] tile571_8m gpu_cupy_slope slope Horn warm rep0: 2.19 s, peak 1544 MB, disk read 4 MB, GPU 57->57 C  | elapsed 0 min, ETA 38 min
+[7/484] tile571_8m gpu_cupy_slope slope Horn warm rep1: 2.19 s, peak 1548 MB, disk read 0 MB, GPU 57->57 C  | elapsed 1 min, ETA 36 min
+[8/484] tile571_8m gpu_cupy_slope slope Horn warm rep2: 2.28 s, peak 1556 MB, disk read 2 MB, GPU 57->59 C  | elapsed 1 min, ETA 34 min
+[9/484] tile571_8m gpu_cupy_slope slope Horn warm rep3: 2.24 s, peak 1544 MB, disk read 0 MB, GPU 57->60 C  | elapsed 1 min, ETA 32 min
+[10/484] tile571_8m gpu_cupy_slope slope Horn warm rep4: 2.27 s, peak 1545 MB, disk read 0 MB, GPU 60->60 C  | elapsed 1 min, ETA 31 min
+[11/484] tile571_8m gpu_cupy_slope slope Horn warm rep5: 2.20 s, peak 1544 MB, disk read 0 MB, GPU 60->60 C  | elapsed 1 min, ETA 29 min
+[12/484] tile571_8m gpu_pageable_slope slope Horn cold rep1: 2.67 s, peak 1390 MB, disk read 515 MB, GPU 60->57 C  | elapsed 1 min, ETA 30 min
+[13/484] tile571_8m gpu_pageable_slope slope Horn cold rep2: 2.60 s, peak 1376 MB, disk read 491 MB, GPU 57->57 C  | elapsed 1 min, ETA 31 min
+[14/484] tile571_8m gpu_pageable_slope slope Horn cold rep3: 2.66 s, peak 1389 MB, disk read 505 MB, GPU 57->57 C  | elapsed 1 min, ETA 31 min
+[15/484] tile571_8m gpu_pageable_slope slope Horn cold rep4: 2.74 s, peak 1386 MB, disk read 663 MB, GPU 57->57 C  | elapsed 1 min, ETA 32 min
+[16/484] tile571_8m gpu_pageable_slope slope Horn cold rep5: 2.63 s, peak 1393 MB, disk read 492 MB, GPU 57->57 C  | elapsed 1 min, ETA 32 min
+[17/484] tile571_8m gpu_pageable_slope slope Horn warm rep0: 1.97 s, peak 1387 MB, disk read 2 MB, GPU 57->58 C  | elapsed 1 min, ETA 31 min
+[18/484] tile571_8m gpu_pageable_slope slope Horn warm rep1: 1.91 s, peak 1386 MB, disk read 2 MB, GPU 57->58 C  | elapsed 1 min, ETA 30 min
+[19/484] tile571_8m gpu_pageable_slope slope Horn warm rep2: 1.93 s, peak 1393 MB, disk read 0 MB, GPU 58->58 C  | elapsed 1 min, ETA 29 min
+[20/484] tile571_8m gpu_pageable_slope slope Horn warm rep3: 1.99 s, peak 1406 MB, disk read 167 MB, GPU 58->58 C  | elapsed 1 min, ETA 29 min
+[21/484] tile571_8m gpu_pageable_slope slope Horn warm rep4: 1.89 s, peak 1405 MB, disk read 2 MB, GPU 58->58 C  | elapsed 1 min, ETA 28 min
+[22/484] tile571_8m gpu_pageable_slope slope Horn warm rep5: 1.99 s, peak 1413 MB, disk read 0 MB, GPU 58->58 C  | elapsed 1 min, ETA 27 min
+[23/484] tile571_8m gpu_pinned_slope slope Horn cold rep1: 2.61 s, peak 1462 MB, disk read 489 MB, GPU 58->58 C  | elapsed 1 min, ETA 28 min
+[24/484] tile571_8m gpu_pinned_slope slope Horn cold rep2: 2.63 s, peak 1494 MB, disk read 490 MB, GPU 58->58 C  | elapsed 1 min, ETA 28 min
+[25/484] tile571_8m gpu_pinned_slope slope Horn cold rep3: 2.70 s, peak 1465 MB, disk read 662 MB, GPU 58->58 C  | elapsed 2 min, ETA 28 min
+[26/484] tile571_8m gpu_pinned_slope slope Horn cold rep4: 2.61 s, peak 1483 MB, disk read 490 MB, GPU 58->58 C  | elapsed 2 min, ETA 29 min
+[27/484] tile571_8m gpu_pinned_slope slope Horn cold rep5: 2.71 s, peak 1466 MB, disk read 490 MB, GPU 58->58 C  | elapsed 2 min, ETA 29 min
+[28/484] tile571_8m gpu_pinned_slope slope Horn warm rep0: 1.93 s, peak 1478 MB, disk read 0 MB, GPU 58->58 C  | elapsed 2 min, ETA 28 min
+[29/484] tile571_8m gpu_pinned_slope slope Horn warm rep1: 1.88 s, peak 1474 MB, disk read 0 MB, GPU 58->58 C  | elapsed 2 min, ETA 28 min
+[30/484] tile571_8m gpu_pinned_slope slope Horn warm rep2: 1.92 s, peak 1464 MB, disk read 5 MB, GPU 58->59 C  | elapsed 2 min, ETA 27 min
+[31/484] tile571_8m gpu_pinned_slope slope Horn warm rep3: 1.90 s, peak 1461 MB, disk read 3 MB, GPU 59->59 C  | elapsed 2 min, ETA 27 min
+[32/484] tile571_8m gpu_pinned_slope slope Horn warm rep4: 1.90 s, peak 1472 MB, disk read 0 MB, GPU 59->59 C  | elapsed 2 min, ETA 27 min
+[33/484] tile571_8m gpu_pinned_slope slope Horn warm rep5: 1.98 s, peak 1468 MB, disk read 0 MB, GPU 59->59 C  | elapsed 2 min, ETA 26 min
+[34/484] tile571_8m gpu_slope slope Horn cold rep1: 2.71 s, peak 1521 MB, disk read 484 MB, GPU 59->58 C  | elapsed 2 min, ETA 27 min
+[35/484] tile571_8m gpu_slope slope Horn cold rep2: 2.68 s, peak 1504 MB, disk read 484 MB, GPU 58->58 C  | elapsed 2 min, ETA 27 min
+[36/484] tile571_8m gpu_slope slope Horn cold rep3: 2.73 s, peak 1516 MB, disk read 487 MB, GPU 58->58 C  | elapsed 2 min, ETA 27 min
+[37/484] tile571_8m gpu_slope slope Horn cold rep4: 2.65 s, peak 1521 MB, disk read 486 MB, GPU 58->58 C  | elapsed 2 min, ETA 27 min
+[38/484] tile571_8m gpu_slope slope Horn cold rep5: 2.66 s, peak 1540 MB, disk read 485 MB, GPU 58->58 C  | elapsed 2 min, ETA 27 min
+[39/484] tile571_8m gpu_slope slope Horn warm rep0: 1.85 s, peak 1520 MB, disk read 0 MB, GPU 58->58 C  | elapsed 2 min, ETA 27 min
+[40/484] tile571_8m gpu_slope slope Horn warm rep1: 1.89 s, peak 1525 MB, disk read 0 MB, GPU 58->58 C  | elapsed 2 min, ETA 27 min
+[41/484] tile571_8m gpu_slope slope Horn warm rep2: 1.96 s, peak 1549 MB, disk read 0 MB, GPU 58->59 C  | elapsed 2 min, ETA 26 min
+[42/484] tile571_8m gpu_slope slope Horn warm rep3: 1.90 s, peak 1517 MB, disk read 0 MB, GPU 59->59 C  | elapsed 2 min, ETA 26 min
+[43/484] tile571_8m gpu_slope slope Horn warm rep4: 1.99 s, peak 1516 MB, disk read 0 MB, GPU 59->59 C  | elapsed 3 min, ETA 26 min
+[44/484] tile571_8m gpu_slope slope Horn warm rep5: 1.90 s, peak 1530 MB, disk read 0 MB, GPU 59->59 C  | elapsed 3 min, ETA 25 min
+[45/484] tile571_8m gpu_slope_fp64 slope Horn cold rep1: 2.62 s, peak 1505 MB, disk read 490 MB, GPU 59->59 C  | elapsed 3 min, ETA 26 min
+[46/484] tile571_8m gpu_slope_fp64 slope Horn cold rep2: 2.69 s, peak 1514 MB, disk read 503 MB, GPU 59->59 C  | elapsed 3 min, ETA 26 min
+[47/484] tile571_8m gpu_slope_fp64 slope Horn cold rep3: 2.63 s, peak 1514 MB, disk read 485 MB, GPU 59->59 C  | elapsed 3 min, ETA 26 min
+[48/484] tile571_8m gpu_slope_fp64 slope Horn cold rep4: 2.61 s, peak 1516 MB, disk read 484 MB, GPU 59->58 C  | elapsed 3 min, ETA 26 min
+[49/484] tile571_8m gpu_slope_fp64 slope Horn cold rep5: 2.64 s, peak 1517 MB, disk read 497 MB, GPU 59->58 C  | elapsed 3 min, ETA 26 min
+[50/484] tile571_8m gpu_slope_fp64 slope Horn warm rep0: 1.97 s, peak 1513 MB, disk read 0 MB, GPU 59->59 C  | elapsed 3 min, ETA 26 min
+[51/484] tile571_8m gpu_slope_fp64 slope Horn warm rep1: 1.94 s, peak 1535 MB, disk read 0 MB, GPU 59->59 C  | elapsed 3 min, ETA 26 min
+[52/484] tile571_8m gpu_slope_fp64 slope Horn warm rep2: 1.93 s, peak 1522 MB, disk read 0 MB, GPU 59->60 C  | elapsed 3 min, ETA 25 min
+[53/484] tile571_8m gpu_slope_fp64 slope Horn warm rep3: 1.95 s, peak 1511 MB, disk read 0 MB, GPU 60->60 C  | elapsed 3 min, ETA 25 min
+[54/484] tile571_8m gpu_slope_fp64 slope Horn warm rep4: 1.92 s, peak 1518 MB, disk read 0 MB, GPU 59->59 C  | elapsed 3 min, ETA 25 min
+[55/484] tile571_8m gpu_slope_fp64 slope Horn warm rep5: 1.95 s, peak 1508 MB, disk read 0 MB, GPU 59->60 C  | elapsed 3 min, ETA 25 min
+[56/484] tile571_8m gpu_slope_nowrite slope Horn cold rep1: 2.59 s, peak 1483 MB, disk read 490 MB, GPU 60->59 C  | elapsed 3 min, ETA 25 min
+[57/484] tile571_8m gpu_slope_nowrite slope Horn cold rep2: 2.54 s, peak 1478 MB, disk read 486 MB, GPU 59->58 C  | elapsed 3 min, ETA 25 min
+[58/484] tile571_8m gpu_slope_nowrite slope Horn cold rep3: 2.49 s, peak 1490 MB, disk read 490 MB, GPU 58->58 C  | elapsed 3 min, ETA 25 min
+[59/484] tile571_8m gpu_slope_nowrite slope Horn cold rep4: 2.57 s, peak 1494 MB, disk read 499 MB, GPU 58->58 C  | elapsed 3 min, ETA 25 min
+[60/484] tile571_8m gpu_slope_nowrite slope Horn cold rep5: 2.47 s, peak 1476 MB, disk read 619 MB, GPU 58->57 C  | elapsed 4 min, ETA 25 min
+[61/484] tile571_8m gpu_slope_nowrite slope Horn warm rep0: 1.78 s, peak 1485 MB, disk read 9 MB, GPU 57->58 C  | elapsed 4 min, ETA 25 min
+[62/484] tile571_8m gpu_slope_nowrite slope Horn warm rep1: 1.80 s, peak 1491 MB, disk read 4 MB, GPU 58->58 C  | elapsed 4 min, ETA 25 min
+[63/484] tile571_8m gpu_slope_nowrite slope Horn warm rep2: 1.80 s, peak 1475 MB, disk read 2 MB, GPU 58->58 C  | elapsed 4 min, ETA 24 min
+[64/484] tile571_8m gpu_slope_nowrite slope Horn warm rep3: 1.80 s, peak 1484 MB, disk read 10 MB, GPU 58->58 C  | elapsed 4 min, ETA 24 min
+[65/484] tile571_8m gpu_slope_nowrite slope Horn warm rep4: 1.78 s, peak 1478 MB, disk read 0 MB, GPU 58->58 C  | elapsed 4 min, ETA 24 min
+[66/484] tile571_8m gpu_slope_nowrite slope Horn warm rep5: 1.85 s, peak 1490 MB, disk read 0 MB, GPU 58->58 C  | elapsed 4 min, ETA 24 min
+[67/484] tile571_8m gpu_slope_r8 slope Horn cold rep1: 2.68 s, peak 1767 MB, disk read 490 MB, GPU 58->58 C  | elapsed 4 min, ETA 24 min
+[68/484] tile571_8m gpu_slope_r8 slope Horn cold rep2: 2.71 s, peak 1752 MB, disk read 492 MB, GPU 58->57 C  | elapsed 4 min, ETA 24 min
+[69/484] tile571_8m gpu_slope_r8 slope Horn cold rep3: 2.76 s, peak 1770 MB, disk read 493 MB, GPU 57->57 C  | elapsed 4 min, ETA 24 min
+[70/484] tile571_8m gpu_slope_r8 slope Horn cold rep4: 2.73 s, peak 1776 MB, disk read 550 MB, GPU 57->57 C  | elapsed 4 min, ETA 24 min
+[71/484] tile571_8m gpu_slope_r8 slope Horn cold rep5: 2.67 s, peak 1769 MB, disk read 492 MB, GPU 57->57 C  | elapsed 4 min, ETA 24 min
+[72/484] tile571_8m gpu_slope_r8 slope Horn warm rep0: 1.95 s, peak 1766 MB, disk read 10 MB, GPU 57->57 C  | elapsed 4 min, ETA 24 min
+[73/484] tile571_8m gpu_slope_r8 slope Horn warm rep1: 1.97 s, peak 1768 MB, disk read 1 MB, GPU 57->57 C  | elapsed 4 min, ETA 24 min
+[74/484] tile571_8m gpu_slope_r8 slope Horn warm rep2: 1.97 s, peak 1768 MB, disk read 0 MB, GPU 57->58 C  | elapsed 4 min, ETA 24 min
+[75/484] tile571_8m gpu_slope_r8 slope Horn warm rep3: 1.97 s, peak 1776 MB, disk read 0 MB, GPU 58->58 C  | elapsed 4 min, ETA 23 min
+[76/484] tile571_8m gpu_slope_r8 slope Horn warm rep4: 1.99 s, peak 1764 MB, disk read 0 MB, GPU 58->58 C  | elapsed 4 min, ETA 23 min
+[77/484] tile571_8m gpu_slope_r8 slope Horn warm rep5: 1.96 s, peak 1758 MB, disk read 0 MB, GPU 58->58 C  | elapsed 4 min, ETA 23 min
+[78/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn cold rep1: 3.34 s, peak 1766 MB, disk read 492 MB, GPU 58->58 C  | elapsed 4 min, ETA 23 min
+[79/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn cold rep2: 3.29 s, peak 1766 MB, disk read 485 MB, GPU 58->57 C  | elapsed 5 min, ETA 23 min
+[80/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn cold rep3: 3.30 s, peak 1766 MB, disk read 489 MB, GPU 57->57 C  | elapsed 5 min, ETA 24 min
+[81/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn cold rep4: 3.32 s, peak 1773 MB, disk read 487 MB, GPU 57->57 C  | elapsed 5 min, ETA 24 min
+[82/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn cold rep5: 3.30 s, peak 1766 MB, disk read 487 MB, GPU 57->57 C  | elapsed 5 min, ETA 24 min
+[83/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn warm rep0: 2.82 s, peak 1767 MB, disk read 390 MB, GPU 57->57 C  | elapsed 5 min, ETA 24 min
+[84/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn warm rep1: 2.59 s, peak 1765 MB, disk read 2 MB, GPU 57->58 C  | elapsed 5 min, ETA 24 min
+[85/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn warm rep2: 2.60 s, peak 1766 MB, disk read 0 MB, GPU 58->58 C  | elapsed 5 min, ETA 23 min
+[86/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn warm rep3: 2.56 s, peak 1770 MB, disk read 0 MB, GPU 58->58 C  | elapsed 5 min, ETA 23 min
+[87/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn warm rep4: 2.52 s, peak 1771 MB, disk read 0 MB, GPU 58->58 C  | elapsed 5 min, ETA 23 min
+[88/484] tile571_8m gpu_3prod slope+aspect+hillshade Horn warm rep5: 2.50 s, peak 1766 MB, disk read 0 MB, GPU 58->58 C  | elapsed 5 min, ETA 23 min
+[89/484] tile571_8m gpu_aspect aspect Horn cold rep1: 2.64 s, peak 1535 MB, disk read 503 MB, GPU 58->57 C  | elapsed 5 min, ETA 23 min
+[90/484] tile571_8m gpu_aspect aspect Horn cold rep2: 2.49 s, peak 1498 MB, disk read 486 MB, GPU 57->57 C  | elapsed 5 min, ETA 23 min
+[91/484] tile571_8m gpu_aspect aspect Horn cold rep3: 2.56 s, peak 1511 MB, disk read 495 MB, GPU 57->57 C  | elapsed 5 min, ETA 23 min
+[92/484] tile571_8m gpu_aspect aspect Horn cold rep4: 2.63 s, peak 1496 MB, disk read 501 MB, GPU 57->57 C  | elapsed 5 min, ETA 23 min
+[93/484] tile571_8m gpu_aspect aspect Horn cold rep5: 2.55 s, peak 1545 MB, disk read 533 MB, GPU 57->57 C  | elapsed 6 min, ETA 23 min
+[94/484] tile571_8m gpu_aspect aspect Horn warm rep0: 1.86 s, peak 1526 MB, disk read 87 MB, GPU 57->57 C  | elapsed 6 min, ETA 23 min
+[95/484] tile571_8m gpu_aspect aspect Horn warm rep1: 1.83 s, peak 1521 MB, disk read 0 MB, GPU 57->57 C  | elapsed 6 min, ETA 23 min
+[96/484] tile571_8m gpu_aspect aspect Horn warm rep2: 1.87 s, peak 1592 MB, disk read 0 MB, GPU 57->57 C  | elapsed 6 min, ETA 23 min
+[97/484] tile571_8m gpu_aspect aspect Horn warm rep3: 1.87 s, peak 1513 MB, disk read 2 MB, GPU 57->57 C  | elapsed 6 min, ETA 23 min
+[98/484] tile571_8m gpu_aspect aspect Horn warm rep4: 1.87 s, peak 1513 MB, disk read 10 MB, GPU 57->57 C  | elapsed 6 min, ETA 23 min
+[99/484] tile571_8m gpu_aspect aspect Horn warm rep5: 1.84 s, peak 1516 MB, disk read 0 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[100/484] tile571_8m gpu_hillshade hillshade Horn cold rep1: 2.42 s, peak 1436 MB, disk read 484 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[101/484] tile571_8m gpu_hillshade hillshade Horn cold rep2: 2.43 s, peak 1438 MB, disk read 488 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[102/484] tile571_8m gpu_hillshade hillshade Horn cold rep3: 2.42 s, peak 1439 MB, disk read 552 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[103/484] tile571_8m gpu_hillshade hillshade Horn cold rep4: 2.50 s, peak 1429 MB, disk read 487 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[104/484] tile571_8m gpu_hillshade hillshade Horn cold rep5: 2.46 s, peak 1438 MB, disk read 496 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[105/484] tile571_8m gpu_hillshade hillshade Horn warm rep0: 1.70 s, peak 1436 MB, disk read 2 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[106/484] tile571_8m gpu_hillshade hillshade Horn warm rep1: 1.78 s, peak 1454 MB, disk read 10 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[107/484] tile571_8m gpu_hillshade hillshade Horn warm rep2: 1.80 s, peak 1453 MB, disk read 1 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[108/484] tile571_8m gpu_hillshade hillshade Horn warm rep3: 1.78 s, peak 1452 MB, disk read 0 MB, GPU 57->58 C  | elapsed 6 min, ETA 22 min
+[109/484] tile571_8m gpu_hillshade hillshade Horn warm rep4: 1.73 s, peak 1451 MB, disk read 0 MB, GPU 58->58 C  | elapsed 6 min, ETA 22 min
+[110/484] tile571_8m gpu_hillshade hillshade Horn warm rep5: 1.76 s, peak 1451 MB, disk read 0 MB, GPU 58->58 C  | elapsed 6 min, ETA 22 min
+[111/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne cold rep1: 2.58 s, peak 1509 MB, disk read 488 MB, GPU 58->57 C  | elapsed 6 min, ETA 22 min
+[112/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne cold rep2: 2.61 s, peak 1513 MB, disk read 484 MB, GPU 57->57 C  | elapsed 6 min, ETA 22 min
+[113/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne cold rep3: 2.55 s, peak 1523 MB, disk read 486 MB, GPU 57->57 C  | elapsed 7 min, ETA 22 min
+[114/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne cold rep4: 2.53 s, peak 1519 MB, disk read 484 MB, GPU 57->57 C  | elapsed 7 min, ETA 22 min
+[115/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne cold rep5: 2.62 s, peak 1513 MB, disk read 488 MB, GPU 57->57 C  | elapsed 7 min, ETA 22 min
+[116/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne warm rep0: 1.87 s, peak 1522 MB, disk read 0 MB, GPU 57->57 C  | elapsed 7 min, ETA 21 min
+[117/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne warm rep1: 1.83 s, peak 1512 MB, disk read 0 MB, GPU 57->57 C  | elapsed 7 min, ETA 21 min
+[118/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne warm rep2: 1.81 s, peak 1536 MB, disk read 0 MB, GPU 57->58 C  | elapsed 7 min, ETA 21 min
+[119/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne warm rep3: 1.87 s, peak 1526 MB, disk read 0 MB, GPU 58->58 C  | elapsed 7 min, ETA 21 min
+[120/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne warm rep4: 1.85 s, peak 1514 MB, disk read 1 MB, GPU 58->58 C  | elapsed 7 min, ETA 21 min
+[121/484] tile571_8m gpu_slope_zt slope ZevenbergenThorne warm rep5: 1.87 s, peak 1501 MB, disk read 0 MB, GPU 58->58 C  | elapsed 7 min, ETA 21 min
+[122/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne cold rep1: 2.59 s, peak 1516 MB, disk read 485 MB, GPU 58->58 C  | elapsed 7 min, ETA 21 min
+[123/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne cold rep2: 2.56 s, peak 1529 MB, disk read 483 MB, GPU 58->58 C  | elapsed 7 min, ETA 21 min
+[124/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne cold rep3: 2.60 s, peak 1511 MB, disk read 488 MB, GPU 58->57 C  | elapsed 7 min, ETA 21 min
+[125/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne cold rep4: 2.58 s, peak 1512 MB, disk read 482 MB, GPU 57->57 C  | elapsed 7 min, ETA 21 min
+[126/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne cold rep5: 2.58 s, peak 1523 MB, disk read 484 MB, GPU 57->57 C  | elapsed 7 min, ETA 21 min
+[127/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne warm rep0: 1.87 s, peak 1531 MB, disk read 0 MB, GPU 57->58 C  | elapsed 7 min, ETA 21 min
+[128/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne warm rep1: 1.86 s, peak 1519 MB, disk read 0 MB, GPU 58->58 C  | elapsed 7 min, ETA 21 min
+[129/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne warm rep2: 1.88 s, peak 1521 MB, disk read 0 MB, GPU 58->58 C  | elapsed 7 min, ETA 20 min
+[130/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne warm rep3: 1.86 s, peak 1544 MB, disk read 1 MB, GPU 58->58 C  | elapsed 7 min, ETA 20 min
+[131/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne warm rep4: 1.87 s, peak 1543 MB, disk read 0 MB, GPU 58->58 C  | elapsed 7 min, ETA 20 min
+[132/484] tile571_8m gpu_aspect_zt aspect ZevenbergenThorne warm rep5: 1.88 s, peak 1517 MB, disk read 13 MB, GPU 58->58 C  | elapsed 8 min, ETA 20 min
+[133/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep1: 2.48 s, peak 1447 MB, disk read 485 MB, GPU 58->58 C  | elapsed 8 min, ETA 20 min
+[134/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep2: 2.49 s, peak 1458 MB, disk read 485 MB, GPU 58->58 C  | elapsed 8 min, ETA 20 min
+[135/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep3: 2.50 s, peak 1440 MB, disk read 502 MB, GPU 58->57 C  | elapsed 8 min, ETA 20 min
+[136/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep4: 2.45 s, peak 1444 MB, disk read 488 MB, GPU 57->57 C  | elapsed 8 min, ETA 20 min
+[137/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep5: 2.49 s, peak 1437 MB, disk read 488 MB, GPU 57->57 C  | elapsed 8 min, ETA 20 min
+[138/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep0: 1.76 s, peak 1448 MB, disk read 10 MB, GPU 57->57 C  | elapsed 8 min, ETA 20 min
+[139/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep1: 1.72 s, peak 1453 MB, disk read 0 MB, GPU 58->58 C  | elapsed 8 min, ETA 20 min
+[140/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep2: 1.80 s, peak 1452 MB, disk read 0 MB, GPU 58->58 C  | elapsed 8 min, ETA 20 min
+[141/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep3: 1.78 s, peak 1445 MB, disk read 0 MB, GPU 58->58 C  | elapsed 8 min, ETA 20 min
+[142/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep4: 1.76 s, peak 1438 MB, disk read 0 MB, GPU 58->58 C  | elapsed 8 min, ETA 19 min
+[143/484] tile571_8m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep5: 1.78 s, peak 1442 MB, disk read 0 MB, GPU 58->58 C  | elapsed 8 min, ETA 19 min
+[144/484] tile571_8m gpu_tri_riley TRI Riley cold rep1: 2.64 s, peak 1520 MB, disk read 488 MB, GPU 58->58 C  | elapsed 8 min, ETA 19 min
+[145/484] tile571_8m gpu_tri_riley TRI Riley cold rep2: 2.55 s, peak 1524 MB, disk read 484 MB, GPU 58->58 C  | elapsed 8 min, ETA 19 min
+[146/484] tile571_8m gpu_tri_riley TRI Riley cold rep3: 2.60 s, peak 1515 MB, disk read 485 MB, GPU 58->58 C  | elapsed 8 min, ETA 19 min
+[147/484] tile571_8m gpu_tri_riley TRI Riley cold rep4: 2.58 s, peak 1509 MB, disk read 484 MB, GPU 58->58 C  | elapsed 8 min, ETA 19 min
+[148/484] tile571_8m gpu_tri_riley TRI Riley cold rep5: 2.57 s, peak 1507 MB, disk read 485 MB, GPU 58->57 C  | elapsed 9 min, ETA 19 min
+[149/484] tile571_8m gpu_tri_riley TRI Riley warm rep0: 1.83 s, peak 1518 MB, disk read 0 MB, GPU 58->58 C  | elapsed 9 min, ETA 19 min
+[150/484] tile571_8m gpu_tri_riley TRI Riley warm rep1: 1.85 s, peak 1521 MB, disk read 0 MB, GPU 58->58 C  | elapsed 9 min, ETA 19 min
+[151/484] tile571_8m gpu_tri_riley TRI Riley warm rep2: 1.90 s, peak 1536 MB, disk read 3 MB, GPU 58->58 C  | elapsed 9 min, ETA 19 min
+[152/484] tile571_8m gpu_tri_riley TRI Riley warm rep3: 1.86 s, peak 1511 MB, disk read 0 MB, GPU 58->58 C  | elapsed 9 min, ETA 19 min
+[153/484] tile571_8m gpu_tri_riley TRI Riley warm rep4: 1.86 s, peak 1520 MB, disk read 2 MB, GPU 58->58 C  | elapsed 9 min, ETA 19 min
+[154/484] tile571_8m gpu_tri_riley TRI Riley warm rep5: 1.87 s, peak 1517 MB, disk read 10 MB, GPU 58->58 C  | elapsed 9 min, ETA 19 min
+[155/484] tile571_8m gpu_tri_wilson TRI Wilson cold rep1: 2.57 s, peak 1507 MB, disk read 485 MB, GPU 58->58 C  | elapsed 9 min, ETA 19 min
+[156/484] tile571_8m gpu_tri_wilson TRI Wilson cold rep2: 2.59 s, peak 1515 MB, disk read 485 MB, GPU 58->58 C  | elapsed 9 min, ETA 19 min
+[157/484] tile571_8m gpu_tri_wilson TRI Wilson cold rep3: 2.64 s, peak 1513 MB, disk read 497 MB, GPU 58->58 C  | elapsed 9 min, ETA 19 min
+[158/484] tile571_8m gpu_tri_wilson TRI Wilson cold rep4: 2.53 s, peak 1515 MB, disk read 485 MB, GPU 58->57 C  | elapsed 9 min, ETA 19 min
+[159/484] tile571_8m gpu_tri_wilson TRI Wilson cold rep5: 2.56 s, peak 1513 MB, disk read 486 MB, GPU 57->57 C  | elapsed 9 min, ETA 19 min
+[160/484] tile571_8m gpu_tri_wilson TRI Wilson warm rep0: 1.85 s, peak 1543 MB, disk read 0 MB, GPU 57->58 C  | elapsed 9 min, ETA 19 min
+[161/484] tile571_8m gpu_tri_wilson TRI Wilson warm rep1: 1.87 s, peak 1522 MB, disk read 2 MB, GPU 58->58 C  | elapsed 9 min, ETA 18 min
+[162/484] tile571_8m gpu_tri_wilson TRI Wilson warm rep2: 1.84 s, peak 1540 MB, disk read 10 MB, GPU 58->58 C  | elapsed 9 min, ETA 18 min
+[163/484] tile571_8m gpu_tri_wilson TRI Wilson warm rep3: 1.89 s, peak 1522 MB, disk read 0 MB, GPU 58->58 C  | elapsed 9 min, ETA 18 min
+[164/484] tile571_8m gpu_tri_wilson TRI Wilson warm rep4: 1.87 s, peak 1530 MB, disk read 1 MB, GPU 58->58 C  | elapsed 9 min, ETA 18 min
+[165/484] tile571_8m gpu_tri_wilson TRI Wilson warm rep5: 1.87 s, peak 1527 MB, disk read 0 MB, GPU 58->58 C  | elapsed 9 min, ETA 18 min
+[166/484] tile571_8m gpu_tpi TPI  cold rep1: 2.63 s, peak 1519 MB, disk read 485 MB, GPU 58->58 C  | elapsed 9 min, ETA 18 min
+[167/484] tile571_8m gpu_tpi TPI  cold rep2: 2.54 s, peak 1515 MB, disk read 487 MB, GPU 58->58 C  | elapsed 9 min, ETA 18 min
+[168/484] tile571_8m gpu_tpi TPI  cold rep3: 2.61 s, peak 1518 MB, disk read 528 MB, GPU 58->57 C  | elapsed 10 min, ETA 18 min
+[169/484] tile571_8m gpu_tpi TPI  cold rep4: 2.55 s, peak 1509 MB, disk read 486 MB, GPU 57->57 C  | elapsed 10 min, ETA 18 min
+[170/484] tile571_8m gpu_tpi TPI  cold rep5: 2.57 s, peak 1521 MB, disk read 496 MB, GPU 57->57 C  | elapsed 10 min, ETA 18 min
+[171/484] tile571_8m gpu_tpi TPI  warm rep0: 1.88 s, peak 1516 MB, disk read 0 MB, GPU 57->57 C  | elapsed 10 min, ETA 18 min
+[172/484] tile571_8m gpu_tpi TPI  warm rep1: 1.90 s, peak 1521 MB, disk read 1 MB, GPU 57->58 C  | elapsed 10 min, ETA 18 min
+[173/484] tile571_8m gpu_tpi TPI  warm rep2: 1.87 s, peak 1513 MB, disk read 0 MB, GPU 58->58 C  | elapsed 10 min, ETA 18 min
+[174/484] tile571_8m gpu_tpi TPI  warm rep3: 1.85 s, peak 1541 MB, disk read 0 MB, GPU 58->58 C  | elapsed 10 min, ETA 18 min
+[175/484] tile571_8m gpu_tpi TPI  warm rep4: 1.84 s, peak 1512 MB, disk read 1 MB, GPU 58->58 C  | elapsed 10 min, ETA 17 min
+[176/484] tile571_8m gpu_tpi TPI  warm rep5: 1.87 s, peak 1532 MB, disk read 0 MB, GPU 58->58 C  | elapsed 10 min, ETA 17 min
+[177/484] tile571_8m gpu_roughness roughness  cold rep1: 2.59 s, peak 1514 MB, disk read 487 MB, GPU 58->58 C  | elapsed 10 min, ETA 17 min
+[178/484] tile571_8m gpu_roughness roughness  cold rep2: 2.59 s, peak 1513 MB, disk read 484 MB, GPU 58->58 C  | elapsed 10 min, ETA 17 min
+[179/484] tile571_8m gpu_roughness roughness  cold rep3: 2.62 s, peak 1509 MB, disk read 488 MB, GPU 58->57 C  | elapsed 10 min, ETA 17 min
+[180/484] tile571_8m gpu_roughness roughness  cold rep4: 2.57 s, peak 1512 MB, disk read 484 MB, GPU 57->57 C  | elapsed 10 min, ETA 17 min
+[181/484] tile571_8m gpu_roughness roughness  cold rep5: 2.57 s, peak 1512 MB, disk read 485 MB, GPU 57->57 C  | elapsed 10 min, ETA 17 min
+[182/484] tile571_8m gpu_roughness roughness  warm rep0: 1.89 s, peak 1517 MB, disk read 0 MB, GPU 57->57 C  | elapsed 10 min, ETA 17 min
+[183/484] tile571_8m gpu_roughness roughness  warm rep1: 1.85 s, peak 1509 MB, disk read 0 MB, GPU 57->58 C  | elapsed 10 min, ETA 17 min
+[184/484] tile571_8m gpu_roughness roughness  warm rep2: 1.89 s, peak 1554 MB, disk read 0 MB, GPU 58->58 C  | elapsed 10 min, ETA 17 min
+[185/484] tile571_8m gpu_roughness roughness  warm rep3: 1.88 s, peak 1532 MB, disk read 0 MB, GPU 58->58 C  | elapsed 10 min, ETA 17 min
+[186/484] tile571_8m gpu_roughness roughness  warm rep4: 1.84 s, peak 1525 MB, disk read 3 MB, GPU 58->58 C  | elapsed 10 min, ETA 17 min
+[187/484] tile571_8m gpu_roughness roughness  warm rep5: 1.89 s, peak 1536 MB, disk read 0 MB, GPU 58->58 C  | elapsed 11 min, ETA 17 min
+[188/484] tile571_8m gpu_window_1024 slope Horn cold rep1: 2.66 s, peak 1284 MB, disk read 486 MB, GPU 58->58 C  | elapsed 11 min, ETA 17 min
+[189/484] tile571_8m gpu_window_1024 slope Horn cold rep2: 2.70 s, peak 1284 MB, disk read 492 MB, GPU 58->57 C  | elapsed 11 min, ETA 17 min
+[190/484] tile571_8m gpu_window_1024 slope Horn cold rep3: 2.70 s, peak 1282 MB, disk read 488 MB, GPU 57->57 C  | elapsed 11 min, ETA 17 min
+[191/484] tile571_8m gpu_window_1024 slope Horn warm rep0: 1.96 s, peak 1285 MB, disk read 0 MB, GPU 57->58 C  | elapsed 11 min, ETA 17 min
+[192/484] tile571_8m gpu_window_1024 slope Horn warm rep1: 1.97 s, peak 1289 MB, disk read 0 MB, GPU 58->58 C  | elapsed 11 min, ETA 16 min
+[193/484] tile571_8m gpu_window_1024 slope Horn warm rep2: 1.98 s, peak 1283 MB, disk read 0 MB, GPU 58->58 C  | elapsed 11 min, ETA 16 min
+[194/484] tile571_8m gpu_window_1024 slope Horn warm rep3: 2.00 s, peak 1289 MB, disk read 2 MB, GPU 58->58 C  | elapsed 11 min, ETA 16 min
+[195/484] tile571_8m gpu_window_4096 slope Horn cold rep1: 2.73 s, peak 2340 MB, disk read 490 MB, GPU 58->58 C  | elapsed 11 min, ETA 16 min
+[196/484] tile571_8m gpu_window_4096 slope Horn cold rep2: 2.71 s, peak 2272 MB, disk read 490 MB, GPU 58->57 C  | elapsed 11 min, ETA 16 min
+[197/484] tile571_8m gpu_window_4096 slope Horn cold rep3: 2.72 s, peak 2276 MB, disk read 492 MB, GPU 57->57 C  | elapsed 11 min, ETA 16 min
+[198/484] tile571_8m gpu_window_4096 slope Horn warm rep0: 2.03 s, peak 2349 MB, disk read 2 MB, GPU 57->57 C  | elapsed 11 min, ETA 16 min
+[199/484] tile571_8m gpu_window_4096 slope Horn warm rep1: 2.09 s, peak 2339 MB, disk read 10 MB, GPU 57->58 C  | elapsed 11 min, ETA 16 min
+[200/484] tile571_8m gpu_window_4096 slope Horn warm rep2: 2.12 s, peak 2348 MB, disk read 1 MB, GPU 58->58 C  | elapsed 11 min, ETA 16 min
+[201/484] tile571_8m gpu_window_4096 slope Horn warm rep3: 2.05 s, peak 2350 MB, disk read 1 MB, GPU 58->58 C  | elapsed 11 min, ETA 16 min
+[202/484] tile571_8m gpu_window_8192 slope Horn cold rep1: 3.35 s, peak 3570 MB, disk read 494 MB, GPU 58->58 C  | elapsed 11 min, ETA 16 min
+[203/484] tile571_8m gpu_window_8192 slope Horn cold rep2: 3.27 s, peak 3568 MB, disk read 496 MB, GPU 58->57 C  | elapsed 11 min, ETA 16 min
+[204/484] tile571_8m gpu_window_8192 slope Horn cold rep3: 3.25 s, peak 3569 MB, disk read 655 MB, GPU 57->57 C  | elapsed 12 min, ETA 16 min
+[205/484] tile571_8m gpu_window_8192 slope Horn warm rep0: 2.55 s, peak 3570 MB, disk read 0 MB, GPU 57->57 C  | elapsed 12 min, ETA 16 min
+[206/484] tile571_8m gpu_window_8192 slope Horn warm rep1: 2.52 s, peak 3570 MB, disk read 0 MB, GPU 57->57 C  | elapsed 12 min, ETA 16 min
+[207/484] tile571_8m gpu_window_8192 slope Horn warm rep2: 2.57 s, peak 3570 MB, disk read 0 MB, GPU 57->57 C  | elapsed 12 min, ETA 16 min
+[208/484] tile571_8m gpu_window_8192 slope Horn warm rep3: 2.58 s, peak 3570 MB, disk read 10 MB, GPU 57->58 C  | elapsed 12 min, ETA 16 min
+[209/484] chamoli_2m gpu_cupy_slope slope Horn cold rep1: 3.39 s, peak 1568 MB, disk read 638 MB, GPU 58->61 C  | elapsed 12 min, ETA 16 min
+[210/484] chamoli_2m gpu_cupy_slope slope Horn cold rep2: 3.46 s, peak 1562 MB, disk read 634 MB, GPU 59->59 C  | elapsed 12 min, ETA 16 min
+[211/484] chamoli_2m gpu_cupy_slope slope Horn cold rep3: 3.36 s, peak 1564 MB, disk read 624 MB, GPU 59->61 C  | elapsed 12 min, ETA 16 min
+[212/484] chamoli_2m gpu_cupy_slope slope Horn cold rep4: 3.41 s, peak 1560 MB, disk read 630 MB, GPU 59->60 C  | elapsed 12 min, ETA 16 min
+[213/484] chamoli_2m gpu_cupy_slope slope Horn cold rep5: 3.43 s, peak 1572 MB, disk read 622 MB, GPU 60->61 C  | elapsed 12 min, ETA 16 min
+[214/484] chamoli_2m gpu_cupy_slope slope Horn warm rep0: 2.73 s, peak 1564 MB, disk read 1 MB, GPU 60->60 C  | elapsed 12 min, ETA 16 min
+[215/484] chamoli_2m gpu_cupy_slope slope Horn warm rep1: 2.61 s, peak 1563 MB, disk read 0 MB, GPU 60->62 C  | elapsed 12 min, ETA 15 min
+[216/484] chamoli_2m gpu_cupy_slope slope Horn warm rep2: 2.64 s, peak 1573 MB, disk read 0 MB, GPU 60->63 C  | elapsed 12 min, ETA 15 min
+[217/484] chamoli_2m gpu_cupy_slope slope Horn warm rep3: 2.66 s, peak 1575 MB, disk read 0 MB, GPU 61->63 C  | elapsed 12 min, ETA 15 min
+[218/484] chamoli_2m gpu_cupy_slope slope Horn warm rep4: 2.62 s, peak 1562 MB, disk read 0 MB, GPU 61->62 C  | elapsed 13 min, ETA 15 min
+[219/484] chamoli_2m gpu_cupy_slope slope Horn warm rep5: 2.69 s, peak 1558 MB, disk read 0 MB, GPU 62->62 C  | elapsed 13 min, ETA 15 min
+[220/484] chamoli_2m gpu_pageable_slope slope Horn cold rep1: 2.96 s, peak 1419 MB, disk read 625 MB, GPU 62->60 C  | elapsed 13 min, ETA 15 min
+[221/484] chamoli_2m gpu_pageable_slope slope Horn cold rep2: 2.88 s, peak 1434 MB, disk read 622 MB, GPU 60->59 C  | elapsed 13 min, ETA 15 min
+[222/484] chamoli_2m gpu_pageable_slope slope Horn cold rep3: 2.95 s, peak 1408 MB, disk read 622 MB, GPU 59->59 C  | elapsed 13 min, ETA 15 min
+[223/484] chamoli_2m gpu_pageable_slope slope Horn cold rep4: 2.95 s, peak 1458 MB, disk read 622 MB, GPU 59->58 C  | elapsed 13 min, ETA 15 min
+[224/484] chamoli_2m gpu_pageable_slope slope Horn cold rep5: 2.88 s, peak 1419 MB, disk read 619 MB, GPU 58->58 C  | elapsed 13 min, ETA 15 min
+[225/484] chamoli_2m gpu_pageable_slope slope Horn warm rep0: 2.25 s, peak 1481 MB, disk read 0 MB, GPU 58->58 C  | elapsed 13 min, ETA 15 min
+[226/484] chamoli_2m gpu_pageable_slope slope Horn warm rep1: 2.18 s, peak 1430 MB, disk read 0 MB, GPU 58->58 C  | elapsed 13 min, ETA 15 min
+[227/484] chamoli_2m gpu_pageable_slope slope Horn warm rep2: 2.27 s, peak 1451 MB, disk read 1 MB, GPU 58->59 C  | elapsed 13 min, ETA 15 min
+[228/484] chamoli_2m gpu_pageable_slope slope Horn warm rep3: 2.35 s, peak 1412 MB, disk read 360 MB, GPU 59->59 C  | elapsed 13 min, ETA 15 min
+[229/484] chamoli_2m gpu_pageable_slope slope Horn warm rep4: 2.22 s, peak 1451 MB, disk read 2 MB, GPU 59->59 C  | elapsed 13 min, ETA 15 min
+[230/484] chamoli_2m gpu_pageable_slope slope Horn warm rep5: 2.26 s, peak 1444 MB, disk read 37 MB, GPU 59->59 C  | elapsed 13 min, ETA 15 min
+[231/484] chamoli_2m gpu_pinned_slope slope Horn cold rep1: 2.88 s, peak 1487 MB, disk read 620 MB, GPU 59->58 C  | elapsed 13 min, ETA 15 min
+[232/484] chamoli_2m gpu_pinned_slope slope Horn cold rep2: 2.99 s, peak 1471 MB, disk read 627 MB, GPU 58->58 C  | elapsed 13 min, ETA 15 min
+[233/484] chamoli_2m gpu_pinned_slope slope Horn cold rep3: 2.92 s, peak 1501 MB, disk read 621 MB, GPU 58->57 C  | elapsed 14 min, ETA 15 min
+[234/484] chamoli_2m gpu_pinned_slope slope Horn cold rep4: 2.87 s, peak 1502 MB, disk read 729 MB, GPU 57->57 C  | elapsed 14 min, ETA 15 min
+[235/484] chamoli_2m gpu_pinned_slope slope Horn cold rep5: 2.88 s, peak 1518 MB, disk read 638 MB, GPU 57->57 C  | elapsed 14 min, ETA 15 min
+[236/484] chamoli_2m gpu_pinned_slope slope Horn warm rep0: 2.15 s, peak 1522 MB, disk read 0 MB, GPU 57->57 C  | elapsed 14 min, ETA 14 min
+[237/484] chamoli_2m gpu_pinned_slope slope Horn warm rep1: 2.19 s, peak 1493 MB, disk read 0 MB, GPU 57->57 C  | elapsed 14 min, ETA 14 min
+[238/484] chamoli_2m gpu_pinned_slope slope Horn warm rep2: 2.21 s, peak 1522 MB, disk read 1 MB, GPU 57->58 C  | elapsed 14 min, ETA 14 min
+[239/484] chamoli_2m gpu_pinned_slope slope Horn warm rep3: 2.19 s, peak 1488 MB, disk read 0 MB, GPU 58->58 C  | elapsed 14 min, ETA 14 min
+[240/484] chamoli_2m gpu_pinned_slope slope Horn warm rep4: 2.18 s, peak 1493 MB, disk read 0 MB, GPU 58->58 C  | elapsed 14 min, ETA 14 min
+[241/484] chamoli_2m gpu_pinned_slope slope Horn warm rep5: 2.17 s, peak 1494 MB, disk read 43 MB, GPU 58->58 C  | elapsed 14 min, ETA 14 min
+[242/484] chamoli_2m gpu_slope slope Horn cold rep1: 2.93 s, peak 1555 MB, disk read 624 MB, GPU 58->58 C  | elapsed 14 min, ETA 14 min
+[243/484] chamoli_2m gpu_slope slope Horn cold rep2: 2.97 s, peak 1532 MB, disk read 1504 MB, GPU 58->58 C  | elapsed 14 min, ETA 14 min
+[244/484] chamoli_2m gpu_slope slope Horn cold rep3: 2.95 s, peak 1541 MB, disk read 621 MB, GPU 57->57 C  | elapsed 14 min, ETA 14 min
+[245/484] chamoli_2m gpu_slope slope Horn cold rep4: 2.88 s, peak 1550 MB, disk read 620 MB, GPU 57->57 C  | elapsed 14 min, ETA 14 min
+[246/484] chamoli_2m gpu_slope slope Horn cold rep5: 2.94 s, peak 1550 MB, disk read 620 MB, GPU 57->57 C  | elapsed 14 min, ETA 14 min
+[247/484] chamoli_2m gpu_slope slope Horn warm rep0: 2.23 s, peak 1588 MB, disk read 4 MB, GPU 57->57 C  | elapsed 14 min, ETA 14 min
+[248/484] chamoli_2m gpu_slope slope Horn warm rep1: 2.13 s, peak 1556 MB, disk read 0 MB, GPU 57->57 C  | elapsed 14 min, ETA 14 min
+[249/484] chamoli_2m gpu_slope slope Horn warm rep2: 2.18 s, peak 1551 MB, disk read 0 MB, GPU 57->58 C  | elapsed 15 min, ETA 14 min
+[250/484] chamoli_2m gpu_slope slope Horn warm rep3: 2.13 s, peak 1557 MB, disk read 0 MB, GPU 58->58 C  | elapsed 15 min, ETA 14 min
+[251/484] chamoli_2m gpu_slope slope Horn warm rep4: 2.28 s, peak 1576 MB, disk read 0 MB, GPU 58->58 C  | elapsed 15 min, ETA 14 min
+[252/484] chamoli_2m gpu_slope slope Horn warm rep5: 2.18 s, peak 1541 MB, disk read 0 MB, GPU 58->58 C  | elapsed 15 min, ETA 13 min
+[253/484] chamoli_2m gpu_slope_fp64 slope Horn cold rep1: 2.91 s, peak 1548 MB, disk read 635 MB, GPU 58->58 C  | elapsed 15 min, ETA 13 min
+[254/484] chamoli_2m gpu_slope_fp64 slope Horn cold rep2: 2.88 s, peak 1566 MB, disk read 615 MB, GPU 58->59 C  | elapsed 15 min, ETA 13 min
+[255/484] chamoli_2m gpu_slope_fp64 slope Horn cold rep3: 2.86 s, peak 1537 MB, disk read 621 MB, GPU 58->58 C  | elapsed 15 min, ETA 13 min
+[256/484] chamoli_2m gpu_slope_fp64 slope Horn cold rep4: 2.89 s, peak 1530 MB, disk read 619 MB, GPU 58->58 C  | elapsed 15 min, ETA 13 min
+[257/484] chamoli_2m gpu_slope_fp64 slope Horn cold rep5: 2.92 s, peak 1549 MB, disk read 621 MB, GPU 58->58 C  | elapsed 15 min, ETA 13 min
+[258/484] chamoli_2m gpu_slope_fp64 slope Horn warm rep0: 2.15 s, peak 1566 MB, disk read 0 MB, GPU 58->58 C  | elapsed 15 min, ETA 13 min
+[259/484] chamoli_2m gpu_slope_fp64 slope Horn warm rep1: 2.18 s, peak 1552 MB, disk read 0 MB, GPU 58->59 C  | elapsed 15 min, ETA 13 min
+[260/484] chamoli_2m gpu_slope_fp64 slope Horn warm rep2: 2.16 s, peak 1546 MB, disk read 0 MB, GPU 59->59 C  | elapsed 15 min, ETA 13 min
+[261/484] chamoli_2m gpu_slope_fp64 slope Horn warm rep3: 2.17 s, peak 1556 MB, disk read 0 MB, GPU 59->59 C  | elapsed 15 min, ETA 13 min
+[262/484] chamoli_2m gpu_slope_fp64 slope Horn warm rep4: 2.21 s, peak 1558 MB, disk read 4 MB, GPU 59->59 C  | elapsed 15 min, ETA 13 min
+[263/484] chamoli_2m gpu_slope_fp64 slope Horn warm rep5: 2.15 s, peak 1543 MB, disk read 1 MB, GPU 59->60 C  | elapsed 15 min, ETA 13 min
+[264/484] chamoli_2m gpu_slope_nowrite slope Horn cold rep1: 2.74 s, peak 1486 MB, disk read 619 MB, GPU 59->58 C  | elapsed 15 min, ETA 13 min
+[265/484] chamoli_2m gpu_slope_nowrite slope Horn cold rep2: 2.72 s, peak 1488 MB, disk read 620 MB, GPU 58->58 C  | elapsed 15 min, ETA 13 min
+[266/484] chamoli_2m gpu_slope_nowrite slope Horn cold rep3: 2.73 s, peak 1490 MB, disk read 675 MB, GPU 58->57 C  | elapsed 16 min, ETA 13 min
+[267/484] chamoli_2m gpu_slope_nowrite slope Horn cold rep4: 2.74 s, peak 1491 MB, disk read 618 MB, GPU 57->57 C  | elapsed 16 min, ETA 13 min
+[268/484] chamoli_2m gpu_slope_nowrite slope Horn cold rep5: 2.69 s, peak 1485 MB, disk read 626 MB, GPU 57->57 C  | elapsed 16 min, ETA 13 min
+[269/484] chamoli_2m gpu_slope_nowrite slope Horn warm rep0: 1.99 s, peak 1489 MB, disk read 1 MB, GPU 57->57 C  | elapsed 16 min, ETA 13 min
+[270/484] chamoli_2m gpu_slope_nowrite slope Horn warm rep1: 2.03 s, peak 1492 MB, disk read 5 MB, GPU 57->58 C  | elapsed 16 min, ETA 13 min
+[271/484] chamoli_2m gpu_slope_nowrite slope Horn warm rep2: 1.99 s, peak 1491 MB, disk read 1 MB, GPU 58->58 C  | elapsed 16 min, ETA 12 min
+[272/484] chamoli_2m gpu_slope_nowrite slope Horn warm rep3: 2.03 s, peak 1485 MB, disk read 0 MB, GPU 58->58 C  | elapsed 16 min, ETA 12 min
+[273/484] chamoli_2m gpu_slope_nowrite slope Horn warm rep4: 2.03 s, peak 1487 MB, disk read 3 MB, GPU 58->58 C  | elapsed 16 min, ETA 12 min
+[274/484] chamoli_2m gpu_slope_nowrite slope Horn warm rep5: 2.17 s, peak 1491 MB, disk read 179 MB, GPU 58->58 C  | elapsed 16 min, ETA 12 min
+[275/484] chamoli_2m gpu_slope_r8 slope Horn cold rep1: 2.97 s, peak 1767 MB, disk read 646 MB, GPU 58->58 C  | elapsed 16 min, ETA 12 min
+[276/484] chamoli_2m gpu_slope_r8 slope Horn cold rep2: 2.99 s, peak 1790 MB, disk read 618 MB, GPU 58->58 C  | elapsed 16 min, ETA 12 min
+[277/484] chamoli_2m gpu_slope_r8 slope Horn cold rep3: 3.03 s, peak 1757 MB, disk read 763 MB, GPU 58->57 C  | elapsed 16 min, ETA 12 min
+[278/484] chamoli_2m gpu_slope_r8 slope Horn cold rep4: 2.97 s, peak 1789 MB, disk read 628 MB, GPU 57->57 C  | elapsed 16 min, ETA 12 min
+[279/484] chamoli_2m gpu_slope_r8 slope Horn cold rep5: 3.06 s, peak 1770 MB, disk read 623 MB, GPU 57->57 C  | elapsed 16 min, ETA 12 min
+[280/484] chamoli_2m gpu_slope_r8 slope Horn warm rep0: 2.25 s, peak 1780 MB, disk read 1 MB, GPU 57->57 C  | elapsed 16 min, ETA 12 min
+[281/484] chamoli_2m gpu_slope_r8 slope Horn warm rep1: 2.19 s, peak 1772 MB, disk read 1 MB, GPU 57->58 C  | elapsed 16 min, ETA 12 min
+[282/484] chamoli_2m gpu_slope_r8 slope Horn warm rep2: 2.22 s, peak 1796 MB, disk read 0 MB, GPU 58->58 C  | elapsed 17 min, ETA 12 min
+[283/484] chamoli_2m gpu_slope_r8 slope Horn warm rep3: 2.20 s, peak 1792 MB, disk read 0 MB, GPU 58->58 C  | elapsed 17 min, ETA 12 min
+[284/484] chamoli_2m gpu_slope_r8 slope Horn warm rep4: 2.27 s, peak 1762 MB, disk read 0 MB, GPU 58->58 C  | elapsed 17 min, ETA 12 min
+[285/484] chamoli_2m gpu_slope_r8 slope Horn warm rep5: 2.26 s, peak 1780 MB, disk read 1 MB, GPU 58->58 C  | elapsed 17 min, ETA 12 min
+[286/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn cold rep1: 3.84 s, peak 1778 MB, disk read 634 MB, GPU 58->58 C  | elapsed 17 min, ETA 12 min
+[287/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn cold rep2: 3.76 s, peak 1776 MB, disk read 626 MB, GPU 58->57 C  | elapsed 17 min, ETA 12 min
+[288/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn cold rep3: 3.89 s, peak 1776 MB, disk read 633 MB, GPU 57->57 C  | elapsed 17 min, ETA 12 min
+[289/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn cold rep4: 3.81 s, peak 1776 MB, disk read 623 MB, GPU 56->57 C  | elapsed 17 min, ETA 12 min
+[290/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn cold rep5: 3.81 s, peak 1773 MB, disk read 622 MB, GPU 57->57 C  | elapsed 17 min, ETA 11 min
+[291/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn warm rep0: 3.13 s, peak 1780 MB, disk read 0 MB, GPU 57->57 C  | elapsed 17 min, ETA 11 min
+[292/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn warm rep1: 3.13 s, peak 1780 MB, disk read 0 MB, GPU 57->58 C  | elapsed 17 min, ETA 11 min
+[293/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn warm rep2: 3.10 s, peak 1779 MB, disk read 1 MB, GPU 58->58 C  | elapsed 17 min, ETA 11 min
+[294/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn warm rep3: 3.17 s, peak 1777 MB, disk read 0 MB, GPU 58->58 C  | elapsed 17 min, ETA 11 min
+[295/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn warm rep4: 3.07 s, peak 1774 MB, disk read 0 MB, GPU 58->58 C  | elapsed 17 min, ETA 11 min
+[296/484] chamoli_2m gpu_3prod slope+aspect+hillshade Horn warm rep5: 3.15 s, peak 1777 MB, disk read 0 MB, GPU 58->58 C  | elapsed 18 min, ETA 11 min
+[297/484] chamoli_2m gpu_aspect aspect Horn cold rep1: 2.88 s, peak 1558 MB, disk read 653 MB, GPU 58->58 C  | elapsed 18 min, ETA 11 min
+[298/484] chamoli_2m gpu_aspect aspect Horn cold rep2: 2.86 s, peak 1542 MB, disk read 620 MB, GPU 58->57 C  | elapsed 18 min, ETA 11 min
+[299/484] chamoli_2m gpu_aspect aspect Horn cold rep3: 2.92 s, peak 1537 MB, disk read 623 MB, GPU 57->57 C  | elapsed 18 min, ETA 11 min
+[300/484] chamoli_2m gpu_aspect aspect Horn cold rep4: 2.94 s, peak 1539 MB, disk read 622 MB, GPU 57->57 C  | elapsed 18 min, ETA 11 min
+[301/484] chamoli_2m gpu_aspect aspect Horn cold rep5: 2.91 s, peak 1551 MB, disk read 631 MB, GPU 57->57 C  | elapsed 18 min, ETA 11 min
+[302/484] chamoli_2m gpu_aspect aspect Horn warm rep0: 2.19 s, peak 1548 MB, disk read 0 MB, GPU 57->57 C  | elapsed 18 min, ETA 11 min
+[303/484] chamoli_2m gpu_aspect aspect Horn warm rep1: 2.21 s, peak 1586 MB, disk read 0 MB, GPU 57->58 C  | elapsed 18 min, ETA 11 min
+[304/484] chamoli_2m gpu_aspect aspect Horn warm rep2: 2.18 s, peak 1590 MB, disk read 0 MB, GPU 58->58 C  | elapsed 18 min, ETA 11 min
+[305/484] chamoli_2m gpu_aspect aspect Horn warm rep3: 2.15 s, peak 1541 MB, disk read 0 MB, GPU 58->58 C  | elapsed 18 min, ETA 11 min
+[306/484] chamoli_2m gpu_aspect aspect Horn warm rep4: 2.18 s, peak 1553 MB, disk read 0 MB, GPU 58->58 C  | elapsed 18 min, ETA 11 min
+[307/484] chamoli_2m gpu_aspect aspect Horn warm rep5: 2.16 s, peak 1556 MB, disk read 0 MB, GPU 58->58 C  | elapsed 18 min, ETA 11 min
+[308/484] chamoli_2m gpu_hillshade hillshade Horn cold rep1: 2.78 s, peak 1451 MB, disk read 626 MB, GPU 58->58 C  | elapsed 18 min, ETA 10 min
+[309/484] chamoli_2m gpu_hillshade hillshade Horn cold rep2: 2.74 s, peak 1452 MB, disk read 626 MB, GPU 58->57 C  | elapsed 18 min, ETA 10 min
+[310/484] chamoli_2m gpu_hillshade hillshade Horn cold rep3: 2.74 s, peak 1450 MB, disk read 623 MB, GPU 57->57 C  | elapsed 18 min, ETA 10 min
+[311/484] chamoli_2m gpu_hillshade hillshade Horn cold rep4: 2.66 s, peak 1448 MB, disk read 620 MB, GPU 57->57 C  | elapsed 19 min, ETA 10 min
+[312/484] chamoli_2m gpu_hillshade hillshade Horn cold rep5: 2.69 s, peak 1447 MB, disk read 625 MB, GPU 57->57 C  | elapsed 19 min, ETA 10 min
+[313/484] chamoli_2m gpu_hillshade hillshade Horn warm rep0: 2.04 s, peak 1447 MB, disk read 0 MB, GPU 57->58 C  | elapsed 19 min, ETA 10 min
+[314/484] chamoli_2m gpu_hillshade hillshade Horn warm rep1: 2.07 s, peak 1449 MB, disk read 0 MB, GPU 58->58 C  | elapsed 19 min, ETA 10 min
+[315/484] chamoli_2m gpu_hillshade hillshade Horn warm rep2: 1.98 s, peak 1449 MB, disk read 10 MB, GPU 58->58 C  | elapsed 19 min, ETA 10 min
+[316/484] chamoli_2m gpu_hillshade hillshade Horn warm rep3: 2.07 s, peak 1455 MB, disk read 0 MB, GPU 58->58 C  | elapsed 19 min, ETA 10 min
+[317/484] chamoli_2m gpu_hillshade hillshade Horn warm rep4: 2.07 s, peak 1446 MB, disk read 49 MB, GPU 58->58 C  | elapsed 19 min, ETA 10 min
+[318/484] chamoli_2m gpu_hillshade hillshade Horn warm rep5: 2.03 s, peak 1453 MB, disk read 4 MB, GPU 58->58 C  | elapsed 19 min, ETA 10 min
+[319/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne cold rep1: 2.87 s, peak 1554 MB, disk read 632 MB, GPU 58->58 C  | elapsed 19 min, ETA 10 min
+[320/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne cold rep2: 2.91 s, peak 1532 MB, disk read 624 MB, GPU 58->58 C  | elapsed 19 min, ETA 10 min
+[321/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne cold rep3: 2.96 s, peak 1566 MB, disk read 621 MB, GPU 58->57 C  | elapsed 19 min, ETA 10 min
+[322/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne cold rep4: 2.90 s, peak 1557 MB, disk read 619 MB, GPU 57->57 C  | elapsed 19 min, ETA 10 min
+[323/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne cold rep5: 2.94 s, peak 1553 MB, disk read 624 MB, GPU 57->57 C  | elapsed 19 min, ETA 10 min
+[324/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne warm rep0: 2.23 s, peak 1591 MB, disk read 0 MB, GPU 57->57 C  | elapsed 19 min, ETA 10 min
+[325/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne warm rep1: 2.22 s, peak 1556 MB, disk read 1 MB, GPU 57->58 C  | elapsed 19 min, ETA 9 min
+[326/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne warm rep2: 2.18 s, peak 1563 MB, disk read 0 MB, GPU 58->58 C  | elapsed 19 min, ETA 9 min
+[327/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne warm rep3: 2.23 s, peak 1577 MB, disk read 0 MB, GPU 58->58 C  | elapsed 19 min, ETA 9 min
+[328/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne warm rep4: 2.15 s, peak 1590 MB, disk read 0 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[329/484] chamoli_2m gpu_slope_zt slope ZevenbergenThorne warm rep5: 2.21 s, peak 1535 MB, disk read 0 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[330/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne cold rep1: 2.91 s, peak 1530 MB, disk read 622 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[331/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne cold rep2: 2.85 s, peak 1532 MB, disk read 623 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[332/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne cold rep3: 2.91 s, peak 1538 MB, disk read 623 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[333/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne cold rep4: 2.91 s, peak 1533 MB, disk read 623 MB, GPU 58->57 C  | elapsed 20 min, ETA 9 min
+[334/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne cold rep5: 2.96 s, peak 1565 MB, disk read 631 MB, GPU 57->57 C  | elapsed 20 min, ETA 9 min
+[335/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne warm rep0: 2.16 s, peak 1556 MB, disk read 0 MB, GPU 57->57 C  | elapsed 20 min, ETA 9 min
+[336/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne warm rep1: 2.21 s, peak 1584 MB, disk read 0 MB, GPU 57->58 C  | elapsed 20 min, ETA 9 min
+[337/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne warm rep2: 2.18 s, peak 1548 MB, disk read 1 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[338/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne warm rep3: 2.19 s, peak 1568 MB, disk read 0 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[339/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne warm rep4: 2.22 s, peak 1572 MB, disk read 0 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[340/484] chamoli_2m gpu_aspect_zt aspect ZevenbergenThorne warm rep5: 2.23 s, peak 1558 MB, disk read 0 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[341/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep1: 2.73 s, peak 1444 MB, disk read 621 MB, GPU 58->58 C  | elapsed 20 min, ETA 9 min
+[342/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep2: 2.73 s, peak 1451 MB, disk read 622 MB, GPU 58->57 C  | elapsed 20 min, ETA 8 min
+[343/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep3: 2.72 s, peak 1449 MB, disk read 623 MB, GPU 57->57 C  | elapsed 20 min, ETA 8 min
+[344/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep4: 2.77 s, peak 1447 MB, disk read 618 MB, GPU 57->57 C  | elapsed 21 min, ETA 8 min
+[345/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne cold rep5: 2.76 s, peak 1452 MB, disk read 620 MB, GPU 57->57 C  | elapsed 21 min, ETA 8 min
+[346/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep0: 1.98 s, peak 1449 MB, disk read 0 MB, GPU 57->57 C  | elapsed 21 min, ETA 8 min
+[347/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep1: 2.01 s, peak 1449 MB, disk read 8 MB, GPU 57->57 C  | elapsed 21 min, ETA 8 min
+[348/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep2: 2.04 s, peak 1444 MB, disk read 0 MB, GPU 57->58 C  | elapsed 21 min, ETA 8 min
+[349/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep3: 2.00 s, peak 1456 MB, disk read 0 MB, GPU 58->58 C  | elapsed 21 min, ETA 8 min
+[350/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep4: 2.02 s, peak 1451 MB, disk read 0 MB, GPU 58->58 C  | elapsed 21 min, ETA 8 min
+[351/484] chamoli_2m gpu_hillshade_zt hillshade ZevenbergenThorne warm rep5: 2.03 s, peak 1450 MB, disk read 0 MB, GPU 58->58 C  | elapsed 21 min, ETA 8 min
+[352/484] chamoli_2m gpu_tri_riley TRI Riley cold rep1: 2.94 s, peak 1557 MB, disk read 628 MB, GPU 58->58 C  | elapsed 21 min, ETA 8 min
+[353/484] chamoli_2m gpu_tri_riley TRI Riley cold rep2: 2.92 s, peak 1549 MB, disk read 619 MB, GPU 58->57 C  | elapsed 21 min, ETA 8 min
+[354/484] chamoli_2m gpu_tri_riley TRI Riley cold rep3: 2.90 s, peak 1557 MB, disk read 619 MB, GPU 57->57 C  | elapsed 21 min, ETA 8 min
+[355/484] chamoli_2m gpu_tri_riley TRI Riley cold rep4: 2.93 s, peak 1551 MB, disk read 623 MB, GPU 57->57 C  | elapsed 21 min, ETA 8 min
+[356/484] chamoli_2m gpu_tri_riley TRI Riley cold rep5: 2.91 s, peak 1540 MB, disk read 624 MB, GPU 57->57 C  | elapsed 21 min, ETA 8 min
+[357/484] chamoli_2m gpu_tri_riley TRI Riley warm rep0: 2.10 s, peak 1553 MB, disk read 0 MB, GPU 57->57 C  | elapsed 21 min, ETA 8 min
+[358/484] chamoli_2m gpu_tri_riley TRI Riley warm rep1: 2.22 s, peak 1562 MB, disk read 4 MB, GPU 57->58 C  | elapsed 21 min, ETA 8 min
+[359/484] chamoli_2m gpu_tri_riley TRI Riley warm rep2: 2.19 s, peak 1536 MB, disk read 1 MB, GPU 58->58 C  | elapsed 21 min, ETA 7 min
+[360/484] chamoli_2m gpu_tri_riley TRI Riley warm rep3: 2.20 s, peak 1556 MB, disk read 0 MB, GPU 58->58 C  | elapsed 21 min, ETA 7 min
+[361/484] chamoli_2m gpu_tri_riley TRI Riley warm rep4: 2.16 s, peak 1551 MB, disk read 0 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[362/484] chamoli_2m gpu_tri_riley TRI Riley warm rep5: 2.22 s, peak 1582 MB, disk read 26 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[363/484] chamoli_2m gpu_tri_wilson TRI Wilson cold rep1: 2.90 s, peak 1567 MB, disk read 621 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[364/484] chamoli_2m gpu_tri_wilson TRI Wilson cold rep2: 2.92 s, peak 1542 MB, disk read 630 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[365/484] chamoli_2m gpu_tri_wilson TRI Wilson cold rep3: 2.94 s, peak 1534 MB, disk read 635 MB, GPU 58->57 C  | elapsed 22 min, ETA 7 min
+[366/484] chamoli_2m gpu_tri_wilson TRI Wilson cold rep4: 2.98 s, peak 1553 MB, disk read 625 MB, GPU 57->57 C  | elapsed 22 min, ETA 7 min
+[367/484] chamoli_2m gpu_tri_wilson TRI Wilson cold rep5: 2.92 s, peak 1539 MB, disk read 627 MB, GPU 57->57 C  | elapsed 22 min, ETA 7 min
+[368/484] chamoli_2m gpu_tri_wilson TRI Wilson warm rep0: 2.18 s, peak 1539 MB, disk read 15 MB, GPU 57->58 C  | elapsed 22 min, ETA 7 min
+[369/484] chamoli_2m gpu_tri_wilson TRI Wilson warm rep1: 2.24 s, peak 1564 MB, disk read 0 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[370/484] chamoli_2m gpu_tri_wilson TRI Wilson warm rep2: 2.21 s, peak 1576 MB, disk read 0 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[371/484] chamoli_2m gpu_tri_wilson TRI Wilson warm rep3: 2.21 s, peak 1537 MB, disk read 0 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[372/484] chamoli_2m gpu_tri_wilson TRI Wilson warm rep4: 2.22 s, peak 1559 MB, disk read 0 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[373/484] chamoli_2m gpu_tri_wilson TRI Wilson warm rep5: 2.18 s, peak 1562 MB, disk read 0 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[374/484] chamoli_2m gpu_tpi TPI  cold rep1: 2.87 s, peak 1535 MB, disk read 619 MB, GPU 58->58 C  | elapsed 22 min, ETA 7 min
+[375/484] chamoli_2m gpu_tpi TPI  cold rep2: 2.91 s, peak 1563 MB, disk read 625 MB, GPU 58->57 C  | elapsed 22 min, ETA 7 min
+[376/484] chamoli_2m gpu_tpi TPI  cold rep3: 2.86 s, peak 1577 MB, disk read 619 MB, GPU 57->57 C  | elapsed 23 min, ETA 6 min
+[377/484] chamoli_2m gpu_tpi TPI  cold rep4: 2.88 s, peak 1560 MB, disk read 622 MB, GPU 57->57 C  | elapsed 23 min, ETA 6 min
+[378/484] chamoli_2m gpu_tpi TPI  cold rep5: 2.87 s, peak 1545 MB, disk read 623 MB, GPU 57->57 C  | elapsed 23 min, ETA 6 min
+[379/484] chamoli_2m gpu_tpi TPI  warm rep0: 2.20 s, peak 1536 MB, disk read 10 MB, GPU 57->57 C  | elapsed 23 min, ETA 6 min
+[380/484] chamoli_2m gpu_tpi TPI  warm rep1: 2.28 s, peak 1560 MB, disk read 350 MB, GPU 57->58 C  | elapsed 23 min, ETA 6 min
+[381/484] chamoli_2m gpu_tpi TPI  warm rep2: 2.14 s, peak 1535 MB, disk read 0 MB, GPU 58->58 C  | elapsed 23 min, ETA 6 min
+[382/484] chamoli_2m gpu_tpi TPI  warm rep3: 2.18 s, peak 1537 MB, disk read 0 MB, GPU 58->58 C  | elapsed 23 min, ETA 6 min
+[383/484] chamoli_2m gpu_tpi TPI  warm rep4: 2.16 s, peak 1549 MB, disk read 0 MB, GPU 58->58 C  | elapsed 23 min, ETA 6 min
+[384/484] chamoli_2m gpu_tpi TPI  warm rep5: 2.23 s, peak 1536 MB, disk read 1 MB, GPU 58->58 C  | elapsed 23 min, ETA 6 min
+[385/484] chamoli_2m gpu_roughness roughness  cold rep1: 2.89 s, peak 1540 MB, disk read 636 MB, GPU 58->58 C  | elapsed 23 min, ETA 6 min
+[386/484] chamoli_2m gpu_roughness roughness  cold rep2: 2.92 s, peak 1536 MB, disk read 621 MB, GPU 58->58 C  | elapsed 23 min, ETA 6 min
+[387/484] chamoli_2m gpu_roughness roughness  cold rep3: 2.90 s, peak 1535 MB, disk read 631 MB, GPU 58->57 C  | elapsed 23 min, ETA 6 min
+[388/484] chamoli_2m gpu_roughness roughness  cold rep4: 2.89 s, peak 1552 MB, disk read 622 MB, GPU 57->57 C  | elapsed 23 min, ETA 6 min
+[389/484] chamoli_2m gpu_roughness roughness  cold rep5: 2.99 s, peak 1540 MB, disk read 625 MB, GPU 57->57 C  | elapsed 23 min, ETA 6 min
+[390/484] chamoli_2m gpu_roughness roughness  warm rep0: 2.19 s, peak 1545 MB, disk read 4 MB, GPU 57->57 C  | elapsed 23 min, ETA 6 min
+[391/484] chamoli_2m gpu_roughness roughness  warm rep1: 2.21 s, peak 1589 MB, disk read 0 MB, GPU 57->57 C  | elapsed 23 min, ETA 6 min
+[392/484] chamoli_2m gpu_roughness roughness  warm rep2: 2.17 s, peak 1554 MB, disk read 1 MB, GPU 57->58 C  | elapsed 24 min, ETA 6 min
+[393/484] chamoli_2m gpu_roughness roughness  warm rep3: 2.20 s, peak 1551 MB, disk read 0 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[394/484] chamoli_2m gpu_roughness roughness  warm rep4: 2.21 s, peak 1570 MB, disk read 163 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[395/484] chamoli_2m gpu_roughness roughness  warm rep5: 2.23 s, peak 1561 MB, disk read 0 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[396/484] chamoli_2m gpu_window_1024 slope Horn cold rep1: 3.22 s, peak 1279 MB, disk read 620 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[397/484] chamoli_2m gpu_window_1024 slope Horn cold rep2: 3.12 s, peak 1283 MB, disk read 628 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[398/484] chamoli_2m gpu_window_1024 slope Horn cold rep3: 3.13 s, peak 1289 MB, disk read 632 MB, GPU 58->57 C  | elapsed 24 min, ETA 5 min
+[399/484] chamoli_2m gpu_window_1024 slope Horn warm rep0: 2.52 s, peak 1281 MB, disk read 13 MB, GPU 57->58 C  | elapsed 24 min, ETA 5 min
+[400/484] chamoli_2m gpu_window_1024 slope Horn warm rep1: 2.38 s, peak 1284 MB, disk read 0 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[401/484] chamoli_2m gpu_window_1024 slope Horn warm rep2: 2.40 s, peak 1287 MB, disk read 0 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[402/484] chamoli_2m gpu_window_1024 slope Horn warm rep3: 2.47 s, peak 1283 MB, disk read 0 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[403/484] chamoli_2m gpu_window_4096 slope Horn cold rep1: 3.08 s, peak 2571 MB, disk read 630 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[404/484] chamoli_2m gpu_window_4096 slope Horn cold rep2: 3.10 s, peak 2602 MB, disk read 646 MB, GPU 58->57 C  | elapsed 24 min, ETA 5 min
+[405/484] chamoli_2m gpu_window_4096 slope Horn cold rep3: 3.16 s, peak 2646 MB, disk read 629 MB, GPU 57->57 C  | elapsed 24 min, ETA 5 min
+[406/484] chamoli_2m gpu_window_4096 slope Horn warm rep0: 2.37 s, peak 2587 MB, disk read 1 MB, GPU 57->58 C  | elapsed 24 min, ETA 5 min
+[407/484] chamoli_2m gpu_window_4096 slope Horn warm rep1: 2.37 s, peak 2558 MB, disk read 18 MB, GPU 58->58 C  | elapsed 24 min, ETA 5 min
+[408/484] chamoli_2m gpu_window_4096 slope Horn warm rep2: 2.34 s, peak 2592 MB, disk read 0 MB, GPU 58->58 C  | elapsed 25 min, ETA 5 min
+[409/484] chamoli_2m gpu_window_4096 slope Horn warm rep3: 2.33 s, peak 2566 MB, disk read 0 MB, GPU 58->58 C  | elapsed 25 min, ETA 5 min
+[410/484] chamoli_2m gpu_window_8192 slope Horn cold rep1: 3.67 s, peak 4027 MB, disk read 631 MB, GPU 58->58 C  | elapsed 25 min, ETA 4 min
+[411/484] chamoli_2m gpu_window_8192 slope Horn cold rep2: 3.62 s, peak 4028 MB, disk read 645 MB, GPU 58->57 C  | elapsed 25 min, ETA 4 min
+[412/484] chamoli_2m gpu_window_8192 slope Horn cold rep3: 3.63 s, peak 4027 MB, disk read 637 MB, GPU 57->57 C  | elapsed 25 min, ETA 4 min
+[413/484] chamoli_2m gpu_window_8192 slope Horn warm rep0: 2.86 s, peak 4028 MB, disk read 0 MB, GPU 57->57 C  | elapsed 25 min, ETA 4 min
+[414/484] chamoli_2m gpu_window_8192 slope Horn warm rep1: 3.00 s, peak 4219 MB, disk read 13 MB, GPU 58->58 C  | elapsed 25 min, ETA 4 min
+[415/484] chamoli_2m gpu_window_8192 slope Horn warm rep2: 2.90 s, peak 4027 MB, disk read 0 MB, GPU 58->58 C  | elapsed 25 min, ETA 4 min
+[416/484] chamoli_2m gpu_window_8192 slope Horn warm rep3: 2.98 s, peak 4219 MB, disk read 0 MB, GPU 58->58 C  | elapsed 25 min, ETA 4 min
+[417/484] tile571_2m_cubic gpu_cupy_slope slope Horn cold rep1: 17.91 s, peak 1587 MB, disk read 3797 MB, GPU 58->61 C  | elapsed 25 min, ETA 4 min
+[418/484] tile571_2m_cubic gpu_cupy_slope slope Horn cold rep2: 17.99 s, peak 1594 MB, disk read 3951 MB, GPU 61->62 C  | elapsed 26 min, ETA 4 min
+[419/484] tile571_2m_cubic gpu_cupy_slope slope Horn cold rep3: 17.52 s, peak 1598 MB, disk read 4182 MB, GPU 61->62 C  | elapsed 26 min, ETA 4 min
+[420/484] tile571_2m_cubic gpu_cupy_slope slope Horn warm rep1: 17.02 s, peak 1587 MB, disk read 3637 MB, GPU 62->63 C  | elapsed 26 min, ETA 4 min
+[421/484] tile571_2m_cubic gpu_pageable_slope slope Horn cold rep1: 12.86 s, peak 1509 MB, disk read 3799 MB, GPU 62->59 C  | elapsed 27 min, ETA 4 min
+[422/484] tile571_2m_cubic gpu_pageable_slope slope Horn cold rep2: 12.73 s, peak 1503 MB, disk read 3791 MB, GPU 59->59 C  | elapsed 27 min, ETA 4 min
+[423/484] tile571_2m_cubic gpu_pageable_slope slope Horn cold rep3: 13.56 s, peak 1504 MB, disk read 4386 MB, GPU 58->59 C  | elapsed 27 min, ETA 4 min
+[424/484] tile571_2m_cubic gpu_pageable_slope slope Horn warm rep1: 12.57 s, peak 1508 MB, disk read 3650 MB, GPU 59->60 C  | elapsed 27 min, ETA 4 min
+[425/484] tile571_2m_cubic gpu_pinned_slope slope Horn cold rep1: 12.12 s, peak 1572 MB, disk read 3901 MB, GPU 60->60 C  | elapsed 28 min, ETA 4 min
+[426/484] tile571_2m_cubic gpu_pinned_slope slope Horn cold rep2: 11.77 s, peak 1570 MB, disk read 3789 MB, GPU 59->59 C  | elapsed 28 min, ETA 4 min
+[427/484] tile571_2m_cubic gpu_pinned_slope slope Horn cold rep3: 12.20 s, peak 1570 MB, disk read 4154 MB, GPU 59->59 C  | elapsed 28 min, ETA 4 min
+[428/484] tile571_2m_cubic gpu_pinned_slope slope Horn warm rep1: 11.11 s, peak 1574 MB, disk read 3605 MB, GPU 59->60 C  | elapsed 28 min, ETA 4 min
+[429/484] tile571_2m_cubic gpu_slope slope Horn cold rep1: 11.88 s, peak 1623 MB, disk read 3807 MB, GPU 60->59 C  | elapsed 29 min, ETA 4 min
+[430/484] tile571_2m_cubic gpu_slope slope Horn cold rep2: 11.82 s, peak 1620 MB, disk read 3874 MB, GPU 59->60 C  | elapsed 29 min, ETA 4 min
+[431/484] tile571_2m_cubic gpu_slope slope Horn cold rep3: 11.85 s, peak 1620 MB, disk read 3800 MB, GPU 59->59 C  | elapsed 29 min, ETA 4 min
+[432/484] tile571_2m_cubic gpu_slope slope Horn warm rep1: 11.33 s, peak 1622 MB, disk read 3676 MB, GPU 59->61 C  | elapsed 29 min, ETA 4 min
+[433/484] tile571_2m_cubic gpu_slope_fp64 slope Horn cold rep1: 11.75 s, peak 1620 MB, disk read 3793 MB, GPU 60->62 C  | elapsed 29 min, ETA 3 min
+[434/484] tile571_2m_cubic gpu_slope_fp64 slope Horn cold rep2: 11.89 s, peak 1614 MB, disk read 3901 MB, GPU 61->61 C  | elapsed 30 min, ETA 3 min
+[435/484] tile571_2m_cubic gpu_slope_fp64 slope Horn cold rep3: 11.72 s, peak 1617 MB, disk read 3797 MB, GPU 60->62 C  | elapsed 30 min, ETA 3 min
+[436/484] tile571_2m_cubic gpu_slope_fp64 slope Horn warm rep1: 11.46 s, peak 1620 MB, disk read 3657 MB, GPU 62->61 C  | elapsed 30 min, ETA 3 min
+[437/484] tile571_2m_cubic gpu_slope_nowrite slope Horn cold rep1: 10.20 s, peak 1491 MB, disk read 3900 MB, GPU 61->60 C  | elapsed 30 min, ETA 3 min
+[438/484] tile571_2m_cubic gpu_slope_nowrite slope Horn cold rep2: 10.14 s, peak 1498 MB, disk read 3783 MB, GPU 60->60 C  | elapsed 31 min, ETA 3 min
+[439/484] tile571_2m_cubic gpu_slope_nowrite slope Horn cold rep3: 10.15 s, peak 1492 MB, disk read 3750 MB, GPU 60->59 C  | elapsed 31 min, ETA 3 min
+[440/484] tile571_2m_cubic gpu_slope_nowrite slope Horn warm rep1: 9.34 s, peak 1492 MB, disk read 19 MB, GPU 59->59 C  | elapsed 31 min, ETA 3 min
+[441/484] tile571_2m_cubic gpu_slope_r8 slope Horn cold rep1: 11.98 s, peak 1785 MB, disk read 3930 MB, GPU 59->59 C  | elapsed 31 min, ETA 3 min
+[442/484] tile571_2m_cubic gpu_slope_r8 slope Horn cold rep2: 11.87 s, peak 1780 MB, disk read 3800 MB, GPU 59->60 C  | elapsed 31 min, ETA 3 min
+[443/484] tile571_2m_cubic gpu_slope_r8 slope Horn cold rep3: 11.93 s, peak 1786 MB, disk read 3910 MB, GPU 59->59 C  | elapsed 32 min, ETA 3 min
+[444/484] tile571_2m_cubic gpu_slope_r8 slope Horn warm rep1: 11.36 s, peak 1775 MB, disk read 3639 MB, GPU 59->60 C  | elapsed 32 min, ETA 3 min
+[445/484] tile571_2m_cubic gpu_3prod slope+aspect+hillshade Horn cold rep1: 22.05 s, peak 1788 MB, disk read 3883 MB, GPU 59->58 C  | elapsed 32 min, ETA 3 min
+[446/484] tile571_2m_cubic gpu_3prod slope+aspect+hillshade Horn cold rep2: 22.18 s, peak 1792 MB, disk read 3840 MB, GPU 57->57 C  | elapsed 33 min, ETA 3 min
+[447/484] tile571_2m_cubic gpu_3prod slope+aspect+hillshade Horn cold rep3: 22.49 s, peak 1808 MB, disk read 3846 MB, GPU 57->57 C  | elapsed 33 min, ETA 3 min
+[448/484] tile571_2m_cubic gpu_3prod slope+aspect+hillshade Horn warm rep1: 20.96 s, peak 1795 MB, disk read 3650 MB, GPU 57->57 C  | elapsed 33 min, ETA 3 min
+[449/484] tile571_2m_cubic gpu_window_1024 slope Horn cold rep1: 14.65 s, peak 1300 MB, disk read 4134 MB, GPU 57->58 C  | elapsed 34 min, ETA 3 min
+[450/484] tile571_2m_cubic gpu_window_1024 slope Horn cold rep2: 14.74 s, peak 1299 MB, disk read 3843 MB, GPU 58->59 C  | elapsed 34 min, ETA 3 min
+[451/484] tile571_2m_cubic gpu_window_1024 slope Horn cold rep3: 14.42 s, peak 1298 MB, disk read 3824 MB, GPU 59->59 C  | elapsed 34 min, ETA 3 min
+[452/484] tile571_2m_cubic gpu_window_1024 slope Horn warm rep0: 13.94 s, peak 1291 MB, disk read 3679 MB, GPU 58->59 C  | elapsed 35 min, ETA 2 min
+[453/484] tile571_2m_cubic gpu_window_1024 slope Horn warm rep1: 13.66 s, peak 1297 MB, disk read 3637 MB, GPU 59->59 C  | elapsed 35 min, ETA 2 min
+[454/484] tile571_2m_cubic gpu_window_1024 slope Horn warm rep2: 13.81 s, peak 1298 MB, disk read 3656 MB, GPU 59->59 C  | elapsed 35 min, ETA 2 min
+[455/484] tile571_2m_cubic gpu_window_1024 slope Horn warm rep3: 13.98 s, peak 1297 MB, disk read 3641 MB, GPU 58->59 C  | elapsed 35 min, ETA 2 min
+[456/484] tile571_2m_cubic gpu_window_4096 slope Horn cold rep1: 11.36 s, peak 2902 MB, disk read 3810 MB, GPU 59->59 C  | elapsed 36 min, ETA 2 min
+[457/484] tile571_2m_cubic gpu_window_4096 slope Horn cold rep2: 11.37 s, peak 2903 MB, disk read 4021 MB, GPU 59->60 C  | elapsed 36 min, ETA 2 min
+[458/484] tile571_2m_cubic gpu_window_4096 slope Horn cold rep3: 11.43 s, peak 2895 MB, disk read 3826 MB, GPU 60->59 C  | elapsed 36 min, ETA 2 min
+[459/484] tile571_2m_cubic gpu_window_4096 slope Horn warm rep0: 11.37 s, peak 2896 MB, disk read 4137 MB, GPU 59->60 C  | elapsed 36 min, ETA 2 min
+[460/484] tile571_2m_cubic gpu_window_4096 slope Horn warm rep1: 11.06 s, peak 2882 MB, disk read 3668 MB, GPU 60->59 C  | elapsed 36 min, ETA 2 min
+[461/484] tile571_2m_cubic gpu_window_4096 slope Horn warm rep2: 11.08 s, peak 2899 MB, disk read 3740 MB, GPU 59->59 C  | elapsed 37 min, ETA 2 min
+[462/484] tile571_2m_cubic gpu_window_4096 slope Horn warm rep3: 11.13 s, peak 2900 MB, disk read 3702 MB, GPU 59->59 C  | elapsed 37 min, ETA 2 min
+[463/484] tile571_2m_cubic gpu_window_8192 slope Horn cold rep1: 14.07 s, peak 7575 MB, disk read 4647 MB, GPU 59->58 C  | elapsed 37 min, ETA 2 min
+[464/484] tile571_2m_cubic gpu_window_8192 slope Horn cold rep2: 13.03 s, peak 7681 MB, disk read 4017 MB, GPU 58->58 C  | elapsed 37 min, ETA 2 min
+[465/484] tile571_2m_cubic gpu_window_8192 slope Horn cold rep3: 13.43 s, peak 7633 MB, disk read 4039 MB, GPU 58->59 C  | elapsed 38 min, ETA 2 min
+[466/484] tile571_2m_cubic gpu_window_8192 slope Horn warm rep0: 12.82 s, peak 7717 MB, disk read 4103 MB, GPU 58->58 C  | elapsed 38 min, ETA 1 min
+[467/484] tile571_2m_cubic gpu_window_8192 slope Horn warm rep1: 12.95 s, peak 7771 MB, disk read 4179 MB, GPU 58->58 C  | elapsed 38 min, ETA 1 min
+[468/484] tile571_2m_cubic gpu_window_8192 slope Horn warm rep2: 13.16 s, peak 7647 MB, disk read 4345 MB, GPU 58->58 C  | elapsed 38 min, ETA 1 min
+[469/484] tile571_2m_cubic gpu_window_8192 slope Horn warm rep3: 12.76 s, peak 7592 MB, disk read 3829 MB, GPU 58->59 C  | elapsed 38 min, ETA 1 min
+[470/484] tile571_1m_cubic gpu_slope slope Horn cold rep1: 43.30 s, peak 1622 MB, disk read 12570 MB, GPU 58->58 C  | elapsed 39 min, ETA 1 min
+[471/484] tile571_1m_cubic gpu_slope slope Horn cold rep2: 43.81 s, peak 1622 MB, disk read 12559 MB, GPU 58->60 C  | elapsed 40 min, ETA 1 min
+[472/484] tile571_1m_cubic gpu_slope slope Horn cold rep3: 43.61 s, peak 1621 MB, disk read 12840 MB, GPU 59->58 C  | elapsed 41 min, ETA 1 min
+[473/484] tile571_1m_cubic gpu_slope slope Horn warm rep1: 43.83 s, peak 1621 MB, disk read 12154 MB, GPU 58->59 C  | elapsed 42 min, ETA 1 min
+[474/484] tile571_1m_cubic gpu_slope_nowrite slope Horn cold rep1: 33.48 s, peak 1494 MB, disk read 12725 MB, GPU 58->59 C  | elapsed 42 min, ETA 1 min
+[475/484] tile571_1m_cubic gpu_slope_nowrite slope Horn cold rep2: 33.64 s, peak 1502 MB, disk read 12566 MB, GPU 59->59 C  | elapsed 43 min, ETA 1 min
+[476/484] tile571_1m_cubic gpu_slope_nowrite slope Horn cold rep3: 33.39 s, peak 1497 MB, disk read 12182 MB, GPU 59->58 C  | elapsed 43 min, ETA 1 min
+[477/484] tile571_1m_cubic gpu_slope_nowrite slope Horn warm rep1: 33.86 s, peak 1497 MB, disk read 12332 MB, GPU 58->59 C  | elapsed 44 min, ETA 1 min
+[478/484] tile571_1m_cubic gpu_slope_r8 slope Horn cold rep1: 43.41 s, peak 1797 MB, disk read 12478 MB, GPU 59->58 C  | elapsed 45 min, ETA 1 min
+[479/484] tile571_1m_cubic gpu_slope_r8 slope Horn cold rep2: 43.97 s, peak 1819 MB, disk read 12595 MB, GPU 58->58 C  | elapsed 46 min, ETA 0 min
+[480/484] tile571_1m_cubic gpu_slope_r8 slope Horn cold rep3: 44.59 s, peak 1808 MB, disk read 14063 MB, GPU 58->58 C  | elapsed 46 min, ETA 0 min
+[481/484] tile571_1m_cubic gpu_slope_r8 slope Horn warm rep1: 42.61 s, peak 1813 MB, disk read 12490 MB, GPU 58->59 C  | elapsed 47 min, ETA 0 min
+[482/484] tile571_1m_cubic gpu_3prod slope+aspect+hillshade Horn cold rep1: 82.63 s, peak 1824 MB, disk read 12984 MB, GPU 58->56 C  | elapsed 49 min, ETA 0 min
+[483/484] tile571_1m_cubic gpu_3prod slope+aspect+hillshade Horn warm rep1: 81.36 s, peak 1817 MB, disk read 12106 MB, GPU 56->55 C  | elapsed 50 min, ETA 0 min
+[484/484] tile571_1m_cubic gpu_pinned_slope slope Horn cold rep1: 43.51 s, peak 1577 MB, disk read 12214 MB, GPU 55->57 C  | elapsed 51 min, ETA 0 min
+[05:23:06] e4_gpu finished, exit code 0

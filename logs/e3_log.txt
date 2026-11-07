@@ -1,0 +1,520 @@
+﻿[02:06:28] starting e3_cpu
+263 runs planned, 0 already in C:\Users\swayam goyal\Desktop\spatial info\Geoguessers\results\runs.csv, 263 to run
+pinned to [0, 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]; power: Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)
+[1/263] tile571_8m engine_all_slope slope Horn cold rep1: 2.68 s, peak 1326 MB, disk read 392 MB  | elapsed 0 min, ETA 23 min
+[2/263] tile571_8m engine_all_slope slope Horn cold rep2: 2.71 s, peak 1298 MB, disk read 376 MB  | elapsed 0 min, ETA 22 min
+[3/263] tile571_8m engine_all_slope slope Horn cold rep3: 2.57 s, peak 1258 MB, disk read 378 MB  | elapsed 0 min, ETA 21 min
+[4/263] tile571_8m engine_all_slope slope Horn cold rep4: 2.57 s, peak 1278 MB, disk read 371 MB  | elapsed 0 min, ETA 21 min
+[5/263] tile571_8m engine_all_slope slope Horn cold rep5: 2.75 s, peak 1254 MB, disk read 374 MB  | elapsed 0 min, ETA 21 min
+[6/263] tile571_8m engine_all_slope slope Horn warm rep0: 2.17 s, peak 1254 MB, disk read 0 MB  | elapsed 0 min, ETA 19 min
+[7/263] tile571_8m engine_all_slope slope Horn warm rep1: 2.10 s, peak 1240 MB, disk read 5 MB  | elapsed 0 min, ETA 17 min
+[8/263] tile571_8m engine_all_slope slope Horn warm rep2: 2.37 s, peak 1295 MB, disk read 126 MB  | elapsed 1 min, ETA 17 min
+[9/263] tile571_8m engine_all_slope slope Horn warm rep3: 2.28 s, peak 1292 MB, disk read 93 MB  | elapsed 1 min, ETA 16 min
+[10/263] tile571_8m engine_all_slope slope Horn warm rep4: 2.11 s, peak 1287 MB, disk read 0 MB  | elapsed 1 min, ETA 15 min
+[11/263] tile571_8m engine_all_slope slope Horn warm rep5: 2.39 s, peak 1335 MB, disk read 29 MB  | elapsed 1 min, ETA 15 min
+[12/263] tile571_8m engine_all_aspect aspect Horn cold rep1: 3.01 s, peak 1296 MB, disk read 413 MB  | elapsed 1 min, ETA 15 min
+[13/263] tile571_8m engine_all_aspect aspect Horn cold rep2: 3.20 s, peak 1263 MB, disk read 388 MB  | elapsed 1 min, ETA 16 min
+[14/263] tile571_8m engine_all_aspect aspect Horn cold rep3: 2.90 s, peak 1282 MB, disk read 429 MB  | elapsed 1 min, ETA 16 min
+[15/263] tile571_8m engine_all_aspect aspect Horn cold rep4: 2.98 s, peak 1306 MB, disk read 382 MB  | elapsed 1 min, ETA 17 min
+[16/263] tile571_8m engine_all_aspect aspect Horn cold rep5: 2.85 s, peak 1269 MB, disk read 385 MB  | elapsed 1 min, ETA 17 min
+[17/263] tile571_8m engine_all_aspect aspect Horn warm rep0: 2.17 s, peak 1248 MB, disk read 1 MB  | elapsed 1 min, ETA 16 min
+[18/263] tile571_8m engine_all_aspect aspect Horn warm rep1: 2.14 s, peak 1272 MB, disk read 0 MB  | elapsed 1 min, ETA 16 min
+[19/263] tile571_8m engine_all_aspect aspect Horn warm rep2: 2.21 s, peak 1304 MB, disk read 2 MB  | elapsed 1 min, ETA 15 min
+[20/263] tile571_8m engine_all_aspect aspect Horn warm rep3: 2.19 s, peak 1288 MB, disk read 1 MB  | elapsed 1 min, ETA 15 min
+[21/263] tile571_8m engine_all_aspect aspect Horn warm rep4: 2.19 s, peak 1273 MB, disk read 1 MB  | elapsed 1 min, ETA 15 min
+[22/263] tile571_8m engine_all_aspect aspect Horn warm rep5: 2.19 s, peak 1288 MB, disk read 37 MB  | elapsed 1 min, ETA 14 min
+[23/263] tile571_8m engine_all_hillshade hillshade Horn cold rep1: 2.41 s, peak 1182 MB, disk read 384 MB  | elapsed 1 min, ETA 15 min
+[24/263] tile571_8m engine_all_hillshade hillshade Horn cold rep2: 2.38 s, peak 1198 MB, disk read 374 MB  | elapsed 1 min, ETA 15 min
+[25/263] tile571_8m engine_all_hillshade hillshade Horn cold rep3: 2.30 s, peak 1179 MB, disk read 355 MB  | elapsed 2 min, ETA 15 min
+[26/263] tile571_8m engine_all_hillshade hillshade Horn cold rep4: 2.23 s, peak 1168 MB, disk read 338 MB  | elapsed 2 min, ETA 15 min
+[27/263] tile571_8m engine_all_hillshade hillshade Horn cold rep5: 2.36 s, peak 1198 MB, disk read 334 MB  | elapsed 2 min, ETA 15 min
+[28/263] tile571_8m engine_all_hillshade hillshade Horn warm rep0: 1.96 s, peak 1193 MB, disk read 0 MB  | elapsed 2 min, ETA 14 min
+[29/263] tile571_8m engine_all_hillshade hillshade Horn warm rep1: 2.06 s, peak 1179 MB, disk read 0 MB  | elapsed 2 min, ETA 14 min
+[30/263] tile571_8m engine_all_hillshade hillshade Horn warm rep2: 2.33 s, peak 1198 MB, disk read 36 MB  | elapsed 2 min, ETA 14 min
+[31/263] tile571_8m engine_all_hillshade hillshade Horn warm rep3: 2.02 s, peak 1200 MB, disk read 10 MB  | elapsed 2 min, ETA 14 min
+[32/263] tile571_8m engine_all_hillshade hillshade Horn warm rep4: 2.09 s, peak 1206 MB, disk read 4 MB  | elapsed 2 min, ETA 13 min
+[33/263] tile571_8m engine_all_hillshade hillshade Horn warm rep5: 2.08 s, peak 1186 MB, disk read 130 MB  | elapsed 2 min, ETA 13 min
+[34/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn cold rep1: 3.66 s, peak 1462 MB, disk read 337 MB  | elapsed 2 min, ETA 13 min
+[35/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn cold rep2: 3.47 s, peak 1464 MB, disk read 334 MB  | elapsed 2 min, ETA 14 min
+[36/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn cold rep3: 3.70 s, peak 1472 MB, disk read 332 MB  | elapsed 2 min, ETA 14 min
+[37/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn cold rep4: 3.71 s, peak 1467 MB, disk read 334 MB  | elapsed 2 min, ETA 14 min
+[38/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn cold rep5: 3.53 s, peak 1470 MB, disk read 334 MB  | elapsed 2 min, ETA 14 min
+[39/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn warm rep0: 3.29 s, peak 1465 MB, disk read 1 MB  | elapsed 2 min, ETA 14 min
+[40/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn warm rep1: 3.31 s, peak 1462 MB, disk read 10 MB  | elapsed 3 min, ETA 14 min
+[41/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn warm rep2: 3.33 s, peak 1477 MB, disk read 2 MB  | elapsed 3 min, ETA 14 min
+[42/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn warm rep3: 3.40 s, peak 1462 MB, disk read 0 MB  | elapsed 3 min, ETA 14 min
+[43/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn warm rep4: 3.31 s, peak 1462 MB, disk read 1 MB  | elapsed 3 min, ETA 14 min
+[44/263] tile571_8m engine_all_3prod slope+aspect+hillshade Horn warm rep5: 3.53 s, peak 1473 MB, disk read 2 MB  | elapsed 3 min, ETA 14 min
+[45/263] tile571_8m engine_perf_slope slope Horn cold rep1: 2.29 s, peak 1219 MB, disk read 330 MB  | elapsed 3 min, ETA 14 min
+[46/263] tile571_8m engine_perf_slope slope Horn cold rep2: 2.24 s, peak 1226 MB, disk read 328 MB  | elapsed 3 min, ETA 14 min
+[47/263] tile571_8m engine_perf_slope slope Horn cold rep3: 2.32 s, peak 1229 MB, disk read 437 MB  | elapsed 3 min, ETA 14 min
+[48/263] tile571_8m engine_perf_slope slope Horn cold rep4: 2.17 s, peak 1219 MB, disk read 328 MB  | elapsed 3 min, ETA 14 min
+[49/263] tile571_8m engine_perf_slope slope Horn cold rep5: 2.15 s, peak 1213 MB, disk read 332 MB  | elapsed 3 min, ETA 14 min
+[50/263] tile571_8m engine_perf_slope slope Horn warm rep0: 1.99 s, peak 1211 MB, disk read 1 MB  | elapsed 3 min, ETA 13 min
+[51/263] tile571_8m engine_perf_slope slope Horn warm rep1: 1.92 s, peak 1237 MB, disk read 1 MB  | elapsed 3 min, ETA 13 min
+[52/263] tile571_8m engine_perf_slope slope Horn warm rep2: 1.93 s, peak 1226 MB, disk read 1 MB  | elapsed 3 min, ETA 13 min
+[53/263] tile571_8m engine_perf_slope slope Horn warm rep3: 2.01 s, peak 1227 MB, disk read 0 MB  | elapsed 3 min, ETA 13 min
+[54/263] tile571_8m engine_perf_slope slope Horn warm rep4: 1.94 s, peak 1242 MB, disk read 0 MB  | elapsed 3 min, ETA 13 min
+[55/263] tile571_8m engine_perf_slope slope Horn warm rep5: 1.99 s, peak 1222 MB, disk read 0 MB  | elapsed 3 min, ETA 12 min
+[56/263] tile571_8m engine_all_slope_nowrite slope Horn cold rep1: 2.14 s, peak 1212 MB, disk read 329 MB  | elapsed 3 min, ETA 12 min
+[57/263] tile571_8m engine_all_slope_nowrite slope Horn cold rep2: 2.18 s, peak 1182 MB, disk read 333 MB  | elapsed 3 min, ETA 12 min
+[58/263] tile571_8m engine_all_slope_nowrite slope Horn cold rep3: 2.11 s, peak 1187 MB, disk read 330 MB  | elapsed 4 min, ETA 12 min
+[59/263] tile571_8m engine_all_slope_nowrite slope Horn cold rep4: 2.20 s, peak 1245 MB, disk read 329 MB  | elapsed 4 min, ETA 12 min
+[60/263] tile571_8m engine_all_slope_nowrite slope Horn cold rep5: 2.20 s, peak 1226 MB, disk read 331 MB  | elapsed 4 min, ETA 12 min
+[61/263] tile571_8m engine_all_slope_nowrite slope Horn warm rep0: 1.92 s, peak 1225 MB, disk read 0 MB  | elapsed 4 min, ETA 12 min
+[62/263] tile571_8m engine_all_slope_nowrite slope Horn warm rep1: 1.97 s, peak 1223 MB, disk read 1 MB  | elapsed 4 min, ETA 12 min
+[63/263] tile571_8m engine_all_slope_nowrite slope Horn warm rep2: 1.94 s, peak 1234 MB, disk read 0 MB  | elapsed 4 min, ETA 12 min
+[64/263] tile571_8m engine_all_slope_nowrite slope Horn warm rep3: 1.94 s, peak 1210 MB, disk read 0 MB  | elapsed 4 min, ETA 12 min
+[65/263] tile571_8m engine_all_slope_nowrite slope Horn warm rep4: 1.92 s, peak 1202 MB, disk read 0 MB  | elapsed 4 min, ETA 12 min
+[66/263] tile571_8m engine_all_slope_nowrite slope Horn warm rep5: 1.96 s, peak 1208 MB, disk read 0 MB  | elapsed 4 min, ETA 12 min
+[67/263] tile571_8m engine_all_slope_zstd1 slope Horn cold rep1: 2.70 s, peak 1317 MB, disk read 334 MB  | elapsed 4 min, ETA 12 min
+[68/263] tile571_8m engine_all_slope_zstd1 slope Horn cold rep2: 2.66 s, peak 1324 MB, disk read 328 MB  | elapsed 4 min, ETA 12 min
+[69/263] tile571_8m engine_all_slope_zstd1 slope Horn cold rep3: 2.71 s, peak 1351 MB, disk read 329 MB  | elapsed 4 min, ETA 12 min
+[70/263] tile571_8m engine_all_slope_zstd1 slope Horn cold rep4: 2.70 s, peak 1379 MB, disk read 330 MB  | elapsed 4 min, ETA 12 min
+[71/263] tile571_8m engine_all_slope_zstd1 slope Horn cold rep5: 2.79 s, peak 1313 MB, disk read 329 MB  | elapsed 4 min, ETA 12 min
+[72/263] tile571_8m engine_all_slope_zstd1 slope Horn warm rep0: 2.27 s, peak 1344 MB, disk read 0 MB  | elapsed 4 min, ETA 11 min
+[73/263] tile571_8m engine_all_slope_zstd1 slope Horn warm rep1: 2.44 s, peak 1312 MB, disk read 0 MB  | elapsed 4 min, ETA 11 min
+[74/263] tile571_8m engine_all_slope_zstd1 slope Horn warm rep2: 2.33 s, peak 1311 MB, disk read 0 MB  | elapsed 4 min, ETA 11 min
+[75/263] tile571_8m engine_all_slope_zstd1 slope Horn warm rep3: 2.40 s, peak 1331 MB, disk read 1 MB  | elapsed 4 min, ETA 11 min
+[76/263] tile571_8m engine_all_slope_zstd1 slope Horn warm rep4: 2.39 s, peak 1368 MB, disk read 3 MB  | elapsed 4 min, ETA 11 min
+[77/263] tile571_8m engine_all_slope_zstd1 slope Horn warm rep5: 2.47 s, peak 1353 MB, disk read 10 MB  | elapsed 4 min, ETA 11 min
+[78/263] tile571_8m numpy_tiled_slope slope Horn cold rep1: 10.64 s, peak 1292 MB, disk read 323 MB  | elapsed 5 min, ETA 11 min
+[79/263] tile571_8m numpy_tiled_slope slope Horn cold rep2: 10.45 s, peak 1290 MB, disk read 358 MB  | elapsed 5 min, ETA 11 min
+[80/263] tile571_8m numpy_tiled_slope slope Horn cold rep3: 10.43 s, peak 1288 MB, disk read 326 MB  | elapsed 5 min, ETA 12 min
+[81/263] tile571_8m numpy_tiled_slope slope Horn warm rep1: 10.69 s, peak 1293 MB, disk read 6 MB  | elapsed 5 min, ETA 12 min
+[82/263] tile571_8m naive_slope slope Horn cold rep1: 7.80 s, peak 3948 MB, disk read 354 MB  | elapsed 5 min, ETA 12 min
+[83/263] tile571_8m naive_slope slope Horn cold rep2: 7.78 s, peak 3948 MB, disk read 335 MB  | elapsed 6 min, ETA 12 min
+[84/263] tile571_8m naive_slope slope Horn cold rep3: 7.71 s, peak 3948 MB, disk read 335 MB  | elapsed 6 min, ETA 12 min
+[85/263] tile571_8m naive_slope slope Horn warm rep1: 7.63 s, peak 3947 MB, disk read 3 MB  | elapsed 6 min, ETA 12 min
+[86/263] tile571_8m threads_1 slope Horn warm rep0: 3.08 s, peak 1208 MB, disk read 58 MB  | elapsed 6 min, ETA 12 min
+[87/263] tile571_8m threads_1 slope Horn warm rep1: 3.00 s, peak 1211 MB, disk read 1 MB  | elapsed 6 min, ETA 12 min
+[88/263] tile571_8m threads_1 slope Horn warm rep2: 3.02 s, peak 1205 MB, disk read 1 MB  | elapsed 6 min, ETA 12 min
+[89/263] tile571_8m threads_1 slope Horn warm rep3: 3.20 s, peak 1210 MB, disk read 5 MB  | elapsed 6 min, ETA 12 min
+[90/263] tile571_8m threads_2 slope Horn warm rep0: 2.38 s, peak 1228 MB, disk read 0 MB  | elapsed 6 min, ETA 12 min
+[91/263] tile571_8m threads_2 slope Horn warm rep1: 2.40 s, peak 1211 MB, disk read 0 MB  | elapsed 6 min, ETA 12 min
+[92/263] tile571_8m threads_2 slope Horn warm rep2: 2.25 s, peak 1218 MB, disk read 1 MB  | elapsed 6 min, ETA 12 min
+[93/263] tile571_8m threads_2 slope Horn warm rep3: 2.33 s, peak 1218 MB, disk read 1 MB  | elapsed 6 min, ETA 12 min
+[94/263] tile571_8m threads_4 slope Horn warm rep0: 2.11 s, peak 1245 MB, disk read 0 MB  | elapsed 6 min, ETA 11 min
+[95/263] tile571_8m threads_4 slope Horn warm rep1: 2.03 s, peak 1239 MB, disk read 0 MB  | elapsed 6 min, ETA 11 min
+[96/263] tile571_8m threads_4 slope Horn warm rep2: 2.05 s, peak 1235 MB, disk read 1 MB  | elapsed 6 min, ETA 11 min
+[97/263] tile571_8m threads_4 slope Horn warm rep3: 2.07 s, peak 1230 MB, disk read 0 MB  | elapsed 6 min, ETA 11 min
+[98/263] tile571_8m threads_8 slope Horn warm rep0: 1.96 s, peak 1228 MB, disk read 1 MB  | elapsed 6 min, ETA 11 min
+[99/263] tile571_8m threads_8 slope Horn warm rep1: 2.02 s, peak 1237 MB, disk read 3 MB  | elapsed 7 min, ETA 11 min
+[100/263] tile571_8m threads_8 slope Horn warm rep2: 2.02 s, peak 1224 MB, disk read 2 MB  | elapsed 7 min, ETA 11 min
+[101/263] tile571_8m threads_8 slope Horn warm rep3: 2.00 s, peak 1234 MB, disk read 0 MB  | elapsed 7 min, ETA 11 min
+[102/263] chamoli_2m engine_all_slope slope Horn cold rep1: 2.81 s, peak 1270 MB, disk read 497 MB  | elapsed 7 min, ETA 11 min
+[103/263] chamoli_2m engine_all_slope slope Horn cold rep2: 2.88 s, peak 1290 MB, disk read 473 MB  | elapsed 7 min, ETA 10 min
+[104/263] chamoli_2m engine_all_slope slope Horn cold rep3: 2.81 s, peak 1306 MB, disk read 470 MB  | elapsed 7 min, ETA 10 min
+[105/263] chamoli_2m engine_all_slope slope Horn cold rep4: 2.88 s, peak 1291 MB, disk read 471 MB  | elapsed 7 min, ETA 10 min
+[106/263] chamoli_2m engine_all_slope slope Horn cold rep5: 2.84 s, peak 1336 MB, disk read 474 MB  | elapsed 7 min, ETA 10 min
+[107/263] chamoli_2m engine_all_slope slope Horn warm rep0: 2.68 s, peak 1281 MB, disk read 0 MB  | elapsed 7 min, ETA 10 min
+[108/263] chamoli_2m engine_all_slope slope Horn warm rep1: 2.72 s, peak 1321 MB, disk read 4 MB  | elapsed 7 min, ETA 10 min
+[109/263] chamoli_2m engine_all_slope slope Horn warm rep2: 2.73 s, peak 1349 MB, disk read 0 MB  | elapsed 7 min, ETA 10 min
+[110/263] chamoli_2m engine_all_slope slope Horn warm rep3: 2.64 s, peak 1316 MB, disk read 0 MB  | elapsed 7 min, ETA 10 min
+[111/263] chamoli_2m engine_all_slope slope Horn warm rep4: 2.75 s, peak 1321 MB, disk read 0 MB  | elapsed 7 min, ETA 10 min
+[112/263] chamoli_2m engine_all_slope slope Horn warm rep5: 2.72 s, peak 1280 MB, disk read 1 MB  | elapsed 7 min, ETA 10 min
+[113/263] chamoli_2m engine_all_aspect aspect Horn cold rep1: 2.92 s, peak 1290 MB, disk read 471 MB  | elapsed 7 min, ETA 10 min
+[114/263] chamoli_2m engine_all_aspect aspect Horn cold rep2: 2.92 s, peak 1272 MB, disk read 466 MB  | elapsed 7 min, ETA 10 min
+[115/263] chamoli_2m engine_all_aspect aspect Horn cold rep3: 3.03 s, peak 1308 MB, disk read 467 MB  | elapsed 8 min, ETA 10 min
+[116/263] chamoli_2m engine_all_aspect aspect Horn cold rep4: 2.93 s, peak 1261 MB, disk read 468 MB  | elapsed 8 min, ETA 10 min
+[117/263] chamoli_2m engine_all_aspect aspect Horn cold rep5: 2.93 s, peak 1279 MB, disk read 467 MB  | elapsed 8 min, ETA 10 min
+[118/263] chamoli_2m engine_all_aspect aspect Horn warm rep0: 2.79 s, peak 1263 MB, disk read 1 MB  | elapsed 8 min, ETA 10 min
+[119/263] chamoli_2m engine_all_aspect aspect Horn warm rep1: 2.83 s, peak 1269 MB, disk read 0 MB  | elapsed 8 min, ETA 9 min
+[120/263] chamoli_2m engine_all_aspect aspect Horn warm rep2: 2.70 s, peak 1305 MB, disk read 0 MB  | elapsed 8 min, ETA 9 min
+[121/263] chamoli_2m engine_all_aspect aspect Horn warm rep3: 2.75 s, peak 1265 MB, disk read 0 MB  | elapsed 8 min, ETA 9 min
+[122/263] chamoli_2m engine_all_aspect aspect Horn warm rep4: 2.79 s, peak 1264 MB, disk read 19 MB  | elapsed 8 min, ETA 9 min
+[123/263] chamoli_2m engine_all_aspect aspect Horn warm rep5: 2.78 s, peak 1280 MB, disk read 0 MB  | elapsed 8 min, ETA 9 min
+[124/263] chamoli_2m engine_all_hillshade hillshade Horn cold rep1: 2.75 s, peak 1195 MB, disk read 465 MB  | elapsed 8 min, ETA 9 min
+[125/263] chamoli_2m engine_all_hillshade hillshade Horn cold rep2: 2.63 s, peak 1184 MB, disk read 464 MB  | elapsed 8 min, ETA 9 min
+[126/263] chamoli_2m engine_all_hillshade hillshade Horn cold rep3: 2.64 s, peak 1221 MB, disk read 460 MB  | elapsed 8 min, ETA 9 min
+[127/263] chamoli_2m engine_all_hillshade hillshade Horn cold rep4: 2.57 s, peak 1177 MB, disk read 463 MB  | elapsed 8 min, ETA 9 min
+[128/263] chamoli_2m engine_all_hillshade hillshade Horn cold rep5: 2.59 s, peak 1196 MB, disk read 465 MB  | elapsed 8 min, ETA 9 min
+[129/263] chamoli_2m engine_all_hillshade hillshade Horn warm rep0: 2.41 s, peak 1180 MB, disk read 0 MB  | elapsed 8 min, ETA 9 min
+[130/263] chamoli_2m engine_all_hillshade hillshade Horn warm rep1: 2.39 s, peak 1189 MB, disk read 0 MB  | elapsed 8 min, ETA 9 min
+[131/263] chamoli_2m engine_all_hillshade hillshade Horn warm rep2: 2.42 s, peak 1197 MB, disk read 22 MB  | elapsed 9 min, ETA 9 min
+[132/263] chamoli_2m engine_all_hillshade hillshade Horn warm rep3: 2.44 s, peak 1183 MB, disk read 1 MB  | elapsed 9 min, ETA 8 min
+[133/263] chamoli_2m engine_all_hillshade hillshade Horn warm rep4: 2.46 s, peak 1190 MB, disk read 0 MB  | elapsed 9 min, ETA 8 min
+[134/263] chamoli_2m engine_all_hillshade hillshade Horn warm rep5: 2.39 s, peak 1212 MB, disk read 2 MB  | elapsed 9 min, ETA 8 min
+[135/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn cold rep1: 4.87 s, peak 1480 MB, disk read 540 MB  | elapsed 9 min, ETA 8 min
+[136/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn cold rep2: 4.94 s, peak 1478 MB, disk read 487 MB  | elapsed 9 min, ETA 8 min
+[137/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn cold rep3: 4.98 s, peak 1480 MB, disk read 693 MB  | elapsed 9 min, ETA 8 min
+[138/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn cold rep4: 4.90 s, peak 1486 MB, disk read 486 MB  | elapsed 9 min, ETA 8 min
+[139/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn cold rep5: 4.99 s, peak 1481 MB, disk read 487 MB  | elapsed 9 min, ETA 8 min
+[140/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn warm rep0: 4.61 s, peak 1489 MB, disk read 10 MB  | elapsed 9 min, ETA 8 min
+[141/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn warm rep1: 4.49 s, peak 1481 MB, disk read 0 MB  | elapsed 9 min, ETA 8 min
+[142/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn warm rep2: 4.41 s, peak 1480 MB, disk read 10 MB  | elapsed 9 min, ETA 8 min
+[143/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn warm rep3: 4.44 s, peak 1480 MB, disk read 0 MB  | elapsed 10 min, ETA 8 min
+[144/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn warm rep4: 4.40 s, peak 1478 MB, disk read 0 MB  | elapsed 10 min, ETA 8 min
+[145/263] chamoli_2m engine_all_3prod slope+aspect+hillshade Horn warm rep5: 4.51 s, peak 1478 MB, disk read 5 MB  | elapsed 10 min, ETA 8 min
+[146/263] chamoli_2m engine_perf_slope slope Horn cold rep1: 2.69 s, peak 1235 MB, disk read 480 MB  | elapsed 10 min, ETA 8 min
+[147/263] chamoli_2m engine_perf_slope slope Horn cold rep2: 2.70 s, peak 1230 MB, disk read 470 MB  | elapsed 10 min, ETA 8 min
+[148/263] chamoli_2m engine_perf_slope slope Horn cold rep3: 3.03 s, peak 1221 MB, disk read 1412 MB  | elapsed 10 min, ETA 8 min
+[149/263] chamoli_2m engine_perf_slope slope Horn cold rep4: 2.90 s, peak 1241 MB, disk read 516 MB  | elapsed 10 min, ETA 8 min
+[150/263] chamoli_2m engine_perf_slope slope Horn cold rep5: 2.82 s, peak 1234 MB, disk read 508 MB  | elapsed 10 min, ETA 8 min
+[151/263] chamoli_2m engine_perf_slope slope Horn warm rep0: 2.54 s, peak 1273 MB, disk read 1 MB  | elapsed 10 min, ETA 8 min
+[152/263] chamoli_2m engine_perf_slope slope Horn warm rep1: 2.48 s, peak 1259 MB, disk read 3 MB  | elapsed 10 min, ETA 7 min
+[153/263] chamoli_2m engine_perf_slope slope Horn warm rep2: 2.53 s, peak 1237 MB, disk read 0 MB  | elapsed 10 min, ETA 7 min
+[154/263] chamoli_2m engine_perf_slope slope Horn warm rep3: 2.51 s, peak 1262 MB, disk read 474 MB  | elapsed 10 min, ETA 7 min
+[155/263] chamoli_2m engine_perf_slope slope Horn warm rep4: 2.61 s, peak 1250 MB, disk read 31 MB  | elapsed 10 min, ETA 7 min
+[156/263] chamoli_2m engine_perf_slope slope Horn warm rep5: 2.59 s, peak 1232 MB, disk read 59 MB  | elapsed 10 min, ETA 7 min
+[157/263] chamoli_2m engine_all_slope_nowrite slope Horn cold rep1: 3.04 s, peak 1214 MB, disk read 565 MB  | elapsed 11 min, ETA 7 min
+[158/263] chamoli_2m engine_all_slope_nowrite slope Horn cold rep2: 3.04 s, peak 1224 MB, disk read 551 MB  | elapsed 11 min, ETA 7 min
+[159/263] chamoli_2m engine_all_slope_nowrite slope Horn cold rep3: 3.03 s, peak 1223 MB, disk read 590 MB  | elapsed 11 min, ETA 7 min
+[160/263] chamoli_2m engine_all_slope_nowrite slope Horn cold rep4: 2.96 s, peak 1216 MB, disk read 539 MB  | elapsed 11 min, ETA 7 min
+[161/263] chamoli_2m engine_all_slope_nowrite slope Horn cold rep5: 2.87 s, peak 1216 MB, disk read 546 MB  | elapsed 11 min, ETA 7 min
+[162/263] chamoli_2m engine_all_slope_nowrite slope Horn warm rep0: 2.38 s, peak 1211 MB, disk read 48 MB  | elapsed 11 min, ETA 7 min
+[163/263] chamoli_2m engine_all_slope_nowrite slope Horn warm rep1: 2.64 s, peak 1237 MB, disk read 46 MB  | elapsed 11 min, ETA 7 min
+[164/263] chamoli_2m engine_all_slope_nowrite slope Horn warm rep2: 2.45 s, peak 1209 MB, disk read 174 MB  | elapsed 11 min, ETA 7 min
+[165/263] chamoli_2m engine_all_slope_nowrite slope Horn warm rep3: 2.49 s, peak 1228 MB, disk read 9 MB  | elapsed 11 min, ETA 7 min
+[166/263] chamoli_2m engine_all_slope_nowrite slope Horn warm rep4: 2.38 s, peak 1227 MB, disk read 9 MB  | elapsed 11 min, ETA 6 min
+[167/263] chamoli_2m engine_all_slope_nowrite slope Horn warm rep5: 2.59 s, peak 1229 MB, disk read 8 MB  | elapsed 11 min, ETA 6 min
+[168/263] chamoli_2m engine_all_slope_zstd1 slope Horn cold rep1: 3.65 s, peak 1323 MB, disk read 528 MB  | elapsed 11 min, ETA 6 min
+[169/263] chamoli_2m engine_all_slope_zstd1 slope Horn cold rep2: 3.69 s, peak 1333 MB, disk read 553 MB  | elapsed 11 min, ETA 6 min
+[170/263] chamoli_2m engine_all_slope_zstd1 slope Horn cold rep3: 3.60 s, peak 1334 MB, disk read 547 MB  | elapsed 11 min, ETA 6 min
+[171/263] chamoli_2m engine_all_slope_zstd1 slope Horn cold rep4: 3.53 s, peak 1354 MB, disk read 581 MB  | elapsed 11 min, ETA 6 min
+[172/263] chamoli_2m engine_all_slope_zstd1 slope Horn cold rep5: 3.78 s, peak 1408 MB, disk read 600 MB  | elapsed 12 min, ETA 6 min
+[173/263] chamoli_2m engine_all_slope_zstd1 slope Horn warm rep0: 3.13 s, peak 1362 MB, disk read 19 MB  | elapsed 12 min, ETA 6 min
+[174/263] chamoli_2m engine_all_slope_zstd1 slope Horn warm rep1: 3.37 s, peak 1342 MB, disk read 10 MB  | elapsed 12 min, ETA 6 min
+[175/263] chamoli_2m engine_all_slope_zstd1 slope Horn warm rep2: 3.21 s, peak 1354 MB, disk read 51 MB  | elapsed 12 min, ETA 6 min
+[176/263] chamoli_2m engine_all_slope_zstd1 slope Horn warm rep3: 3.57 s, peak 1313 MB, disk read 198 MB  | elapsed 12 min, ETA 6 min
+[177/263] chamoli_2m engine_all_slope_zstd1 slope Horn warm rep4: 3.47 s, peak 1378 MB, disk read 103 MB  | elapsed 12 min, ETA 6 min
+[178/263] chamoli_2m engine_all_slope_zstd1 slope Horn warm rep5: 3.26 s, peak 1329 MB, disk read 18 MB  | elapsed 12 min, ETA 6 min
+[179/263] chamoli_2m numpy_tiled_slope slope Horn cold rep1: 16.58 s, peak 1295 MB, disk read 1171 MB  | elapsed 12 min, ETA 6 min
+[180/263] chamoli_2m numpy_tiled_slope slope Horn cold rep2: 16.23 s, peak 1295 MB, disk read 532 MB  | elapsed 13 min, ETA 6 min
+[181/263] chamoli_2m numpy_tiled_slope slope Horn cold rep3: 16.29 s, peak 1296 MB, disk read 537 MB  | elapsed 13 min, ETA 6 min
+[182/263] chamoli_2m numpy_tiled_slope slope Horn warm rep1: 15.85 s, peak 1296 MB, disk read 160 MB  | elapsed 13 min, ETA 6 min
+[183/263] chamoli_2m naive_slope slope Horn cold rep1: 15.11 s, peak 5757 MB, disk read 867 MB  | elapsed 13 min, ETA 6 min
+[184/263] chamoli_2m naive_slope slope Horn cold rep2: 13.64 s, peak 6132 MB, disk read 805 MB  | elapsed 14 min, ETA 6 min
+[185/263] chamoli_2m naive_slope slope Horn cold rep3: 11.83 s, peak 6132 MB, disk read 511 MB  | elapsed 14 min, ETA 6 min
+[186/263] chamoli_2m naive_slope slope Horn warm rep1: 11.52 s, peak 6132 MB, disk read 63 MB  | elapsed 14 min, ETA 6 min
+[187/263] chamoli_2m threads_1 slope Horn warm rep0: 4.50 s, peak 1216 MB, disk read 54 MB  | elapsed 14 min, ETA 6 min
+[188/263] chamoli_2m threads_1 slope Horn warm rep1: 4.32 s, peak 1219 MB, disk read 7 MB  | elapsed 14 min, ETA 6 min
+[189/263] chamoli_2m threads_1 slope Horn warm rep2: 4.33 s, peak 1216 MB, disk read 4 MB  | elapsed 14 min, ETA 6 min
+[190/263] chamoli_2m threads_1 slope Horn warm rep3: 4.29 s, peak 1221 MB, disk read 4 MB  | elapsed 14 min, ETA 6 min
+[191/263] chamoli_2m threads_2 slope Horn warm rep0: 2.98 s, peak 1228 MB, disk read 5 MB  | elapsed 14 min, ETA 5 min
+[192/263] chamoli_2m threads_2 slope Horn warm rep1: 3.05 s, peak 1231 MB, disk read 3 MB  | elapsed 15 min, ETA 5 min
+[193/263] chamoli_2m threads_2 slope Horn warm rep2: 3.03 s, peak 1232 MB, disk read 4 MB  | elapsed 15 min, ETA 5 min
+[194/263] chamoli_2m threads_2 slope Horn warm rep3: 3.02 s, peak 1238 MB, disk read 341 MB  | elapsed 15 min, ETA 5 min
+[195/263] chamoli_2m threads_4 slope Horn warm rep0: 2.61 s, peak 1240 MB, disk read 9 MB  | elapsed 15 min, ETA 5 min
+[196/263] chamoli_2m threads_4 slope Horn warm rep1: 2.61 s, peak 1234 MB, disk read 6 MB  | elapsed 15 min, ETA 5 min
+[197/263] chamoli_2m threads_4 slope Horn warm rep2: 2.60 s, peak 1242 MB, disk read 4 MB  | elapsed 15 min, ETA 5 min
+[198/263] chamoli_2m threads_4 slope Horn warm rep3: 2.57 s, peak 1243 MB, disk read 1 MB  | elapsed 15 min, ETA 5 min
+[199/263] chamoli_2m threads_8 slope Horn warm rep0: 2.42 s, peak 1241 MB, disk read 1 MB  | elapsed 15 min, ETA 5 min
+[200/263] chamoli_2m threads_8 slope Horn warm rep1: 2.46 s, peak 1236 MB, disk read 1 MB  | elapsed 15 min, ETA 5 min
+[201/263] chamoli_2m threads_8 slope Horn warm rep2: 2.38 s, peak 1245 MB, disk read 4 MB  | elapsed 15 min, ETA 5 min
+[202/263] chamoli_2m threads_8 slope Horn warm rep3: 2.42 s, peak 1216 MB, disk read 71 MB  | elapsed 15 min, ETA 5 min
+[203/263] tile571_2m_cubic engine_all_slope slope Horn cold rep1: 16.85 s, peak 1357 MB, disk read 3686 MB  | elapsed 15 min, ETA 5 min
+[204/263] tile571_2m_cubic engine_all_slope slope Horn cold rep2: 16.92 s, peak 1359 MB, disk read 3685 MB  | elapsed 16 min, ETA 5 min
+[205/263] tile571_2m_cubic engine_all_slope slope Horn cold rep3: 16.95 s, peak 1359 MB, disk read 4005 MB  | elapsed 16 min, ETA 5 min
+[206/263] tile571_2m_cubic engine_all_slope slope Horn warm rep1: 16.41 s, peak 1347 MB, disk read 3631 MB  | elapsed 16 min, ETA 4 min
+[207/263] tile571_2m_cubic engine_all_aspect aspect Horn cold rep1: 17.38 s, peak 1358 MB, disk read 3684 MB  | elapsed 17 min, ETA 4 min
+[208/263] tile571_2m_cubic engine_all_aspect aspect Horn cold rep2: 17.67 s, peak 1367 MB, disk read 3663 MB  | elapsed 17 min, ETA 4 min
+[209/263] tile571_2m_cubic engine_all_aspect aspect Horn cold rep3: 17.64 s, peak 1365 MB, disk read 3896 MB  | elapsed 17 min, ETA 4 min
+[210/263] tile571_2m_cubic engine_all_aspect aspect Horn warm rep1: 17.76 s, peak 1362 MB, disk read 3981 MB  | elapsed 18 min, ETA 4 min
+[211/263] tile571_2m_cubic engine_all_hillshade hillshade Horn cold rep1: 14.42 s, peak 1224 MB, disk read 3662 MB  | elapsed 18 min, ETA 4 min
+[212/263] tile571_2m_cubic engine_all_hillshade hillshade Horn cold rep2: 14.17 s, peak 1236 MB, disk read 3702 MB  | elapsed 18 min, ETA 4 min
+[213/263] tile571_2m_cubic engine_all_hillshade hillshade Horn cold rep3: 14.23 s, peak 1227 MB, disk read 3646 MB  | elapsed 18 min, ETA 4 min
+[214/263] tile571_2m_cubic engine_all_hillshade hillshade Horn warm rep1: 14.81 s, peak 1222 MB, disk read 2655 MB  | elapsed 19 min, ETA 4 min
+[215/263] tile571_2m_cubic engine_all_3prod slope+aspect+hillshade Horn cold rep1: 34.15 s, peak 1510 MB, disk read 3869 MB  | elapsed 19 min, ETA 4 min
+[216/263] tile571_2m_cubic engine_all_3prod slope+aspect+hillshade Horn cold rep2: 35.15 s, peak 1513 MB, disk read 4034 MB  | elapsed 20 min, ETA 4 min
+[217/263] tile571_2m_cubic engine_all_3prod slope+aspect+hillshade Horn cold rep3: 35.79 s, peak 1516 MB, disk read 4088 MB  | elapsed 20 min, ETA 4 min
+[218/263] tile571_2m_cubic engine_all_3prod slope+aspect+hillshade Horn warm rep1: 34.38 s, peak 1517 MB, disk read 4187 MB  | elapsed 21 min, ETA 4 min
+[219/263] tile571_2m_cubic engine_perf_slope slope Horn cold rep1: 16.61 s, peak 1281 MB, disk read 3655 MB  | elapsed 21 min, ETA 4 min
+[220/263] tile571_2m_cubic engine_perf_slope slope Horn cold rep2: 16.40 s, peak 1234 MB, disk read 3675 MB  | elapsed 22 min, ETA 4 min
+[221/263] tile571_2m_cubic engine_perf_slope slope Horn cold rep3: 16.45 s, peak 1250 MB, disk read 4084 MB  | elapsed 22 min, ETA 4 min
+[222/263] tile571_2m_cubic engine_perf_slope slope Horn warm rep1: 16.33 s, peak 1238 MB, disk read 3659 MB  | elapsed 22 min, ETA 4 min
+[223/263] tile571_2m_cubic engine_all_slope_nowrite slope Horn cold rep1: 15.06 s, peak 1250 MB, disk read 3632 MB  | elapsed 23 min, ETA 4 min
+[224/263] tile571_2m_cubic engine_all_slope_nowrite slope Horn cold rep2: 15.51 s, peak 1258 MB, disk read 4021 MB  | elapsed 23 min, ETA 4 min
+[225/263] tile571_2m_cubic engine_all_slope_nowrite slope Horn cold rep3: 14.80 s, peak 1254 MB, disk read 3801 MB  | elapsed 23 min, ETA 4 min
+[226/263] tile571_2m_cubic engine_all_slope_nowrite slope Horn warm rep1: 14.98 s, peak 1258 MB, disk read 159 MB  | elapsed 23 min, ETA 4 min
+[227/263] tile571_2m_cubic engine_all_slope_zstd1 slope Horn cold rep1: 21.13 s, peak 1427 MB, disk read 3735 MB  | elapsed 24 min, ETA 4 min
+[228/263] tile571_2m_cubic engine_all_slope_zstd1 slope Horn cold rep2: 19.71 s, peak 1430 MB, disk read 4012 MB  | elapsed 24 min, ETA 4 min
+[229/263] tile571_2m_cubic engine_all_slope_zstd1 slope Horn cold rep3: 21.22 s, peak 1432 MB, disk read 3666 MB  | elapsed 25 min, ETA 4 min
+[230/263] tile571_2m_cubic engine_all_slope_zstd1 slope Horn warm rep1: 21.19 s, peak 1428 MB, disk read 3600 MB  | elapsed 25 min, ETA 4 min
+[231/263] tile571_2m_cubic numpy_tiled_slope slope Horn cold rep1: 163.66 s, peak 1310 MB, disk read 4299 MB  | elapsed 28 min, ETA 4 min
+[232/263] tile571_2m_cubic naive_slope slope Horn cold rep1: 18.31 s, peak 9162 MB, disk read 4861 MB  FAILED: _impl.py", line 115, in _pad_simple
+    padded = np.empty(new_shape, dtype=array.dtype, order=order)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 10.0 GiB for an array with shape (51302, 52562) and data type float32  | elapsed 28 min, ETA 4 min
+[233/263] tile571_2m_cubic threads_1 slope Horn warm rep0: 27.85 s, peak 1252 MB, disk read 4414 MB  | elapsed 29 min, ETA 4 min
+[234/263] tile571_2m_cubic threads_1 slope Horn warm rep1: 27.11 s, peak 1244 MB, disk read 4202 MB  | elapsed 29 min, ETA 4 min
+[235/263] tile571_2m_cubic threads_1 slope Horn warm rep2: 27.24 s, peak 1246 MB, disk read 4081 MB  | elapsed 29 min, ETA 4 min
+[236/263] tile571_2m_cubic threads_1 slope Horn warm rep3: 27.62 s, peak 1242 MB, disk read 4935 MB  | elapsed 30 min, ETA 3 min
+[237/263] tile571_2m_cubic threads_2 slope Horn warm rep0: 17.40 s, peak 1254 MB, disk read 3734 MB  | elapsed 30 min, ETA 3 min
+[238/263] tile571_2m_cubic threads_2 slope Horn warm rep1: 17.50 s, peak 1251 MB, disk read 3702 MB  | elapsed 31 min, ETA 3 min
+[239/263] tile571_2m_cubic threads_2 slope Horn warm rep2: 20.32 s, peak 1258 MB, disk read 4037 MB  | elapsed 31 min, ETA 3 min
+[240/263] tile571_2m_cubic threads_2 slope Horn warm rep3: 17.36 s, peak 1253 MB, disk read 3701 MB  | elapsed 31 min, ETA 3 min
+[241/263] tile571_2m_cubic threads_4 slope Horn warm rep0: 14.74 s, peak 1262 MB, disk read 3631 MB  | elapsed 31 min, ETA 3 min
+[242/263] tile571_2m_cubic threads_4 slope Horn warm rep1: 15.18 s, peak 1265 MB, disk read 3646 MB  | elapsed 32 min, ETA 3 min
+[243/263] tile571_2m_cubic threads_4 slope Horn warm rep2: 15.51 s, peak 1267 MB, disk read 3860 MB  | elapsed 32 min, ETA 3 min
+[244/263] tile571_2m_cubic threads_4 slope Horn warm rep3: 15.14 s, peak 1265 MB, disk read 3681 MB  | elapsed 32 min, ETA 3 min
+[245/263] tile571_2m_cubic threads_8 slope Horn warm rep0: 15.09 s, peak 1298 MB, disk read 3685 MB  | elapsed 32 min, ETA 2 min
+[246/263] tile571_2m_cubic threads_8 slope Horn warm rep1: 15.09 s, peak 1254 MB, disk read 3658 MB  | elapsed 33 min, ETA 2 min
+[247/263] tile571_2m_cubic threads_8 slope Horn warm rep2: 15.09 s, peak 1275 MB, disk read 3678 MB  | elapsed 33 min, ETA 2 min
+[248/263] tile571_2m_cubic threads_8 slope Horn warm rep3: 15.28 s, peak 1267 MB, disk read 3688 MB  | elapsed 33 min, ETA 2 min
+[249/263] tile571_1m_cubic engine_all_slope slope Horn cold rep1: 75.66 s, peak 1369 MB, disk read 14159 MB  | elapsed 35 min, ETA 2 min
+[250/263] tile571_1m_cubic engine_all_slope slope Horn cold rep2: 66.85 s, peak 1366 MB, disk read 12930 MB  | elapsed 36 min, ETA 2 min
+[251/263] tile571_1m_cubic engine_all_slope slope Horn cold rep3: 67.15 s, peak 1364 MB, disk read 12401 MB  | elapsed 37 min, ETA 2 min
+[252/263] tile571_1m_cubic engine_all_slope slope Horn warm rep1: 68.20 s, peak 1365 MB, disk read 12555 MB  | elapsed 38 min, ETA 2 min
+[253/263] tile571_1m_cubic engine_perf_slope slope Horn cold rep1: 60.29 s, peak 1352 MB, disk read 12209 MB  | elapsed 39 min, ETA 2 min
+[254/263] tile571_1m_cubic engine_perf_slope slope Horn cold rep2: 59.87 s, peak 1359 MB, disk read 12253 MB  | elapsed 40 min, ETA 1 min
+[255/263] tile571_1m_cubic engine_perf_slope slope Horn cold rep3: 59.86 s, peak 1346 MB, disk read 12885 MB  | elapsed 41 min, ETA 1 min
+[256/263] tile571_1m_cubic engine_perf_slope slope Horn warm rep1: 60.31 s, peak 1362 MB, disk read 13029 MB  | elapsed 42 min, ETA 1 min
+[257/263] tile571_1m_cubic engine_all_slope_nowrite slope Horn cold rep1: 53.81 s, peak 1253 MB, disk read 12343 MB  | elapsed 43 min, ETA 1 min
+[258/263] tile571_1m_cubic engine_all_slope_nowrite slope Horn cold rep2: 53.64 s, peak 1232 MB, disk read 12401 MB  | elapsed 44 min, ETA 1 min
+[259/263] tile571_1m_cubic engine_all_slope_nowrite slope Horn cold rep3: 53.73 s, peak 1241 MB, disk read 12056 MB  | elapsed 45 min, ETA 1 min
+[260/263] tile571_1m_cubic engine_all_slope_nowrite slope Horn warm rep1: 55.41 s, peak 1250 MB, disk read 12188 MB  | elapsed 46 min, ETA 1 min
+[261/263] tile571_1m_cubic engine_all_3prod slope+aspect+hillshade Horn cold rep1: 145.89 s, peak 1523 MB, disk read 12738 MB  | elapsed 48 min, ETA 0 min
+[262/263] tile571_1m_cubic engine_all_3prod slope+aspect+hillshade Horn warm rep1: 134.77 s, peak 1529 MB, disk read 12116 MB  | elapsed 51 min, ETA 0 min
+[263/263] tile571_1m_cubic naive_slope slope Horn cold rep1: 0.89 s, peak 89 MB, disk read 72 MB  FAILED: at32, the whole grid
+        ^^^^^^^^^^^
+  File "rasterio/_io.pyx", line 547, in rasterio._io.DatasetReaderBase.read
+    out = np.empty(out_shape, dtype=dtype)
+numpy._core._exceptions._ArrayMemoryError: Unable to allocate 40.2 GiB for an array with shape (1, 102600, 105120) and data type float32  | elapsed 51 min, ETA 0 min
+[02:57:22] e3_cpu finished, exit code 0
+[03:16:21] starting e3_cpu
+347 runs planned, 263 already in C:\Users\swayam goyal\Desktop\spatial info\Geoguessers\results\runs.csv, 84 to run
+pinned to [0, 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]; power: Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)
+[1/84] tile571_8m window_512 slope Horn cold rep1: 2.75 s, peak 975 MB, disk read 413 MB  | elapsed 0 min, ETA 8 min
+[2/84] tile571_8m window_512 slope Horn cold rep2: 2.79 s, peak 975 MB, disk read 414 MB  | elapsed 0 min, ETA 7 min
+[3/84] tile571_8m window_512 slope Horn cold rep3: 2.76 s, peak 978 MB, disk read 429 MB  | elapsed 0 min, ETA 7 min
+[4/84] tile571_8m window_512 slope Horn warm rep0: 2.54 s, peak 976 MB, disk read 0 MB  | elapsed 0 min, ETA 6 min
+[5/84] tile571_8m window_512 slope Horn warm rep1: 2.48 s, peak 974 MB, disk read 1 MB  | elapsed 0 min, ETA 5 min
+[6/84] tile571_8m window_512 slope Horn warm rep2: 2.53 s, peak 973 MB, disk read 0 MB  | elapsed 0 min, ETA 5 min
+[7/84] tile571_8m window_512 slope Horn warm rep3: 2.51 s, peak 976 MB, disk read 3 MB  | elapsed 0 min, ETA 5 min
+[8/84] tile571_8m window_1024 slope Horn cold rep1: 2.47 s, peak 1025 MB, disk read 401 MB  | elapsed 1 min, ETA 5 min
+[9/84] tile571_8m window_1024 slope Horn cold rep2: 2.48 s, peak 1026 MB, disk read 396 MB  | elapsed 1 min, ETA 5 min
+[10/84] tile571_8m window_1024 slope Horn cold rep3: 2.52 s, peak 1025 MB, disk read 408 MB  | elapsed 1 min, ETA 5 min
+[11/84] tile571_8m window_1024 slope Horn warm rep0: 2.25 s, peak 1030 MB, disk read 0 MB  | elapsed 1 min, ETA 5 min
+[12/84] tile571_8m window_1024 slope Horn warm rep1: 2.21 s, peak 1024 MB, disk read 1 MB  | elapsed 1 min, ETA 4 min
+[13/84] tile571_8m window_1024 slope Horn warm rep2: 2.19 s, peak 1027 MB, disk read 0 MB  | elapsed 1 min, ETA 4 min
+[14/84] tile571_8m window_1024 slope Horn warm rep3: 2.24 s, peak 1022 MB, disk read 1 MB  | elapsed 1 min, ETA 4 min
+[15/84] tile571_8m window_4096 slope Horn cold rep1: 2.38 s, peak 1992 MB, disk read 397 MB  | elapsed 1 min, ETA 4 min
+[16/84] tile571_8m window_4096 slope Horn cold rep2: 2.44 s, peak 1903 MB, disk read 414 MB  | elapsed 1 min, ETA 4 min
+[17/84] tile571_8m window_4096 slope Horn cold rep3: 2.31 s, peak 1929 MB, disk read 404 MB  | elapsed 1 min, ETA 4 min
+[18/84] tile571_8m window_4096 slope Horn warm rep0: 2.14 s, peak 1967 MB, disk read 0 MB  | elapsed 1 min, ETA 4 min
+[19/84] tile571_8m window_4096 slope Horn warm rep1: 2.13 s, peak 1943 MB, disk read 0 MB  | elapsed 1 min, ETA 4 min
+[20/84] tile571_8m window_4096 slope Horn warm rep2: 2.23 s, peak 1946 MB, disk read 0 MB  | elapsed 1 min, ETA 4 min
+[21/84] tile571_8m window_4096 slope Horn warm rep3: 2.22 s, peak 2009 MB, disk read 0 MB  | elapsed 1 min, ETA 4 min
+[22/84] tile571_8m window_8192 slope Horn cold rep1: 2.82 s, peak 2481 MB, disk read 553 MB  | elapsed 1 min, ETA 4 min
+[23/84] tile571_8m window_8192 slope Horn cold rep2: 2.76 s, peak 2480 MB, disk read 403 MB  | elapsed 1 min, ETA 4 min
+[24/84] tile571_8m window_8192 slope Horn cold rep3: 2.72 s, peak 2476 MB, disk read 402 MB  | elapsed 1 min, ETA 4 min
+[25/84] tile571_8m window_8192 slope Horn warm rep0: 2.55 s, peak 2474 MB, disk read 6 MB  | elapsed 1 min, ETA 4 min
+[26/84] tile571_8m window_8192 slope Horn warm rep1: 2.45 s, peak 2474 MB, disk read 0 MB  | elapsed 2 min, ETA 3 min
+[27/84] tile571_8m window_8192 slope Horn warm rep2: 2.64 s, peak 2474 MB, disk read 0 MB  | elapsed 2 min, ETA 3 min
+[28/84] tile571_8m window_8192 slope Horn warm rep3: 2.52 s, peak 2502 MB, disk read 1 MB  | elapsed 2 min, ETA 3 min
+[29/84] chamoli_2m window_512 slope Horn cold rep1: 3.72 s, peak 971 MB, disk read 561 MB  | elapsed 2 min, ETA 3 min
+[30/84] chamoli_2m window_512 slope Horn cold rep2: 3.62 s, peak 973 MB, disk read 546 MB  | elapsed 2 min, ETA 3 min
+[31/84] chamoli_2m window_512 slope Horn cold rep3: 3.80 s, peak 970 MB, disk read 725 MB  | elapsed 2 min, ETA 3 min
+[32/84] chamoli_2m window_512 slope Horn warm rep0: 3.52 s, peak 972 MB, disk read 54 MB  | elapsed 2 min, ETA 3 min
+[33/84] chamoli_2m window_512 slope Horn warm rep1: 3.52 s, peak 971 MB, disk read 8 MB  | elapsed 2 min, ETA 3 min
+[34/84] chamoli_2m window_512 slope Horn warm rep2: 3.47 s, peak 972 MB, disk read 5 MB  | elapsed 2 min, ETA 3 min
+[35/84] chamoli_2m window_512 slope Horn warm rep3: 3.47 s, peak 971 MB, disk read 14 MB  | elapsed 2 min, ETA 3 min
+[36/84] chamoli_2m window_1024 slope Horn cold rep1: 3.26 s, peak 1024 MB, disk read 543 MB  | elapsed 2 min, ETA 3 min
+[37/84] chamoli_2m window_1024 slope Horn cold rep2: 3.14 s, peak 1027 MB, disk read 547 MB  | elapsed 2 min, ETA 3 min
+[38/84] chamoli_2m window_1024 slope Horn cold rep3: 3.19 s, peak 1027 MB, disk read 537 MB  | elapsed 2 min, ETA 3 min
+[39/84] chamoli_2m window_1024 slope Horn warm rep0: 2.88 s, peak 1026 MB, disk read 0 MB  | elapsed 3 min, ETA 3 min
+[40/84] chamoli_2m window_1024 slope Horn warm rep1: 2.89 s, peak 1028 MB, disk read 1 MB  | elapsed 3 min, ETA 3 min
+[41/84] chamoli_2m window_1024 slope Horn warm rep2: 2.89 s, peak 1024 MB, disk read 1 MB  | elapsed 3 min, ETA 3 min
+[42/84] chamoli_2m window_1024 slope Horn warm rep3: 2.86 s, peak 1024 MB, disk read 0 MB  | elapsed 3 min, ETA 3 min
+[43/84] chamoli_2m window_4096 slope Horn cold rep1: 2.89 s, peak 2091 MB, disk read 536 MB  | elapsed 3 min, ETA 3 min
+[44/84] chamoli_2m window_4096 slope Horn cold rep2: 2.86 s, peak 2160 MB, disk read 529 MB  | elapsed 3 min, ETA 3 min
+[45/84] chamoli_2m window_4096 slope Horn cold rep3: 2.76 s, peak 2101 MB, disk read 530 MB  | elapsed 3 min, ETA 3 min
+[46/84] chamoli_2m window_4096 slope Horn warm rep0: 2.64 s, peak 2112 MB, disk read 12 MB  | elapsed 3 min, ETA 2 min
+[47/84] chamoli_2m window_4096 slope Horn warm rep1: 2.66 s, peak 2192 MB, disk read 0 MB  | elapsed 3 min, ETA 2 min
+[48/84] chamoli_2m window_4096 slope Horn warm rep2: 2.70 s, peak 2237 MB, disk read 0 MB  | elapsed 3 min, ETA 2 min
+[49/84] chamoli_2m window_4096 slope Horn warm rep3: 2.62 s, peak 2188 MB, disk read 0 MB  | elapsed 3 min, ETA 2 min
+[50/84] chamoli_2m window_8192 slope Horn cold rep1: 3.26 s, peak 3710 MB, disk read 549 MB  | elapsed 3 min, ETA 2 min
+[51/84] chamoli_2m window_8192 slope Horn cold rep2: 3.11 s, peak 3707 MB, disk read 619 MB  | elapsed 3 min, ETA 2 min
+[52/84] chamoli_2m window_8192 slope Horn cold rep3: 3.21 s, peak 3699 MB, disk read 549 MB  | elapsed 3 min, ETA 2 min
+[53/84] chamoli_2m window_8192 slope Horn warm rep0: 2.96 s, peak 3708 MB, disk read 0 MB  | elapsed 3 min, ETA 2 min
+[54/84] chamoli_2m window_8192 slope Horn warm rep1: 2.93 s, peak 3701 MB, disk read 0 MB  | elapsed 3 min, ETA 2 min
+[55/84] chamoli_2m window_8192 slope Horn warm rep2: 3.02 s, peak 3716 MB, disk read 1 MB  | elapsed 4 min, ETA 2 min
+[56/84] chamoli_2m window_8192 slope Horn warm rep3: 2.93 s, peak 3681 MB, disk read 0 MB  | elapsed 4 min, ETA 2 min
+[57/84] tile571_2m_cubic window_512 slope Horn cold rep1: 36.96 s, peak 969 MB, disk read 3734 MB  | elapsed 4 min, ETA 2 min
+[58/84] tile571_2m_cubic window_512 slope Horn cold rep2: 36.66 s, peak 968 MB, disk read 3704 MB  | elapsed 5 min, ETA 2 min
+[59/84] tile571_2m_cubic window_512 slope Horn cold rep3: 36.76 s, peak 968 MB, disk read 3912 MB  | elapsed 6 min, ETA 2 min
+[60/84] tile571_2m_cubic window_512 slope Horn warm rep0: 37.09 s, peak 968 MB, disk read 4182 MB  | elapsed 6 min, ETA 2 min
+[61/84] tile571_2m_cubic window_512 slope Horn warm rep1: 36.74 s, peak 970 MB, disk read 4080 MB  | elapsed 7 min, ETA 3 min
+[62/84] tile571_2m_cubic window_512 slope Horn warm rep2: 36.70 s, peak 969 MB, disk read 3659 MB  | elapsed 7 min, ETA 3 min
+[63/84] tile571_2m_cubic window_512 slope Horn warm rep3: 36.29 s, peak 968 MB, disk read 4011 MB  | elapsed 8 min, ETA 3 min
+[64/84] tile571_2m_cubic window_1024 slope Horn cold rep1: 19.49 s, peak 1039 MB, disk read 3710 MB  | elapsed 8 min, ETA 3 min
+[65/84] tile571_2m_cubic window_1024 slope Horn cold rep2: 19.70 s, peak 1043 MB, disk read 3694 MB  | elapsed 9 min, ETA 3 min
+[66/84] tile571_2m_cubic window_1024 slope Horn cold rep3: 19.52 s, peak 1026 MB, disk read 3699 MB  | elapsed 9 min, ETA 2 min
+[67/84] tile571_2m_cubic window_1024 slope Horn warm rep0: 19.46 s, peak 1035 MB, disk read 3820 MB  | elapsed 9 min, ETA 2 min
+[68/84] tile571_2m_cubic window_1024 slope Horn warm rep1: 19.55 s, peak 1038 MB, disk read 3661 MB  | elapsed 10 min, ETA 2 min
+[69/84] tile571_2m_cubic window_1024 slope Horn warm rep2: 19.55 s, peak 1026 MB, disk read 3644 MB  | elapsed 10 min, ETA 2 min
+[70/84] tile571_2m_cubic window_1024 slope Horn warm rep3: 19.51 s, peak 1046 MB, disk read 3630 MB  | elapsed 10 min, ETA 2 min
+[71/84] tile571_2m_cubic window_4096 slope Horn cold rep1: 15.16 s, peak 2576 MB, disk read 3708 MB  | elapsed 11 min, ETA 2 min
+[72/84] tile571_2m_cubic window_4096 slope Horn cold rep2: 15.19 s, peak 2586 MB, disk read 3681 MB  | elapsed 11 min, ETA 2 min
+[73/84] tile571_2m_cubic window_4096 slope Horn cold rep3: 15.21 s, peak 2580 MB, disk read 3843 MB  | elapsed 11 min, ETA 2 min
+[74/84] tile571_2m_cubic window_4096 slope Horn warm rep0: 15.45 s, peak 2568 MB, disk read 3937 MB  | elapsed 12 min, ETA 2 min
+[75/84] tile571_2m_cubic window_4096 slope Horn warm rep1: 15.22 s, peak 2578 MB, disk read 3624 MB  | elapsed 12 min, ETA 1 min
+[76/84] tile571_2m_cubic window_4096 slope Horn warm rep2: 15.15 s, peak 2571 MB, disk read 3590 MB  | elapsed 12 min, ETA 1 min
+[77/84] tile571_2m_cubic window_4096 slope Horn warm rep3: 15.36 s, peak 2579 MB, disk read 3620 MB  | elapsed 12 min, ETA 1 min
+[78/84] tile571_2m_cubic window_8192 slope Horn cold rep1: 16.53 s, peak 6953 MB, disk read 4031 MB  | elapsed 13 min, ETA 1 min
+[79/84] tile571_2m_cubic window_8192 slope Horn cold rep2: 15.85 s, peak 7021 MB, disk read 3814 MB  | elapsed 13 min, ETA 1 min
+[80/84] tile571_2m_cubic window_8192 slope Horn cold rep3: 15.69 s, peak 7024 MB, disk read 3830 MB  | elapsed 13 min, ETA 1 min
+[81/84] tile571_2m_cubic window_8192 slope Horn warm rep0: 15.90 s, peak 6932 MB, disk read 3700 MB  | elapsed 14 min, ETA 1 min
+[82/84] tile571_2m_cubic window_8192 slope Horn warm rep1: 15.78 s, peak 6914 MB, disk read 3671 MB  | elapsed 14 min, ETA 0 min
+[83/84] tile571_2m_cubic window_8192 slope Horn warm rep2: 16.14 s, peak 7075 MB, disk read 3622 MB  | elapsed 14 min, ETA 0 min
+[84/84] tile571_2m_cubic window_8192 slope Horn warm rep3: 15.94 s, peak 7031 MB, disk read 3611 MB  | elapsed 14 min, ETA 0 min
+[03:30:53] e3_cpu finished, exit code 0
+[03:54:03] starting e3_cpu
+501 runs planned, 347 already in C:\Users\swayam goyal\Desktop\spatial info\Geoguessers\results\runs.csv, 154 to run
+pinned to [0, 1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]; power: Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)
+[1/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne cold rep1: 2.38 s, peak 1286 MB, disk read 407 MB  | elapsed 0 min, ETA 12 min
+[2/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne cold rep2: 2.48 s, peak 1304 MB, disk read 401 MB  | elapsed 0 min, ETA 12 min
+[3/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne cold rep3: 2.39 s, peak 1246 MB, disk read 393 MB  | elapsed 0 min, ETA 12 min
+[4/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne cold rep4: 2.48 s, peak 1257 MB, disk read 394 MB  | elapsed 0 min, ETA 12 min
+[5/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne cold rep5: 2.48 s, peak 1255 MB, disk read 393 MB  | elapsed 0 min, ETA 12 min
+[6/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne warm rep0: 2.15 s, peak 1253 MB, disk read 0 MB  | elapsed 0 min, ETA 11 min
+[7/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne warm rep1: 2.16 s, peak 1251 MB, disk read 1 MB  | elapsed 0 min, ETA 10 min
+[8/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne warm rep2: 2.31 s, peak 1311 MB, disk read 1 MB  | elapsed 1 min, ETA 9 min
+[9/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne warm rep3: 2.22 s, peak 1268 MB, disk read 1 MB  | elapsed 1 min, ETA 9 min
+[10/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne warm rep4: 2.29 s, peak 1276 MB, disk read 0 MB  | elapsed 1 min, ETA 8 min
+[11/154] tile571_8m engine_all_slope_zt slope ZevenbergenThorne warm rep5: 2.18 s, peak 1258 MB, disk read 2 MB  | elapsed 1 min, ETA 8 min
+[12/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne cold rep1: 2.57 s, peak 1273 MB, disk read 410 MB  | elapsed 1 min, ETA 8 min
+[13/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne cold rep2: 2.42 s, peak 1245 MB, disk read 400 MB  | elapsed 1 min, ETA 8 min
+[14/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne cold rep3: 2.45 s, peak 1248 MB, disk read 393 MB  | elapsed 1 min, ETA 9 min
+[15/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne cold rep4: 2.48 s, peak 1268 MB, disk read 394 MB  | elapsed 1 min, ETA 9 min
+[16/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne cold rep5: 2.55 s, peak 1252 MB, disk read 406 MB  | elapsed 1 min, ETA 9 min
+[17/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne warm rep0: 2.30 s, peak 1274 MB, disk read 2 MB  | elapsed 1 min, ETA 9 min
+[18/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne warm rep1: 2.32 s, peak 1328 MB, disk read 1 MB  | elapsed 1 min, ETA 8 min
+[19/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne warm rep2: 2.29 s, peak 1286 MB, disk read 1 MB  | elapsed 1 min, ETA 8 min
+[20/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne warm rep3: 2.35 s, peak 1338 MB, disk read 5 MB  | elapsed 1 min, ETA 8 min
+[21/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne warm rep4: 2.29 s, peak 1307 MB, disk read 1 MB  | elapsed 1 min, ETA 8 min
+[22/154] tile571_8m engine_all_aspect_zt aspect ZevenbergenThorne warm rep5: 2.32 s, peak 1324 MB, disk read 0 MB  | elapsed 1 min, ETA 8 min
+[23/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep1: 2.11 s, peak 1175 MB, disk read 399 MB  | elapsed 1 min, ETA 8 min
+[24/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep2: 2.12 s, peak 1175 MB, disk read 398 MB  | elapsed 1 min, ETA 8 min
+[25/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep3: 2.09 s, peak 1171 MB, disk read 399 MB  | elapsed 1 min, ETA 8 min
+[26/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep4: 2.19 s, peak 1172 MB, disk read 394 MB  | elapsed 2 min, ETA 8 min
+[27/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep5: 2.25 s, peak 1187 MB, disk read 393 MB  | elapsed 2 min, ETA 8 min
+[28/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep0: 1.99 s, peak 1198 MB, disk read 2 MB  | elapsed 2 min, ETA 7 min
+[29/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep1: 2.05 s, peak 1189 MB, disk read 24 MB  | elapsed 2 min, ETA 7 min
+[30/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep2: 1.97 s, peak 1213 MB, disk read 212 MB  | elapsed 2 min, ETA 7 min
+[31/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep3: 1.99 s, peak 1186 MB, disk read 0 MB  | elapsed 2 min, ETA 7 min
+[32/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep4: 2.01 s, peak 1212 MB, disk read 0 MB  | elapsed 2 min, ETA 7 min
+[33/154] tile571_8m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep5: 1.99 s, peak 1187 MB, disk read 0 MB  | elapsed 2 min, ETA 7 min
+[34/154] tile571_8m engine_all_tri_riley TRI Riley cold rep1: 2.42 s, peak 1243 MB, disk read 417 MB  | elapsed 2 min, ETA 7 min
+[35/154] tile571_8m engine_all_tri_riley TRI Riley cold rep2: 2.31 s, peak 1248 MB, disk read 394 MB  | elapsed 2 min, ETA 7 min
+[36/154] tile571_8m engine_all_tri_riley TRI Riley cold rep3: 2.45 s, peak 1268 MB, disk read 395 MB  | elapsed 2 min, ETA 7 min
+[37/154] tile571_8m engine_all_tri_riley TRI Riley cold rep4: 2.40 s, peak 1271 MB, disk read 392 MB  | elapsed 2 min, ETA 7 min
+[38/154] tile571_8m engine_all_tri_riley TRI Riley cold rep5: 2.48 s, peak 1269 MB, disk read 403 MB  | elapsed 2 min, ETA 7 min
+[39/154] tile571_8m engine_all_tri_riley TRI Riley warm rep0: 2.18 s, peak 1273 MB, disk read 0 MB  | elapsed 2 min, ETA 7 min
+[40/154] tile571_8m engine_all_tri_riley TRI Riley warm rep1: 2.17 s, peak 1252 MB, disk read 0 MB  | elapsed 2 min, ETA 6 min
+[41/154] tile571_8m engine_all_tri_riley TRI Riley warm rep2: 2.13 s, peak 1274 MB, disk read 0 MB  | elapsed 2 min, ETA 6 min
+[42/154] tile571_8m engine_all_tri_riley TRI Riley warm rep3: 2.20 s, peak 1260 MB, disk read 1 MB  | elapsed 2 min, ETA 6 min
+[43/154] tile571_8m engine_all_tri_riley TRI Riley warm rep4: 2.18 s, peak 1260 MB, disk read 0 MB  | elapsed 2 min, ETA 6 min
+[44/154] tile571_8m engine_all_tri_riley TRI Riley warm rep5: 2.15 s, peak 1269 MB, disk read 0 MB  | elapsed 2 min, ETA 6 min
+[45/154] tile571_8m engine_all_tri_wilson TRI Wilson cold rep1: 2.36 s, peak 1255 MB, disk read 399 MB  | elapsed 3 min, ETA 6 min
+[46/154] tile571_8m engine_all_tri_wilson TRI Wilson cold rep2: 2.42 s, peak 1270 MB, disk read 408 MB  | elapsed 3 min, ETA 6 min
+[47/154] tile571_8m engine_all_tri_wilson TRI Wilson cold rep3: 2.31 s, peak 1257 MB, disk read 396 MB  | elapsed 3 min, ETA 6 min
+[48/154] tile571_8m engine_all_tri_wilson TRI Wilson cold rep4: 2.36 s, peak 1265 MB, disk read 394 MB  | elapsed 3 min, ETA 6 min
+[49/154] tile571_8m engine_all_tri_wilson TRI Wilson cold rep5: 2.36 s, peak 1256 MB, disk read 390 MB  | elapsed 3 min, ETA 6 min
+[50/154] tile571_8m engine_all_tri_wilson TRI Wilson warm rep0: 2.17 s, peak 1255 MB, disk read 2 MB  | elapsed 3 min, ETA 6 min
+[51/154] tile571_8m engine_all_tri_wilson TRI Wilson warm rep1: 2.24 s, peak 1270 MB, disk read 10 MB  | elapsed 3 min, ETA 6 min
+[52/154] tile571_8m engine_all_tri_wilson TRI Wilson warm rep2: 2.15 s, peak 1268 MB, disk read 0 MB  | elapsed 3 min, ETA 6 min
+[53/154] tile571_8m engine_all_tri_wilson TRI Wilson warm rep3: 2.25 s, peak 1274 MB, disk read 62 MB  | elapsed 3 min, ETA 6 min
+[54/154] tile571_8m engine_all_tri_wilson TRI Wilson warm rep4: 2.13 s, peak 1246 MB, disk read 0 MB  | elapsed 3 min, ETA 6 min
+[55/154] tile571_8m engine_all_tri_wilson TRI Wilson warm rep5: 2.21 s, peak 1274 MB, disk read 1 MB  | elapsed 3 min, ETA 5 min
+[56/154] tile571_8m engine_all_tpi TPI  cold rep1: 2.41 s, peak 1263 MB, disk read 398 MB  | elapsed 3 min, ETA 5 min
+[57/154] tile571_8m engine_all_tpi TPI  cold rep2: 2.48 s, peak 1252 MB, disk read 409 MB  | elapsed 3 min, ETA 5 min
+[58/154] tile571_8m engine_all_tpi TPI  cold rep3: 2.39 s, peak 1311 MB, disk read 398 MB  | elapsed 3 min, ETA 5 min
+[59/154] tile571_8m engine_all_tpi TPI  cold rep4: 2.27 s, peak 1277 MB, disk read 392 MB  | elapsed 3 min, ETA 5 min
+[60/154] tile571_8m engine_all_tpi TPI  cold rep5: 2.49 s, peak 1306 MB, disk read 398 MB  | elapsed 3 min, ETA 5 min
+[61/154] tile571_8m engine_all_tpi TPI  warm rep0: 2.16 s, peak 1246 MB, disk read 1 MB  | elapsed 3 min, ETA 5 min
+[62/154] tile571_8m engine_all_tpi TPI  warm rep1: 2.16 s, peak 1262 MB, disk read 0 MB  | elapsed 4 min, ETA 5 min
+[63/154] tile571_8m engine_all_tpi TPI  warm rep2: 2.20 s, peak 1273 MB, disk read 3 MB  | elapsed 4 min, ETA 5 min
+[64/154] tile571_8m engine_all_tpi TPI  warm rep3: 2.22 s, peak 1283 MB, disk read 0 MB  | elapsed 4 min, ETA 5 min
+[65/154] tile571_8m engine_all_tpi TPI  warm rep4: 2.13 s, peak 1274 MB, disk read 0 MB  | elapsed 4 min, ETA 5 min
+[66/154] tile571_8m engine_all_tpi TPI  warm rep5: 2.22 s, peak 1268 MB, disk read 0 MB  | elapsed 4 min, ETA 5 min
+[67/154] tile571_8m engine_all_roughness roughness  cold rep1: 2.35 s, peak 1244 MB, disk read 597 MB  | elapsed 4 min, ETA 5 min
+[68/154] tile571_8m engine_all_roughness roughness  cold rep2: 2.30 s, peak 1238 MB, disk read 399 MB  | elapsed 4 min, ETA 5 min
+[69/154] tile571_8m engine_all_roughness roughness  cold rep3: 2.36 s, peak 1237 MB, disk read 410 MB  | elapsed 4 min, ETA 5 min
+[70/154] tile571_8m engine_all_roughness roughness  cold rep4: 2.36 s, peak 1252 MB, disk read 399 MB  | elapsed 4 min, ETA 5 min
+[71/154] tile571_8m engine_all_roughness roughness  cold rep5: 2.40 s, peak 1280 MB, disk read 393 MB  | elapsed 4 min, ETA 5 min
+[72/154] tile571_8m engine_all_roughness roughness  warm rep0: 2.19 s, peak 1268 MB, disk read 6 MB  | elapsed 4 min, ETA 5 min
+[73/154] tile571_8m engine_all_roughness roughness  warm rep1: 2.09 s, peak 1241 MB, disk read 0 MB  | elapsed 4 min, ETA 5 min
+[74/154] tile571_8m engine_all_roughness roughness  warm rep2: 2.10 s, peak 1243 MB, disk read 2 MB  | elapsed 4 min, ETA 4 min
+[75/154] tile571_8m engine_all_roughness roughness  warm rep3: 2.20 s, peak 1293 MB, disk read 1 MB  | elapsed 4 min, ETA 4 min
+[76/154] tile571_8m engine_all_roughness roughness  warm rep4: 2.23 s, peak 1265 MB, disk read 0 MB  | elapsed 4 min, ETA 4 min
+[77/154] tile571_8m engine_all_roughness roughness  warm rep5: 2.28 s, peak 1316 MB, disk read 0 MB  | elapsed 4 min, ETA 4 min
+[78/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne cold rep1: 2.92 s, peak 1295 MB, disk read 546 MB  | elapsed 4 min, ETA 4 min
+[79/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne cold rep2: 2.91 s, peak 1297 MB, disk read 528 MB  | elapsed 4 min, ETA 4 min
+[80/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne cold rep3: 2.94 s, peak 1287 MB, disk read 529 MB  | elapsed 5 min, ETA 4 min
+[81/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne cold rep4: 3.01 s, peak 1301 MB, disk read 529 MB  | elapsed 5 min, ETA 4 min
+[82/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne cold rep5: 3.07 s, peak 1334 MB, disk read 542 MB  | elapsed 5 min, ETA 4 min
+[83/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne warm rep0: 2.68 s, peak 1278 MB, disk read 0 MB  | elapsed 5 min, ETA 4 min
+[84/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne warm rep1: 2.72 s, peak 1266 MB, disk read 0 MB  | elapsed 5 min, ETA 4 min
+[85/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne warm rep2: 2.78 s, peak 1289 MB, disk read 0 MB  | elapsed 5 min, ETA 4 min
+[86/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne warm rep3: 2.80 s, peak 1351 MB, disk read 0 MB  | elapsed 5 min, ETA 4 min
+[87/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne warm rep4: 2.85 s, peak 1340 MB, disk read 1 MB  | elapsed 5 min, ETA 4 min
+[88/154] chamoli_2m engine_all_slope_zt slope ZevenbergenThorne warm rep5: 2.68 s, peak 1333 MB, disk read 1 MB  | elapsed 5 min, ETA 4 min
+[89/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne cold rep1: 3.14 s, peak 1336 MB, disk read 526 MB  | elapsed 5 min, ETA 4 min
+[90/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne cold rep2: 3.05 s, peak 1339 MB, disk read 536 MB  | elapsed 5 min, ETA 4 min
+[91/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne cold rep3: 3.22 s, peak 1330 MB, disk read 536 MB  | elapsed 5 min, ETA 4 min
+[92/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne cold rep4: 2.92 s, peak 1334 MB, disk read 536 MB  | elapsed 5 min, ETA 4 min
+[93/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne cold rep5: 2.94 s, peak 1343 MB, disk read 536 MB  | elapsed 5 min, ETA 4 min
+[94/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne warm rep0: 2.80 s, peak 1327 MB, disk read 0 MB  | elapsed 5 min, ETA 3 min
+[95/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne warm rep1: 2.76 s, peak 1337 MB, disk read 30 MB  | elapsed 6 min, ETA 3 min
+[96/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne warm rep2: 2.90 s, peak 1276 MB, disk read 24 MB  | elapsed 6 min, ETA 3 min
+[97/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne warm rep3: 2.82 s, peak 1321 MB, disk read 7 MB  | elapsed 6 min, ETA 3 min
+[98/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne warm rep4: 2.76 s, peak 1338 MB, disk read 0 MB  | elapsed 6 min, ETA 3 min
+[99/154] chamoli_2m engine_all_aspect_zt aspect ZevenbergenThorne warm rep5: 2.94 s, peak 1338 MB, disk read 50 MB  | elapsed 6 min, ETA 3 min
+[100/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep1: 2.73 s, peak 1203 MB, disk read 532 MB  | elapsed 6 min, ETA 3 min
+[101/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep2: 2.66 s, peak 1212 MB, disk read 562 MB  | elapsed 6 min, ETA 3 min
+[102/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep3: 2.64 s, peak 1194 MB, disk read 533 MB  | elapsed 6 min, ETA 3 min
+[103/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep4: 2.65 s, peak 1177 MB, disk read 533 MB  | elapsed 6 min, ETA 3 min
+[104/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne cold rep5: 2.54 s, peak 1181 MB, disk read 532 MB  | elapsed 6 min, ETA 3 min
+[105/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep0: 2.39 s, peak 1208 MB, disk read 2 MB  | elapsed 6 min, ETA 3 min
+[106/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep1: 2.47 s, peak 1182 MB, disk read 10 MB  | elapsed 6 min, ETA 3 min
+[107/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep2: 2.44 s, peak 1182 MB, disk read 0 MB  | elapsed 6 min, ETA 3 min
+[108/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep3: 2.36 s, peak 1203 MB, disk read 0 MB  | elapsed 6 min, ETA 3 min
+[109/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep4: 2.42 s, peak 1176 MB, disk read 0 MB  | elapsed 6 min, ETA 3 min
+[110/154] chamoli_2m engine_all_hillshade_zt hillshade ZevenbergenThorne warm rep5: 2.43 s, peak 1185 MB, disk read 0 MB  | elapsed 6 min, ETA 3 min
+[111/154] chamoli_2m engine_all_tri_riley TRI Riley cold rep1: 2.85 s, peak 1354 MB, disk read 532 MB  | elapsed 6 min, ETA 3 min
+[112/154] chamoli_2m engine_all_tri_riley TRI Riley cold rep2: 2.88 s, peak 1351 MB, disk read 537 MB  | elapsed 7 min, ETA 2 min
+[113/154] chamoli_2m engine_all_tri_riley TRI Riley cold rep3: 2.96 s, peak 1345 MB, disk read 534 MB  | elapsed 7 min, ETA 2 min
+[114/154] chamoli_2m engine_all_tri_riley TRI Riley cold rep4: 2.94 s, peak 1350 MB, disk read 547 MB  | elapsed 7 min, ETA 2 min
+[115/154] chamoli_2m engine_all_tri_riley TRI Riley cold rep5: 2.90 s, peak 1355 MB, disk read 531 MB  | elapsed 7 min, ETA 2 min
+[116/154] chamoli_2m engine_all_tri_riley TRI Riley warm rep0: 2.73 s, peak 1353 MB, disk read 0 MB  | elapsed 7 min, ETA 2 min
+[117/154] chamoli_2m engine_all_tri_riley TRI Riley warm rep1: 2.71 s, peak 1345 MB, disk read 13 MB  | elapsed 7 min, ETA 2 min
+[118/154] chamoli_2m engine_all_tri_riley TRI Riley warm rep2: 2.72 s, peak 1354 MB, disk read 0 MB  | elapsed 7 min, ETA 2 min
+[119/154] chamoli_2m engine_all_tri_riley TRI Riley warm rep3: 2.74 s, peak 1344 MB, disk read 1 MB  | elapsed 7 min, ETA 2 min
+[120/154] chamoli_2m engine_all_tri_riley TRI Riley warm rep4: 2.64 s, peak 1333 MB, disk read 0 MB  | elapsed 7 min, ETA 2 min
+[121/154] chamoli_2m engine_all_tri_riley TRI Riley warm rep5: 2.75 s, peak 1347 MB, disk read 1 MB  | elapsed 7 min, ETA 2 min
+[122/154] chamoli_2m engine_all_tri_wilson TRI Wilson cold rep1: 2.97 s, peak 1347 MB, disk read 534 MB  | elapsed 7 min, ETA 2 min
+[123/154] chamoli_2m engine_all_tri_wilson TRI Wilson cold rep2: 2.91 s, peak 1345 MB, disk read 537 MB  | elapsed 7 min, ETA 2 min
+[124/154] chamoli_2m engine_all_tri_wilson TRI Wilson cold rep3: 2.89 s, peak 1346 MB, disk read 550 MB  | elapsed 7 min, ETA 2 min
+[125/154] chamoli_2m engine_all_tri_wilson TRI Wilson cold rep4: 2.89 s, peak 1276 MB, disk read 534 MB  | elapsed 7 min, ETA 2 min
+[126/154] chamoli_2m engine_all_tri_wilson TRI Wilson cold rep5: 2.86 s, peak 1318 MB, disk read 532 MB  | elapsed 8 min, ETA 2 min
+[127/154] chamoli_2m engine_all_tri_wilson TRI Wilson warm rep0: 2.68 s, peak 1334 MB, disk read 3 MB  | elapsed 8 min, ETA 2 min
+[128/154] chamoli_2m engine_all_tri_wilson TRI Wilson warm rep1: 2.79 s, peak 1303 MB, disk read 11 MB  | elapsed 8 min, ETA 2 min
+[129/154] chamoli_2m engine_all_tri_wilson TRI Wilson warm rep2: 2.69 s, peak 1291 MB, disk read 1 MB  | elapsed 8 min, ETA 1 min
+[130/154] chamoli_2m engine_all_tri_wilson TRI Wilson warm rep3: 2.75 s, peak 1354 MB, disk read 36 MB  | elapsed 8 min, ETA 1 min
+[131/154] chamoli_2m engine_all_tri_wilson TRI Wilson warm rep4: 2.72 s, peak 1324 MB, disk read 153 MB  | elapsed 8 min, ETA 1 min
+[132/154] chamoli_2m engine_all_tri_wilson TRI Wilson warm rep5: 2.88 s, peak 1353 MB, disk read 373 MB  | elapsed 8 min, ETA 1 min
+[133/154] chamoli_2m engine_all_tpi TPI  cold rep1: 3.08 s, peak 1348 MB, disk read 637 MB  | elapsed 8 min, ETA 1 min
+[134/154] chamoli_2m engine_all_tpi TPI  cold rep2: 3.02 s, peak 1324 MB, disk read 537 MB  | elapsed 8 min, ETA 1 min
+[135/154] chamoli_2m engine_all_tpi TPI  cold rep3: 2.89 s, peak 1342 MB, disk read 527 MB  | elapsed 8 min, ETA 1 min
+[136/154] chamoli_2m engine_all_tpi TPI  cold rep4: 3.01 s, peak 1349 MB, disk read 533 MB  | elapsed 8 min, ETA 1 min
+[137/154] chamoli_2m engine_all_tpi TPI  cold rep5: 3.02 s, peak 1352 MB, disk read 543 MB  | elapsed 8 min, ETA 1 min
+[138/154] chamoli_2m engine_all_tpi TPI  warm rep0: 2.76 s, peak 1347 MB, disk read 6 MB  | elapsed 8 min, ETA 1 min
+[139/154] chamoli_2m engine_all_tpi TPI  warm rep1: 2.66 s, peak 1344 MB, disk read 0 MB  | elapsed 8 min, ETA 1 min
+[140/154] chamoli_2m engine_all_tpi TPI  warm rep2: 2.72 s, peak 1353 MB, disk read 2 MB  | elapsed 8 min, ETA 1 min
+[141/154] chamoli_2m engine_all_tpi TPI  warm rep3: 2.70 s, peak 1336 MB, disk read 5 MB  | elapsed 8 min, ETA 1 min
+[142/154] chamoli_2m engine_all_tpi TPI  warm rep4: 2.76 s, peak 1352 MB, disk read 1 MB  | elapsed 8 min, ETA 1 min
+[143/154] chamoli_2m engine_all_tpi TPI  warm rep5: 2.69 s, peak 1333 MB, disk read 0 MB  | elapsed 9 min, ETA 1 min
+[144/154] chamoli_2m engine_all_roughness roughness  cold rep1: 3.05 s, peak 1344 MB, disk read 546 MB  | elapsed 9 min, ETA 1 min
+[145/154] chamoli_2m engine_all_roughness roughness  cold rep2: 2.88 s, peak 1350 MB, disk read 549 MB  | elapsed 9 min, ETA 1 min
+[146/154] chamoli_2m engine_all_roughness roughness  cold rep3: 2.94 s, peak 1355 MB, disk read 900 MB  | elapsed 9 min, ETA 0 min
+[147/154] chamoli_2m engine_all_roughness roughness  cold rep4: 2.89 s, peak 1305 MB, disk read 533 MB  | elapsed 9 min, ETA 0 min
+[148/154] chamoli_2m engine_all_roughness roughness  cold rep5: 2.90 s, peak 1247 MB, disk read 530 MB  | elapsed 9 min, ETA 0 min
+[149/154] chamoli_2m engine_all_roughness roughness  warm rep0: 2.70 s, peak 1342 MB, disk read 1 MB  | elapsed 9 min, ETA 0 min
+[150/154] chamoli_2m engine_all_roughness roughness  warm rep1: 2.66 s, peak 1309 MB, disk read 0 MB  | elapsed 9 min, ETA 0 min
+[151/154] chamoli_2m engine_all_roughness roughness  warm rep2: 2.71 s, peak 1347 MB, disk read 0 MB  | elapsed 9 min, ETA 0 min
+[152/154] chamoli_2m engine_all_roughness roughness  warm rep3: 2.72 s, peak 1341 MB, disk read 1 MB  | elapsed 9 min, ETA 0 min
+[153/154] chamoli_2m engine_all_roughness roughness  warm rep4: 2.75 s, peak 1319 MB, disk read 2 MB  | elapsed 9 min, ETA 0 min
+[154/154] chamoli_2m engine_all_roughness roughness  warm rep5: 2.89 s, peak 1347 MB, disk read 10 MB  | elapsed 9 min, ETA 0 min
+[04:03:24] e3_cpu finished, exit code 0

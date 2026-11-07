@@ -1,0 +1,18 @@
+﻿chamoli_2m: 17460 x 15120, 93.9% valid, fine slope/aspect in 8 s
+  L1 4 m on demand (COG overvie rmse 2.31 bias -0.45 >5deg 4.1% | L1 4 m on demand (exact 2^k p rmse 2.31 bias -0.45 >5deg 4.1% | L1 4 m precomputed slope pyra rmse 0.00 bias -0.00 >5deg 0.0%
+  L2 8 m on demand (COG overvie rmse 4.42 bias -1.22 >5deg 15.5% | L2 8 m on demand (exact 2^k p rmse 4.42 bias -1.22 >5deg 15.5% | L2 8 m precomputed slope pyra rmse 0.00 bias -0.00 >5deg 0.0%
+  L3 16 m on demand (COG overvie rmse 5.62 bias -2.20 >5deg 23.4% | L3 16 m on demand (exact 2^k p rmse 5.56 bias -2.17 >5deg 22.9% | L3 16 m precomputed slope pyra rmse 0.70 bias +0.00 >5deg 0.0%
+  L4 32 m on demand (COG overvie rmse 6.42 bias -3.34 >5deg 30.5% | L4 32 m on demand (exact 2^k p rmse 6.41 bias -3.33 >5deg 30.3% | L4 32 m precomputed slope pyra rmse 0.28 bias +0.00 >5deg 0.0%
+  L5 64 m on demand (COG overvie rmse 7.87 bias -5.03 >5deg 43.1% | L5 64 m on demand (exact 2^k p rmse 7.76 bias -4.92 >5deg 41.8% | L5 64 m precomputed slope pyra rmse 0.96 bias +0.00 >5deg 0.0%
+  L6 128 m on demand (COG overvie rmse 10.00 bias -7.27 >5deg 57.8% | L6 128 m on demand (exact 2^k p rmse 9.90 bias -7.16 >5deg 57.0% | L6 128 m precomputed slope pyra rmse 0.71 bias +0.00 >5deg 0.0%
+independent sensors over the Chamoli footprint:
+  HMA 8 m: HMA 8 m vs truth: rmse 8.61 bias -1.73 | Chamoli 2 m averaged vs truth: rmse 4.49 bias -1.31 | HMA 8 m vs Chamoli 2 m averaged: rmse 7.26 bias -0.41
+  Copernicus 30 m: Copernicus 30 m vs truth: rmse 9.36 bias -4.81 | Chamoli 2 m averaged vs truth: rmse 6.31 bias -3.21 | Copernicus 30 m vs Chamoli 2 m averaged: rmse 6.44 bias -1.60
+  Copernicus 90 m: Copernicus 90 m vs truth: rmse 9.86 bias -6.81 | Chamoli 2 m averaged vs truth: rmse 8.71 bias -5.92 | Copernicus 90 m vs Chamoli 2 m averaged: rmse 3.34 bias -0.89
+tile571_8m: 12825 x 13140, 83.7% valid, fine slope/aspect in 3 s
+  L1 16 m on demand (COG overvie rmse 2.63 bias -0.68 >5deg 6.6% | L1 16 m on demand (exact 2^k p rmse 2.45 bias -0.65 >5deg 5.5% | L1 16 m precomputed slope pyra rmse 1.00 bias +0.00 >5deg 0.5%
+  L2 32 m on demand (COG overvie rmse 3.97 bias -1.60 >5deg 15.6% | L2 32 m on demand (exact 2^k p rmse 3.94 bias -1.59 >5deg 15.4% | L2 32 m precomputed slope pyra rmse 0.59 bias -0.00 >5deg 0.0%
+  L3 64 m on demand (COG overvie rmse 5.33 bias -2.90 >5deg 26.3% | L3 64 m on demand (exact 2^k p rmse 5.26 bias -2.85 >5deg 25.7% | L3 64 m precomputed slope pyra rmse 0.70 bias +0.00 >5deg 0.0%
+  L4 128 m on demand (COG overvie rmse 6.93 bias -4.54 >5deg 40.5% | L4 128 m on demand (exact 2^k p rmse 6.86 bias -4.49 >5deg 39.8% | L4 128 m precomputed slope pyra rmse 0.63 bias +0.01 >5deg 0.0%
+  L5 256 m on demand (COG overvie rmse 8.97 bias -6.84 >5deg 58.7% | L5 256 m on demand (exact 2^k p rmse 8.80 bias -6.69 >5deg 57.7% | L5 256 m precomputed slope pyra rmse 0.88 bias +0.03 >5deg 0.0%
+wrote results/e5_*.csv and results/plots/e5_maps.png
