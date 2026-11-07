@@ -42,7 +42,7 @@ BASE = f"http://127.0.0.1:{PORT}"
 
 PAN = ["pan-line-0.5", "pan-line-1", "pan-line-2", "pan-reverse-0.5", "pan-reverse-1", "pan-reverse-2", "pan-walk"]
 ZOOM = ["zoom-burst-in-0.3", "zoom-burst-out-0.3", "zoom-burst-in-1", "zoom-burst-out-1", "zoom-burst-in-2",
-        "zoom-burst-out-2", "zoom-pan"]
+        "zoom-burst-out-2", "zoom-notched", "zoom-notched-slow", "zoom-pan"]
 MIX = ["pan-walk", "zoom-pan", "zoom-burst-in-1", "zoom-burst-out-1", "box"]
 ALL = PAN + ZOOM + ["box"]
 

@@ -13,7 +13,8 @@ Traces are dataset-independent: pans stay within +-3.5 view widths of the start 
 
 Families (spec "Traces"): pan-line, pan-reverse (0.5 / 1 / 2 view widths per second, 5 s), pan-walk (random
 heading changes every 0.3-1 s), zoom-burst (0.3 / 1 / 2 s of 60 Hz wheel ticks, in and out, 1 / 2 / 3 levels),
-zoom-pan (alternating bursts and pans, 10 s), box (nested boxes from the whole map to full resolution).
+zoom-notched (a notched mouse wheel: 10 discrete ticks, 30-150 or 120-300 ms apart, 2 levels in), zoom-pan
+(alternating bursts and pans, 10 s), box (nested boxes from the whole map to full resolution).
 """
 import json
 import math
@@ -82,6 +83,20 @@ def zoom_burst(direction, seconds, levels, seed):
             "seed": seed, "start": {"u": 0, "v": 0, "level": 3 if direction == "in" else 0}, "events": ev}
 
 
+def zoom_notched(name, gap_ms, seed, notches=10, levels=2):
+    """A notched mouse wheel: discrete ticks with gaps (ms, uniform in gap_ms), zooming in `levels` levels."""
+    rng = random.Random(seed)
+    factor = 2 ** (-levels / notches)
+    sx, sy = W / 2 + rng.uniform(-0.15, 0.15) * W, H / 2 + rng.uniform(-0.15, 0.15) * H
+    t, ev = 0.2, []
+    for _ in range(notches):
+        ev.append([round(t, 4), "wheel", factor, round(sx, 1), round(sy, 1), 0])
+        t += rng.uniform(*gap_ms) / 1000
+    return {"name": name, "family": "zoom-notched",
+            "params": {"notches": notches, "levels": levels, "gap_ms": list(gap_ms)},
+            "seed": seed, "start": {"u": 0, "v": 0, "level": 3}, "events": ev}
+
+
 def zoom_pan(seed, dur=10.0, start_level=2, bound=2.5):
     rng = random.Random(seed)
     t, level, g = 0.2, float(start_level), 0
@@ -136,6 +151,8 @@ def all_traces():
     for i, (sec, lv) in enumerate(((0.3, 1), (1, 2), (2, 3))):
         out.append(zoom_burst("in", sec, lv, 400 + i))
         out.append(zoom_burst("out", sec, lv, 500 + i))
+    out.append(zoom_notched("zoom-notched", (30, 150), 450))       # brisk scrolling with a notched wheel
+    out.append(zoom_notched("zoom-notched-slow", (120, 300), 451))  # slow scrolling: gaps near the debounce
     out.append(zoom_pan(600))
     out.append(boxes(700))
     for tr in out:
