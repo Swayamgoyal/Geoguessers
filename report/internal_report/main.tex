@@ -12,6 +12,7 @@
 \captionsetup{font=small,labelfont=bf}
 \setlist{itemsep=2pt,topsep=4pt}
 \setlength{\parskip}{4pt}
+\setlength{\emergencystretch}{2.5em}
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \newcolumntype{R}{>{\raggedleft\arraybackslash}X}
 \newcommand{\key}[1]{\par\smallskip\noindent\colorbox{black!6}{\parbox{\dimexpr\linewidth-2\fboxsep}{\small\textbf{Key idea.} #1}}\par\smallskip}
@@ -20,7 +21,7 @@
 
 \title{\textbf{GeoGuessers: What We Did, Why, and What It Means}\\[4pt]
 \large Internal report for the team (not for submission)\\[2pt]
-\normalsize Phases 0--4 complete; Phase 5 designed. Read this before the presentation.}
+\normalsize Phases 0--5 complete (including the interactive viewer and E6). Read this before the presentation.}
 \author{Swayam Goyal (2024111012) \quad Siddharth Choudhary (2024111021)\\ Yakkala Viswanadha Kartikeya (2024111033)}
 \date{}
 
@@ -46,10 +47,12 @@ helps. Our literature review turned this into these research gaps:
 \end{itemize}
 
 \paragraph{What is finished.} Phase 0 (setup), Phase 1 (data), Phase 2 (baseline of the standard tools, E1/E2/QGIS),
-Phase 3 (our own CPU and GPU engine, E3/E4), Phase 4 (derivatives on demand from the pyramid, E5). Every result was
-audited number by number against the raw data. Phase 5 (the interactive viewer) is designed but not started.
+Phase 3 (our own CPU and GPU engine, E3/E4), Phase 4 (derivatives on demand from the pyramid, E5), all audited number
+by number against the raw data. Phase 5: the interactive viewer (a tile server, a browser viewer with continuous
+debounced pan/zoom and neighbour prefetch, a QGIS plugin), built and measured in E6 (1{,}068 runs). What remains are the
+final deliverables: final report, slides, demo.
 
-\paragraph{The answer, in six lines.}
+\paragraph{The answer, in seven lines.}
 \begin{enumerate}
   \item \code{gdaldem} (GDAL's terrain tool, which QGIS also calls) \textbf{never runs out of memory}: it handles
   10.8 billion cells (43\,GB) with 0.87\,GB of RAM. It just gets slower: 3.5\,min for one slope pass at 1\,m.
@@ -65,10 +68,14 @@ audited number by number against the raw data. Phase 5 (the interactive viewer) 
   \item \textbf{On demand from the pyramid}, one display tile costs 5--8\,ms at every zoom level, 8--450$\times$ less
   than computing it exactly at full resolution. The price: slope comes out \emph{too low}, by 2.3$^\circ$ RMSE one
   level up to 6.4$^\circ$ four levels up (worst on steep slopes). Aspect is barely affected.
+  \item \textbf{Our viewer} computes every $512^2$ tile on demand while the user pans and zooms continuously. With
+  neighbour prefetch 98--100\% of the tiles entering the view while panning are already in the browser; a 150\,ms
+  trailing debounce cuts the server's tiles per zoom gesture from 62 to 19 (3.3$\times$); prefetch does not slow the
+  visible tiles. The remaining latency comes from decoding blocks and the browser's 6 connections, not from computing.
 \end{enumerate}
 
-\paragraph{Where we go next.} Phase 5: a viewer where the user sees the whole map, drags a bounding box, and only
-that box is computed at the right pyramid level (Section~\ref{sec:phase5}). Then the final report and demo.
+\paragraph{Where we go next.} The final deliverables (the final plan's Phase 6, Section~\ref{sec:future}): final
+report, slides and a recorded demo of the viewer and the QGIS plugin as a fallback for the live demo.
 
 \begin{figure}[!htbp]
 \centering
@@ -78,11 +85,13 @@ that box is computed at the right pyramid level (Section~\ref{sec:phase5}). Then
 \node[box, fill=orange!12, right=5mm of p2] (p3) {\textbf{Phase 3 CPU}\\parallel engine:\\read / write-bound};
 \node[box, fill=green!10, right=5mm of p3] (p3g) {\textbf{Phase 3 GPU}\\kernel 50$\times$ faster:\\copies + I/O dominate};
 \node[box, fill=violet!10, right=5mm of p3g] (p4) {\textbf{Phase 4}\\compute only what is\\viewed, from the pyramid};
-\draw[arr] (p2) -- (p3); \draw[arr] (p3) -- (p3g); \draw[arr] (p3g) -- (p4);
+\node[box, fill=red!8, text width=7.4cm] (p5) at ($(p3)!0.5!(p3g)+(0,-1.9)$) {\textbf{Phase 5}\\continuous pan/zoom viewer: $512^2$ tiles
+on demand, debounce + prefetch;\\latency set by block decoding and the browser's 6 connections};
+\draw[arr] (p2) -- (p3); \draw[arr] (p3) -- (p3g); \draw[arr] (p3g) -- (p4); \draw[arr] (p4.south) |- (p5.east);
 \end{tikzpicture}
 \caption{The story of the project in one picture. Each step removes the current bottleneck and exposes the next one.
 The answer to ``how do we handle a DEM bigger than RAM on a laptop'' is: do not process all of it; read and compute only
-the window and resolution the user needs.}
+the window and resolution the user needs, and (Phase 5) do that fast enough to follow a user panning and zooming.}
 \end{figure}
 
 %=====================================================================
@@ -180,9 +189,94 @@ Fully valid cell & A coarse cell whose footprint and 8 neighbours contain no nod
 Circular mean, $R$ & Average of directions (via sin/cos); $R$ (0--1) says how much the directions agree. \\
 Levels up & How many pyramid levels above the source data: the error depends on this, not on metres. \\
 \midrule
+\multicolumn{2}{l}{\textit{Phase 5: the tile server}} \\
+Tile lattice & A fixed grid of $512\times512$ tiles per pyramid level, aligned to that level's own $512^2$ COG blocks.
+A tile is named (level, $t_x$, $t_y$); with its 1-cell halo it touches up to 9 stored blocks. \\
+Level choice, hysteresis & The viewer shows the finest level whose cell is at most one screen pixel (real cell sizes,
+not $2^k$). Hysteresis ($\pm$10\%) keeps it from flipping between two levels when the zoom sits near a boundary. \\
+Foreground / background (fg / bg) & Foreground tiles are what the user is looking at now; background tiles are
+speculative prefetch. They have separate queues and separate worker threads. \\
+GIL, \code{nogil} & Python's global interpreter lock lets only one thread run Python code at a time. Numba functions
+compiled with \code{nogil=True} (and zlib compression) release it, so several tiles really run in parallel on
+several threads. \\
+Palette PNG, Z\_RLE & An 8-bit PNG storing one byte per cell plus a 256-colour palette (index 0 transparent =
+nodata): smaller and faster to encode than RGBA. Z\_RLE is zlib's run-length deflate mode: 2--3$\times$ faster than
+default deflate for 5--15\% larger tiles. \\
+Block cache, result cache & Two server caches: decoded $512^2$ blocks as float32 (1024\,MiB; all-nodata blocks
+stored as a 0-byte marker) and finished PNG tiles (512\,MiB), keyed by a BLAKE2b hash of the full tile
+specification. \\
+SLRU & Segmented LRU cache: new entries go to a probation segment (20\%); an entry hit again moves to the protected
+segment (80\%). A one-off scan (a prefetch ring never visited) cannot flush entries that are really reused. \\
+Single-flight & Identical concurrent requests share one computation: 100 identical requests compute once. \\
+Generation & A counter per viewer session, raised at every zoom commit. Work for an older generation is superseded
+(dropped) on the server. \\
+Cancel token & A flag each job checks between stages (before dequeue, after each block read, before the kernel,
+before encoding); a cancelled job stops at the next check. \\
+Promotion & A foreground request for a tile still queued as prefetch moves that job to the foreground queue. \\
+Yielding (prefetch) & A background worker does not start a new tile while any foreground tile is queued or running
+(\code{DEMLAB\_BG\_YIELD}, default on). \\
+Memory guard, 503 & Prefetch pauses when free RAM falls below 1.0\,GB (\code{DEMLAB\_BG\_MIN\_FREE\_GB}); while
+paused, prefetch requests get HTTP 503 at once and the client backs off. \\
+Efficiency class, last-level cache & Windows labels every logical CPU with an efficiency class; on our CPU the E-
+and LP-cores get the same class, so we tell them apart by which last-level cache they sit behind. \\
+Pinning (threads) & Fixing a thread to chosen CPUs (\code{SetThreadAffinityMask}): foreground workers on the 12
+P-core threads (CPUs 0, 1, 10--19), prefetch workers on the 8 E-cores (CPUs 2--9); LP-cores (20--21) unused. \\
+\code{Server-Timing} & An HTTP response header; every tile reports its queue, read, decode, kernel, colour-map and
+encode times and its cache tier in it. \\
+Event-driven disconnect & The server learns that a browser aborted a request from the connection-closed event,
+instead of checking every 20\,ms, and cancels the job. \\
+\midrule
+\multicolumn{2}{l}{\textit{Phase 5: the viewer}} \\
+Commit & The moment the viewer fixes a new view (level and extent) and requests its tiles. \\
+Debounce, trailing debounce & Waiting until input has stopped before acting. Trailing: the zoom commits once,
+150\,ms after the \emph{last} wheel tick, instead of on every tick. Meanwhile the screen shows the tiles it already
+has, rescaled. \\
+\code{maxWaitMs} & An optional forced commit after continuous scrolling for that long; off (measured to nearly double
+the tiles). \\
+Fallback chain & What a frame draws for a missing tile: a coarser cached level, else a finer cached level, else the
+overview (the coarsest level, always loaded). So the view is never blank. \\
+Prefetch ring & After a commit, the 8 view-sized rectangles around the view (N, S, E, W and the corners) are loaded at
+background priority, at most 2 requests at a time, aborted when the user goes elsewhere. \\
+Velocity-first & Ring order: the direction of the last pan first, then cardinals before corners, then nearer before
+farther. \\
+Recentre & The ring is rebuilt when the camera moves more than 25\% of the view off the committed centre (at most
+once per 100\,ms); ring requests no longer needed are aborted. \\
+Back-off & The client stops prefetch for 2\,s when the p95 of its last 20 foreground tiles exceeds 250\,ms (or on a
+503). \\
+6 connections per origin & A browser opens at most 6 HTTP/1.1 connections to one server; further tile requests wait
+for a free one. \\
+\code{AbortController} & The browser mechanism that cancels a fetch; it closes the connection, which the server
+sees as a disconnect. \\
+Box zoom, \code{POST /view} & Shift + drag zooms the viewer to a box. \code{POST /view} computes a box directly as a PNG
+or GeoTIFF; the QGIS plugin uses it. \\
+\midrule
+\multicolumn{2}{l}{\textit{Phase 5: measuring the viewer (E6)}} \\
+Virtual client & A Python port of the viewer's policy (camera, level choice, browser cache, debounce, generations,
+aborts, prefetch) that replays a trace in real time against the live server with 6 connections and 60\,Hz frames. \\
+Trace & A seeded, stored script of user input (pans, wheel bursts, notches, box zooms) replayed identically in every
+run. \\
+Notched wheel & A mouse wheel that clicks in discrete steps 30--300\,ms apart, unlike the 17\,ms gaps of a 60\,Hz
+burst. \\
+Pan hit rate & Share of tiles already cached in the browser when they first enter the view during a pan. \\
+Prefetch precision & Prefetched tiles later drawn, divided by all prefetched tiles (0.34 means about 3 fetched per 1
+used). \\
+TTFF, complete & Time to first frame: from the last wheel tick (or the end of a box animation) to the first frame
+showing a tile of the committed level. \emph{Complete}: to the first frame with every visible tile of that level. \\
+Blank area-time & Share of view area $\times$ frames not drawn from the needed level's own tiles (a preview or the
+overview instead). \\
+Server tiles per gesture & Foreground jobs the server finished or cancelled mid-render, divided by zoom gestures. \\
+p50 / p95 & The median and 95th percentile of tile latencies: 95\% of tiles are faster than the p95. \\
+Cold start & Every E6 run starts a new server with empty caches, so latencies are on the slow side. \\
+Chrome DevTools protocol (CDP) & The interface through which a program drives Chrome. We drive headless Chrome over it
+in real time with the \code{websockets} package (no Playwright). \emph{Virtual time} (a headless mode in which the page's
+clock does not follow real time) distorted every network wait and was dropped. \\
+High-resolution event loop & Python 3.12's default event-loop clock on Windows moves in 15.6\,ms steps; the virtual
+client runs its own loop on the high-resolution clock (timers accurate to about 1\,ms). \\
+RSS & Resident set size: the RAM a process holds (server memory in E6, in MiB). \\
+\midrule
 \multicolumn{2}{l}{\textit{Experiments}} \\
 E1--E6 & E1 gdaldem baseline; E2 storage layouts; E1q QGIS display; E3 CPU engine; E4 GPU engine; E5 pyramid accuracy
-and time; E6 interactive viewer (Phase 5, not yet run). \\
+and time; E6 interactive viewer (Phase 5: virtual client replaying traces against the tile server, 1{,}068 runs). \\
 \bottomrule
 \end{longtable}
 
@@ -290,9 +384,39 @@ report regenerated (identical), every number in every document checked by indepe
 that mixed cold and warm runs, MiB/GB units, several overstated claims (Section~\ref{sec:problems}). Added: correctness
 check on the 90\,m/30\,m grids (the plan's ``correctness gate''), median + IQR for every configuration, stage chart.
 \item \textbf{LaTeX progress reports} for Phases 3 and 4 (Phase 2 report corrected).
-\item \textbf{Team decision for Phase 5:} zoom by bounding boxes instead of streaming tiles (Section~\ref{sec:phase5}).
+\item \textbf{Team decision for Phase 5:} zoom by bounding boxes instead of streaming tiles. \emph{Superseded} by the
+professor's input (item 24): box zoom survives only as Shift + drag and for QGIS.
 \item \textbf{Hand-off:} everything pushed to GitHub; a complete SHA-256-verified copy (project, all data, environment,
 notes) on the external drive \code{K:\textbackslash spatial project\textbackslash GeoGuessers\_handoff}.
+\end{enumerate}
+
+\subsection{Phase 5 (the interactive viewer and E6)}
+\begin{enumerate}
+\setcounter{enumi}{23}
+\item \textbf{Professor's input:} the viewer should work like a map, with continuous pan and zoom and prefetch of the
+neighbourhood, not box by box. Kartikeya wrote the engineering spec (\code{docs/PHASE5\_DEBOUNCED\_ZOOM\_SPEC.md}: goals,
+architecture, E6 gates); we wrote \code{docs/FINAL\_PLAN.md}, which renumbers the remaining work (Phase 0 = everything
+above; Phases 1--5 = the viewer and E6; Phase 6 = final deliverables) and adopts the spec where it is the best
+choice and differs where noted. Team decisions: continuous debounced pan/zoom is the main interaction; box zoom stays
+as Shift + drag and for QGIS; owners: backend and server Swayam, web viewer and prefetch Kartikeya, E6 Siddharth,
+QGIS plugin and final deliverables shared.
+\item \textbf{Tile engine core} (final plan Phase 1): tile lattice, GIL-free tile kernels, block and result caches,
+palette PNG; 24 new tests (143 in total). Parallel gate first failed at 4.3$\times$; passed at 5.4$\times$ after
+moving colour quantisation and PNG encoding off the GIL.
+\item \textbf{Scheduler and server} (Phase 2): two pinned worker pools, single-flight, generations, cancel tokens,
+FastAPI server; 17 new tests (160). Isolation gate noisy (+6--15\%) until prefetch was made to yield; cancellation
+gate failed with polling (58--80\,ms) and passed event-driven (37\,ms).
+\item \textbf{Web viewer} (Phase 3): plain ES modules, debounce, fallback chain, prefetch ring, box zoom; 6 Node unit
+tests and an in-browser self-test in headless Chrome. Fixes: memory guard default, 503 for paused prefetch, pending
+prefetch flag, double commit on box zoom, blank first map.
+\item \textbf{QGIS plugin} (Phase 4): box tool $\to$ \code{POST /view} $\to$ styled GeoTIFF layer; headless end-to-end check
+13/13; server limit of 64\,M cells per box (161 tests).
+\item \textbf{E6} (Phase 5): virtual client, 15 seeded traces, pilot (back-off threshold raised to 250\,ms); first sweep
+stopped after 17 runs because of timer precision, rerun with a high-resolution loop: 996 runs in 147\,min; then 2
+notched-wheel traces (72 runs) that set the debounce to 150\,ms; headless-Chrome cross-check. Total 1{,}068 runs.
+\item {\raggedright\textbf{Write-up:} results document, tables and charts (\code{docs/PHASE5\_RESULTS.md};
+\code{results/e6\_tables.md}; \code{results/plots/e6\_*.png}); the Phase 5 LaTeX progress report
+(\code{report/phase5\_report}); and this report.\par}
 \end{enumerate}
 
 %=====================================================================
@@ -392,6 +516,9 @@ $128^2$--$8192^2$). \\
 E5 & Accuracy of slope/aspect from every pyramid level (Chamoli 2\,m: 6 levels; 8\,m: 5 levels) on fully valid cells,
 exact-pyramid cross-check, slope classes, thresholds, independent DEMs. Timing: one $512^2$ tile at 8 places and the
 whole grid per level, three routes, cold/warm (670 timings summarised). \\
+E6 (1{,}068 runs) & The viewer: a virtual client replays 17 seeded traces (pans, zoom bursts, notched wheels, zoom-pan,
+box zooms) against a fresh tile server per run; 24 configurations, one factor at a time; 1 warm-up + 5 measured runs
+each. Plus a headless-Chrome cross-check on 3 traces (Section~\ref{sec:e6method}). \\
 \bottomrule
 \end{longtable}
 
@@ -706,6 +833,507 @@ costs $\sim$2.5$^\circ$ slope RMSE for the first level and $\sim$1.5$^\circ$ per
 underestimate, worst on steep ground. Aspect costs much less. Good for display; not for slope thresholds.}
 
 %=====================================================================
+\section{Phase 5: the interactive viewer and E6}\label{sec:phase5}
+\subsection{What changed and how the work was organised}
+Our earlier plan was a \emph{box-zoom} viewer: see the whole map, drag a box, compute only that box, repeat. The
+professor asked for something closer to a real map: \textbf{pan and zoom continuously}, compute only what is in view at
+the resolution the screen needs, and \textbf{prefetch} what the user will probably look at next. Kartikeya turned this
+into an engineering spec (\code{docs/PHASE5\_DEBOUNCED\_ZOOM\_SPEC.md}); \code{docs/FINAL\_PLAN.md} is the working plan we
+followed. It adopts the spec where it is the best choice and differs where noted. \textbf{Careful with the numbering:} the
+final plan calls everything up to our Phase 4 ``Phase 0'' and splits our Phase 5 into its Phases 1--5:
+\begin{center}\small
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{3.3cm}>{\raggedright\arraybackslash}p{3.2cm}L>{\raggedright\arraybackslash}p{2.3cm}}
+\toprule
+Final plan & This report & What & Owner \\
+\midrule
+Phase 0 & Phases 0--4 & everything in Sections 1--8 & done \\
+Phase 1 & \S\ref{sec:p5engine} & tile engine core (backend only) & Swayam \\
+Phase 2 & \S\ref{sec:p5server} & scheduler and server API & Swayam \\
+Phase 3 & \S\ref{sec:p5viewer} & web viewer & Kartikeya \\
+Phase 4 & \S\ref{sec:p5qgis} & QGIS plugin & shared \\
+Phase 5 & \S\ref{sec:e6method}--\ref{sec:p5policy} & E6 benchmark, tuning, results & Siddharth \\
+Phase 6 & \S\ref{sec:future} & final report, slides, demo & shared \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{What Phases 0--4 told the design} (from measurements, not assumptions):
+\begin{itemize}
+  \item A $512^2$ tile costs 5--8\,ms on demand, of which the slope kernel is $\sim$0.5\,ms. \textbf{Decoding, not
+  computing, is the cost.}
+  \item Every pyramid level is stored in $512\times512$ compressed blocks. A $512^2$ window with a 1-cell halo decodes
+  up to \textbf{9 blocks}; a shared cache of decoded blocks can bring that to about 1 per tile.
+  \item 12 performance-core threads beat all 22; efficiency cores are 1.7$\times$ slower and slow the foreground when
+  mixed in.
+  \item Exact (full-resolution) tiles cost up to 2.9\,s at 32\,m: never prefetch them.
+\end{itemize}
+
+\paragraph{The goals (from the spec).} (1) Continuous pan and zoom over a fixed $512^2$ tile lattice per level, box
+zoom kept as Shift + drag and \code{POST /view}. (2) Debounced zoom: commit once after the last wheel tick; during the
+gesture show existing tiles rescaled, never a blank area. (3) Speculative prefetch of the 8 neighbouring views at low
+priority on the efficiency cores, cancelled when the user moves elsewhere. (4) Caches at every tier. (5) Cancellation
+by generation. (6) Bounded memory (server $\approx$2.2\,GB budget). (7) Exact mode without prefetch; the expected E5
+error of the shown level displayed. (8) E6 with two gates: \textbf{gate 1} prefetch raises foreground p95 by at most
+10\%; \textbf{gate 2} the debounce cuts server tiles per zoom gesture while the first frame arrives $<$100\,ms after the
+debounce.
+
+\subsection{Architecture}
+A visible tile travels top to bottom in Figure~\ref{fig:arch}: the browser asks for it with its session, generation and
+priority; the server answers from the result cache or submits a job to the scheduler; a worker renders it from cached
+or freshly decoded blocks; the PNG goes back with its timings and is kept in the result cache.
+\begin{figure}[!htbp]
+\centering
+\begin{tikzpicture}[font=\footnotesize, node distance=5mm,
+  b/.style={draw, rounded corners, align=center, inner sep=3pt, minimum height=8mm},
+  arr/.style={-{Stealth}, thick}]
+\node[b, fill=blue!8, text width=9.2cm] (web) {\textbf{Browser viewer} (\code{viz/web}, plain ES modules, canvas)\\
+camera $\cdot$ gestures (trailing debounce) $\cdot$ tile layer (fallback chain) $\cdot$ bitmap cache (256\,MiB LRU) $\cdot$
+prefetch ring};
+\node[b, fill=blue!8, right=4mm of web, text width=3.6cm] (qgis) {\textbf{QGIS plugin}\\box tool, background task};
+\node[b, fill=orange!12, below=9mm of web, text width=9.2cm] (srv) {\textbf{FastAPI server} (\code{server/app.py}, one
+process)\\\code{/info} \code{/overview} \code{/tiles} \code{/session/\{sid\}/gen} \code{/prefetch} \code{/view} \code{/stats}};
+\node[b, fill=green!10, below=of srv, text width=9.2cm] (sch) {\textbf{Scheduler} (\code{demlab/sched.py})\\fg queue
+$\to$ 8 workers on P-cores $\mid$ bg queue $\to$ 3 workers on E-cores\\single-flight $\cdot$ generations $\cdot$ cancel tokens
+$\cdot$ yielding $\cdot$ memory guard};
+\node[b, fill=violet!10, below=of sch, text width=9.2cm] (ren) {\textbf{Tile renderer} (\code{demlab/view.py})\\lattice
+$\to$ blocks (+ halo) $\to$ kernel (\code{nogil}, 1 thread) $\to$ palette PNG};
+\node[b, fill=gray!10, below=of ren, xshift=-2.5cm, text width=4.2cm] (rc) {\textbf{Result cache}\\PNG tiles, 512\,MiB,
+SLRU};
+\node[b, fill=gray!10, below=of ren, xshift=2.5cm, text width=4.2cm] (bc) {\textbf{Block cache}\\decoded $512^2$ blocks,
+1024\,MiB, SLRU};
+\node[b, fill=gray!20, below=of bc, text width=4.2cm] (cog) {COG pyramid on SSD\\(GDAL, thread-local handles)};
+\draw[arr] (web) -- node[right, font=\scriptsize, align=left] {\code{GET /tiles/\{ds\}/\{level\}/\{tx\}/\{ty\}.png}\\
+headers \code{X-Session}, \code{X-Gen}, \code{X-Priority} fg$\mid$bg} (srv);
+\draw[arr] (qgis.south) |- node[pos=0.25, right, font=\scriptsize] {\code{POST /view}} (srv.east);
+\draw[arr] (srv) -- (sch); \draw[arr] (sch) -- (ren);
+\draw[arr] (ren.south -| rc) -- (rc); \draw[arr] (ren.south -| bc) -- (bc); \draw[arr] (bc) -- (cog);
+\end{tikzpicture}
+\caption{The Phase 5 system. One server serves both the browser and QGIS, so they share the caches. The policy numbers
+(debounce, prefetch) live in \code{viz/web/policy.json}, read by the browser and by the E6 virtual client.}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Tile engine core (final plan Phase 1)}\label{sec:p5engine}
+Files: \code{demlab/view.py}, \code{kernels/tile\_k.py}, \code{blockcache.py}, \code{resultcache.py}, \code{slru.py},
+\code{colormap.py}, \code{cancel.py}. Design and why:
+\begin{itemize}
+  \item \textbf{$512^2$ lattice aligned to the COG blocks.} Every level is stored in 512 blocks (checked), so one tile =
+  one stored block plus its 1-cell halo. Each level's lattice comes from its own geotransform and size (GDAL's levels
+  are not exact halvings, Phase 4). Edge and partial tiles are filled with nodata (transparent); tiles outside the
+  DEM are answered as empty.
+  \item \textbf{Level choice:} the finest level whose cell is $\leq$ one device pixel, using real cell sizes (not
+  $2^k$), with $\pm$10\% hysteresis. The browser mirrors the same rule (tested on a shared fixture).
+  \item \textbf{GIL-free per-tile kernels.} One tile is rendered on one thread by separate single-threaded
+  \code{nogil} Numba kernels (slope / aspect / hillshade, TRI, TPI, roughness), so many tiles run in parallel on many
+  threads. The spec suggested recompiling the existing kernels; we added separate ones so the parallel engine kernels
+  stay untouched and E3/E4 stay reproducible. One Numba and one GDAL thread per tile; fixed pools (no oversubscription).
+  \item \textbf{Block cache.} Our reader reads whole aligned blocks, decodes each once (single-flight), keeps them as
+  float32 in a byte-budgeted SLRU (1024\,MiB) and assembles windows from them. All-nodata blocks are a 0-byte marker.
+  This removes the halo re-decoding found in E3.
+  \item \textbf{Result cache + single-flight.} Finished PNGs (512\,MiB, SLRU), keyed by a BLAKE2b hash of the canonical
+  tile specification (dataset, level, tile, operator and every parameter); 100 identical concurrent requests
+  compute once.
+  \item \textbf{Palette PNG.} The colour map has 256 entries, so a tile is one byte per cell plus a palette (index 0
+  transparent = nodata), smaller and faster to encode than RGBA. The quantiser is a \code{nogil} Numba function and
+  the PNG is written by our own small writer with \code{zlib} in run-length mode (Z\_RLE): 2--3$\times$ faster than
+  default deflate for 5--15\% larger tiles. Both release the GIL.
+  \item \textbf{Modes:} \emph{auto} (the level's own cells, E5 error), \emph{exact} (full resolution, then averaged, as
+  E5's truth), \emph{precomputed} (E5's stored slope pyramid). Per-stage timings (read, decode, kernel, colour,
+  encode) for every tile.
+\end{itemize}
+\textbf{Gates and results.} 24 new tests (143 in total). Every auto-mode tile equals the existing engine's result on the
+whole level, cell for cell, for all 8 operator configurations, on every level of a test pyramid with data gaps and
+partial edge tiles. \textbf{Parallel gate} (\code{bench/check\_tile\_parallel}, Chamoli 2\,m, 64 tiles, warm blocks): 8
+threads \textbf{5.4$\times$} faster than 1 (8.2\,ms $\to$ 1.5\,ms per tile of throughput; gate $\geq$5$\times$); with
+NumPy quantising and Pillow encoding it was 4.3$\times$. \textbf{Block cache:} 64 neighbouring tiles decode \textbf{100
+blocks instead of up to 576}; warm tiles decode none.
+
+\subsection{Scheduler and server (final plan Phase 2)}\label{sec:p5server}
+Files: \code{demlab/sched.py}, \code{service.py}, \code{cpus.py}, \code{server/app.py} (\code{python -m server}). Design
+and why:
+\begin{itemize}
+  \item \textbf{Two pools pinned to core classes.} Foreground (visible) jobs go to 8 workers pinned to the 12
+  performance-core threads (CPUs 0, 1, 10--19); background (prefetch) jobs to 3 workers on the 8 efficiency cores (CPUs
+  2--9). They never share workers, because E3 showed that efficiency cores mixed in slow the foreground. Pinning is per
+  thread (\code{SetThreadAffinityMask}); the low-power cores (20--21) are not used.
+  \item \textbf{Queue order:} newest generation first, then distance from the view centre / pan direction.
+  \item \textbf{Single-flight with tickets.} Each request holds a ticket on a job; identical requests share the job. A
+  foreground request for a tile queued as prefetch \emph{promotes} it. A job is cancelled only when its last live ticket
+  is gone.
+  \item \textbf{Generations.} Every zoom commit raises the generation of the viewer's session, announced with
+  \code{POST /session/\{sid\}/gen}; older work of that session is superseded (HTTP 409).
+  \item \textbf{Cancel tokens}, checked before dequeue, after each block read, before the kernel and before encoding.
+  GDAL reads cannot be interrupted, so the worst case is one block decode. Exact-mode tiles are computed in strips one
+  stored block row deep and stop at the next strip.
+  \item \textbf{Prefetch yields:} a background worker does not start a new tile while any foreground tile is queued or
+  running (a running one is not interrupted).
+  \item \textbf{Backpressure and memory guard.} The prefetch queue holds at most 256 jobs (oldest generation, then
+  farthest, dropped first). Prefetch pauses below 1.0\,GB free RAM, and paused prefetch requests get HTTP 503 at once.
+  \item \textbf{Event-driven disconnect detection:} a closed connection (a browser abort) cancels the job (HTTP 499
+  internally).
+  \item \textbf{API:} \code{GET /info} (datasets, levels, expected E5 error, legends), \code{GET /overview} (coarsest level,
+  the base layer), \code{GET /tiles/\{dataset\}/\{level\}/\{tx\}/\{ty\}.png} (ETag, cache headers, \code{Server-Timing},
+  \code{X-Expected-Error}), \code{POST /prefetch}, \code{POST /view} (a box as PNG or GeoTIFF, rendered from the shared
+  block cache), \code{GET /stats}, and the viewer itself at \code{/viewer/}. Settings by environment variables
+  (cache budgets, worker counts, guard, yielding).
+\end{itemize}
+\textbf{Gates and results} (17 new tests, 160 in total; \code{bench/check\_server}, real server, Chamoli 2\,m):
+\begin{itemize}
+  \item \textbf{Isolation:} foreground p95 16.6\,ms idle vs 16.6\,ms with 256 prefetch tiles queued (\textbf{+0.4\%};
+  median of 3 rounds $\times$ 100 tiles; gate $\leq$+10\%). Before yielding it swung between +6\% and +15\%.
+  \item \textbf{Cancellation:} an aborted request still queued is dropped in a median \textbf{37\,ms} (gate 50\,ms). A
+  running exact-mode tile stops at its next strip (7--155\,ms).
+  \item \textbf{Core classes} detected per thread as above; \textbf{memory guard} works (with 1.9\,GB free it paused
+  prefetch as designed).
+  \item \textbf{Deviation} from the spec's URL: tiles carry the dataset name, because two datasets are served.
+\end{itemize}
+
+\subsection{Web viewer (final plan Phase 3)}\label{sec:p5viewer}
+\code{viz/web/} (plain ES modules, no build step), served by the tile server: \code{python -m server}, then open
+\url{http://127.0.0.1:8765/viewer/}. Design and why:
+\begin{itemize}
+  \item \textbf{Camera:} UTM centre and metres per device pixel; device-pixel ratio capped at 1 for level choice
+  (HiDPI screens would multiply the work).
+  \item \textbf{Tile layer:} every frame draws the needed level's tiles; a missing tile falls back to a coarser cached
+  level, then a finer cached level, then the overview (always loaded), so no cell is ever blank. During gestures the
+  preview is the browser's scaled \code{drawImage} of the fallback tiles.
+  \item \textbf{Bitmap cache:} byte-accounted LRU of 256\,MiB, other levels evicted first, \code{close()} on evict.
+  \item \textbf{Gestures:} wheel (cursor-anchored), pinch, drag, keyboard. \textbf{Zoom commits once after a trailing
+  debounce} (150\,ms after E6); \textbf{pan requests new tiles at once} (no debounce: a pan does not change the
+  level). Foreground tiles are requested from the centre out; every request carries the session's generation and is
+  aborted (\code{AbortController}) when no longer visible.
+  \item \textbf{Prefetch ring:} after a commit, the 8 view-sized rectangles around the view at the committed level,
+  velocity-first, at most 2 in flight (leaving 4 of the browser's 6 connections for the foreground), recentred at a
+  25\% offset (at most once per 100\,ms), shrunk to the 4 cardinals above 150 tiles. Off in exact mode, in a hidden tab,
+  and for 2\,s after a slow foreground (p95 of the last 20 tiles $>$250\,ms) or a 503. Requests time out after 10\,s.
+  \item \textbf{UI:} operator, method, mode (auto / exact / precomputed), legend, level, cell size and expected error,
+  breadcrumb, Back, Whole map, and Shift + drag box zoom.
+  \item \textbf{One policy file} (\code{viz/web/policy.json}) read by the browser and by the E6 virtual client.
+\end{itemize}
+\textbf{Checks.} 6 Node unit tests (level choice equals the server's on a fixture; lattice, camera, cache eviction,
+prefetch ring). In-browser self-test (\code{/viewer/?selftest=1}) in headless Chrome against the real server
+(Chamoli 2\,m, hillshade), all four pass:
+\begin{center}\small
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{5.0cm}L}
+\toprule
+Check & Result \\
+\midrule
+2\,s wheel burst (120 ticks at 60\,Hz) & 0 commits during the burst, exactly 1 after the debounce (level 4 $\to$ 2); in
+real-time Chrome the first exact frame comes 88\,ms and the full view 161\,ms after the commit \\
+Prefetch ring after the commit & 52 neighbour tiles loaded at background priority \\
+Pan by half a view at the settled level & 0 commits; all 8 new tiles from the prefetch ring, no foreground requests \\
+Shift + drag box zoom on the central quarter & 1 commit, 4$\times$ zoom, level 0 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{QGIS plugin (final plan Phase 4)}\label{sec:p5qgis}
+\code{qgis\_plugin/geoguessers\_view} (``GeoGuessers terrain''; install with \code{qgis\_plugin\textbackslash install.ps1},
+notes in \code{qgis\_plugin/README.md}). A panel (server, dataset, product, method, values auto / exact / precomputed,
+cell size match-the-box-on-screen / full resolution, sun direction) and a box tool. \textbf{How it works:} the user drags
+a rectangle; the plugin reprojects it to UTM 44N (the map can use any CRS), sends it with the map's screen width to
+\code{POST /view} in a background \code{QgsTask} (QGIS stays usable), and adds the returned GeoTIFF as a styled layer,
+with level, cell size and the E5 expected error in its metadata. The server picks the level whose cells match the
+box on screen, so a large box comes back quickly from a coarse level, and a smaller box inside it at a finer level.
+Same server, same caches as the browser. A full-resolution box is limited to 64\,M cells (about 16\,km $\times$ 16\,km at
+2\,m; HTTP 400 with the reason), so one request cannot build a multi-GB mosaic.
+
+\textbf{Check} (\code{qgis\_plugin/check\_plugin.py}, headless, QGIS 3.44's Python against the real server): 13/13 pass.
+A full-resolution slope box lands on the DEM's cell grid and is \textbf{identical} to gdaldem's slope of the
+full-resolution DEM (1.22\,M cells, max difference 0); a box drawn on a WGS\,84 map gets exactly the level the rule
+gives; both datasets work; an oversized box and a box outside the data give messages instead of layers. Still to do by
+hand: one look in the QGIS GUI.
+
+\subsection{E6 method (final plan Phase 5)}\label{sec:e6method}
+\paragraph{Virtual client.} \code{bench/vclient.py} ports the viewer to Python: camera, level choice with hysteresis,
+byte-budgeted bitmap cache, trailing debounce, generations, aborts, prefetch ring and back-off. It reads the same
+\code{policy.json} and replays a trace in real time against the live server: HTTP/1.1 through \code{httpx} with at most 6
+connections (a browser's limit), 60\,Hz frames, and an abort closes the connection as \code{AbortController} does.
+It runs its own event loop on the high-resolution clock (Problems, Section~\ref{sec:problems}).
+
+\paragraph{Traces} (\code{bench/traces/*.json}, seeded, 1600$\times$900 view; 17 in total):
+\begin{center}\small
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{3.0cm}L}
+\toprule
+Family & Traces \\
+\midrule
+\code{pan-line} & 5\,s at 0.5, 1 and 2 view widths per second, roughly diagonal, at level 0 \\
+\code{pan-reverse} & the same, turning back at 2.5\,s \\
+\code{pan-walk} & 6\,s random walk, new heading every 0.3--1\,s \\
+\code{zoom-burst} & 60\,Hz wheel ticks for 0.3 / 1 / 2\,s, in and out, 1 / 2 / 3 levels (6 traces) \\
+\code{zoom-notched} & 10 discrete notches 30--150\,ms apart (brisk) or 120--300\,ms apart (slow), 2 levels in \\
+\code{zoom-pan} & 10\,s of alternating 0.5\,s bursts (one level) and 1\,s pans \\
+\code{box} & three nested box zooms ($\times$4 each) from the whole map to full resolution \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\paragraph{Protocol.} One factor at a time around the defaults, 24 configurations (debounce off / 100--250\,ms /
+forced commit; prefetch off, back-off variants, fixed ring order; background shared on P-cores, no yielding, 2 or 4 bg
+workers; 4 or 6 fg workers; block cache 0 / 256\,MiB; result cache off; slope, aspect, precomputed; 8\,m dataset;
+cold OS cache). Every (configuration, trace): 1 warm-up + 5 measured runs; 996 runs (147\,min) plus 72 for the notched
+traces = \textbf{1{,}068}. Each run starts a new server process (empty caches; kernels warmed on the other dataset),
+loads the overview and the first view with its prefetch ring, then starts the trace clock. Server counters from
+\code{/stats} at trace start and end; RSS and free memory every 50\,ms; per-CPU times bracket the trace. Data: Chamoli
+2\,m (levels 0--6), hillshade, unless stated. The prefetch memory guard was set to 0.5\,GB for E6 (the editor leaves
+the laptop with about 2\,GB free); no prefetch request was refused in any run (free memory never below 633\,MB).
+\textbf{The sweep's base debounce was 200\,ms}; 150\,ms became the default only after the sweep.
+
+\paragraph{Metrics.} Pan hit rate, blank area-time, TTFF, complete, server tiles per gesture, prefetch precision, and
+foreground p95 both at the client (request to response, including the wait for a connection) and on the server (queue
++ render, from \code{Server-Timing}); definitions in the glossary.
+
+\subsection{E6 results}\label{sec:e6results}
+\begin{table}[H]
+\centering\small
+\caption{Default policy on every trace (median of 5 runs; debounce 200\,ms, the sweep's base). TTFF and Complete
+(ms) for zoom traces include the debounce; Tiles/gest.\ = server foreground tiles per zoom gesture.}
+\label{tab:e6base}
+\footnotesize\setlength{\tabcolsep}{2pt}
+\begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrrr}
+\toprule
+Trace & Fg req. & Prefetched & Hit rate & TTFF & Complete & Tiles/gest. \\
+\midrule
+pan-line 0.5/1/2 & 0 / 0 / 2 & 175 / 313 / 333 & 1.00 / 1.00 / 0.99 & & & \\
+pan-reverse 0.5/1/2 & 0 / 0 / 5 & 73 / 128 / 443 & 1.00 / 1.00 / 0.98 & & & \\
+pan-walk & 0 & 290 & 1.00 & & & \\
+zoom in 0.3/1/2\,s & 20 / 15 / 20 & & & 272 / 273 / 289 & 325 / 325 / 358 & 20 / 15 / 20 \\
+zoom out 0.3/1/2\,s & 18 / 20 / 12 & & & 269 / 264 / 257 & 321 / 314 / 276 & 18 / 20 / 12 \\
+zoom-pan & 36 & 128 & 1.00 & 206 & 206 & 7.2 \\
+box & 35 & 125 & & 64 & 127 & \\
+\bottomrule
+\end{tabular*}
+\end{table}
+\textbf{On-the-fly computation keeps up} (Table~\ref{tab:e6base}):
+\begin{itemize}
+  \item \textbf{Pans:} 98--100\% of the tiles entering the view are already in the browser, at 0.5, 1 and 2 view widths
+  per second, straight or reversing; blank area-time rounds to 0.000.
+  \item \textbf{Zoom bursts:} the first exact tile appears 57--89\,ms after the commit, the whole view 76--158\,ms after
+  it (the table's TTFF adds the 200\,ms debounce).
+  \item \textbf{Box zoom:} first exact tile 64\,ms after the animation ends, whole view after 127\,ms.
+  \item \textbf{Cost:} the server never needed more than 982\,MiB; prefetch used about 3 CPU-seconds of efficiency cores
+  per 5\,s pan.
+  \item In zoom-pan, three of the five gestures zoom back out to cached levels (no requests), so the median gesture
+  completes when the debounce fires; the two zoom-ins complete about 300--320\,ms after the last tick.
+\end{itemize}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\linewidth]{e6_timeline.png}
+\caption{What the viewer draws during zoom-pan (defaults, 60\,Hz frames): share of the view from the needed level's own
+tiles (dark) or from another cached level (light). Only after the two zoom-ins do coarser tiles stand in, for a few
+hundred milliseconds.}
+\end{figure}
+
+\paragraph{Gate 2: the debounce.}
+\begin{table}[H]
+\centering\small
+\caption{Server foreground tiles per zoom gesture and delay, by debounce (median of runs).}
+\label{tab:e6debounce}
+\begin{tabularx}{\linewidth}{lRRRRR}
+\toprule
+Debounce & 60\,Hz bursts & Notched 30--150\,ms & Notched 120--300\,ms & TTFF $-$ debounce, bursts (ms) & TTFF, bursts (ms) \\
+\midrule
+off (every tick) & 62 & 36 & 48 & -- & 6 \\
+100\,ms & 19 & 36 & 48 & 63 & 163 \\
+\textbf{150\,ms (new default)} & 19 & \textbf{15} & \textbf{39} & 68 & 218 \\
+200\,ms & 19 & 15 & 39 & 71 & 271 \\
+250\,ms & 19 & 15 & 39 & 68 & 318 \\
+200\,ms + forced commit at 500\,ms & 35 & 30 & 39 & 62 & 262 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{itemize}
+  \item \textbf{Without a debounce} every tick commits (up to 121 commits in a 2\,s burst): each changes the generation,
+  aborts the previous commit's requests and starts the next. The server renders a median of \textbf{62} foreground
+  tiles per gesture (it finishes most aborted tiles, which are short, and cancels 4--19 per burst mid-render).
+  \item \textbf{With a trailing debounce} it renders \textbf{19 (3.3$\times$ fewer)} and the first exact tile arrives
+  \textbf{63--71\,ms after the debounce fires}, inside the 100\,ms gate. \textbf{Gate 2 passes.}
+  \item \textbf{What it trades:} a fixed wait after the last tick against wasted work. Committing on every tick buys
+  only a sharper preview during the gesture (blank area-time 0.1 vs 0.4).
+  \item \textbf{Why 150\,ms:} at 60\,Hz the ticks are 17\,ms apart, so every value from 100 to 250\,ms gives the same 19
+  tiles. A notched wheel decides it: with notches 30--150\,ms apart, 100\,ms commits between notches (36 tiles, as bad
+  as no debounce), while 150, 200 and 250\,ms coalesce the gesture (15). Slow scrolling (120--300\,ms gaps): 48 at
+  100\,ms, 39 at 150\,ms and longer. 200\,ms costs 40--50\,ms more delay than 150\,ms for no fewer tiles.
+  \item \textbf{Forced commit} after 500\,ms of continuous scrolling (\code{maxWaitMs}) almost doubles the tiles (35 vs
+  19) for 9\,ms less delay: stays off.
+\end{itemize}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.88\linewidth]{e6_debounce.png}
+\caption{Zoom bursts at 60\,Hz: foreground tiles the server renders per gesture, and time from the last tick to the
+first exact tile, against the debounce.}
+\end{figure}
+
+\paragraph{Prefetch.}
+\begin{table}[H]
+\centering\small
+\caption{Prefetch policies over the seven pan traces and zoom-pan (40 runs each; median [interquartile range]).}
+\label{tab:e6prefetch}
+\begin{tabularx}{\linewidth}{Xrrrr}
+\toprule
+Policy & Foreground requests & Pan hit rate & Prefetched & Precision \\
+\midrule
+prefetch off & 104 [68--135] & 0.30 [0.00--0.51] & 0 & -- \\
+defaults (back-off if foreground p95 $>$ 250\,ms) & 0 [0--4] & 1.00 [1.00--1.00] & 218 & 0.34 \\
+first policy (back-off at 100\,ms) & 0 [0--56] & 1.00 [0.70--1.00] & 192 & 0.29 \\
+no back-off & 0 [0--4] & 1.00 [1.00--1.00] & 232 & 0.34 \\
+ring in fixed order & 0 [0--7] & 1.00 [0.97--1.00] & 292 & 0.33 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{itemize}
+  \item \textbf{With prefetch} pans need 0--5 foreground requests instead of 36--202; on a straight pan the entering
+  tiles are 99--100\% cached. \textbf{Without} it 0\% on a straight pan and about 50\% on a pan that turns back over its
+  own path. The view still looks almost complete without prefetch (blank area-time 0.2--3.4\%): each new tile
+  arrives in about 50\,ms and the coarser cached level covers the gap.
+  \item \textbf{Cost:} precision 0.20--0.56, i.e.\ 2--5 tiles fetched for each one used: a ring of 8 neighbours always
+  loads directions the user does not take. The price is paid in efficiency-core time, not in foreground latency.
+  \item \textbf{Ordering:} velocity-first keeps the hit rate at 0.99 at 2 view widths per second; a fixed order drops it
+  to 0.91.
+  \item \textbf{Back-off threshold:} at 100\,ms (the first policy) prefetch switched off at random, because the cold-start
+  p95 is about 100\,ms; the fast reversing pan fell from 0.98 to 0.50 (19 back-offs per run). At 250\,ms the policy
+  equals ``no back-off'' on every trace and keeps a safety valve for a really overloaded server.
+\end{itemize}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.55\linewidth]{e6_hit_vs_speed.png}
+\caption{Pan hit rate (tiles already in the browser when they enter the view) against pan speed.}
+\end{figure}
+
+\paragraph{Gate 1: prefetch and the foreground.}
+\begin{table}[H]
+\centering\small
+\caption{Foreground p95 with and without prefetch. None of these foreground tiles overlapped a prefetch request.}
+\label{tab:e6gate1}
+\begin{tabularx}{\linewidth}{llRRR}
+\toprule
+Trace & Configuration & Fg tiles rendered & Server p95 (ms) & Client p95 (ms) \\
+\midrule
+box (same tiles) & prefetch off & 175 & 94.7 & 137.6 \\
+box (same tiles) & prefetch on & 175 & 89.7 & 129.3 \\
+zoom-pan & defaults: E-cores + yield & 180 & 58.1 & 103.5 \\
+zoom-pan & E-cores, no yield & 180 & 63.6 & 111.6 \\
+zoom-pan & P-cores (shared) + yield & 180 & 52.1 & 94.8 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{itemize}
+  \item \textbf{Like for like:} on the box trace the foreground tiles are identical with prefetch on and off. Server p95
+  is \textbf{90\,ms with prefetch vs 95\,ms without} (client 129 vs 138\,ms): prefetch is slightly \emph{faster},
+  because it has already decoded shared blocks. \textbf{Gate 1 passes.}
+  \item \textbf{Why (structural):} prefetch stops at the first input event of a gesture and restarts only when the view is
+  complete. With the defaults only 25 of 905 foreground tiles (3\%) were ever requested while a prefetch request was in
+  flight. On top of that the server keeps prefetch on other cores and lets it yield.
+  \item \textbf{Placement:} on zoom-pan, letting prefetch start while foreground work is pending raises server p95 by 9\%
+  (64 vs 58\,ms). \textbf{Pinning held:} 20{,}242 foreground jobs ran on performance cores only and 122{,}215 prefetch
+  jobs on efficiency cores only.
+  \item \textbf{Why not the spec's form of the gate:} per-trace foreground p95 with prefetch on vs off compares
+  \emph{different tiles} (with prefetch on, pans need almost no foreground tiles; what remains are cold tiles at a new
+  level after a zoom), so we used the like-for-like box comparison.
+\end{itemize}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.88\linewidth]{e6_fg_p95.png}
+\caption{Foreground tile latency (p95) on identical tile sets: on the server (queue + render) and at the client (also
+waiting for one of six connections).}
+\end{figure}
+
+\paragraph{Workers, caches and the rest.}
+\begin{table}[H]
+\centering\small
+\caption{Mixed traces (pan-walk, zoom-pan, two bursts, box; 25 runs each; medians).}
+\label{tab:e6mixed}
+\begin{tabularx}{\linewidth}{lRRRRR}
+\toprule
+Configuration & Client p95 ms & Server p95 ms & Complete ms & Blocks decoded & Peak RSS MiB \\
+\midrule
+defaults (8 workers, 1024\,MiB block cache) & 104 & 98 & 260 & 185 & 608 \\
+4 / 6 foreground workers & 106 / 101 & 76 / 92 & 254 / 251 & 185 & 588 / 598 \\
+no block cache & 146 & 111 & 285 & 1{,}128 & 386 \\
+256\,MiB block cache & 108 & 94 & 260 & 185 & 608 \\
+result cache off & 103 & 91 & 257 & 185 & 576 \\
+slope / aspect & 115 / 115 & 97 / 103 & 255 / 258 & 185 & 606 / 608 \\
+precomputed slope & 93 & 56 & 248 & 160 & 562 \\
+HMA 8\,m DEM & 118 & 92 & 268 & 130 & 594 \\
+OS file cache flushed & 103 & 104 & 257 & 185 & 608 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{itemize}
+  \item \textbf{The browser's 6 connections, not the server, set the foreground latency.} Client p95 is about 40\,ms
+  above server p95 (box: 90 $\to$ 129\,ms) because tiles queue for a connection. 4, 6 or 8 foreground workers give the
+  same client p95 (101--106\,ms); with 4 the server p95 is even lower (76 vs 98\,ms, less contention for decoding), but
+  one browser cannot use more than 6 at once. 8 stay the default so a second client (QGIS, another tab) does not queue.
+  \item \textbf{Block cache:} without it the server decodes 6$\times$ more blocks (1{,}128 vs 185) and client p95 rises
+  40\% (146 vs 104\,ms). 256\,MiB equals 1024\,MiB over these 1--11\,s traces because the cache never fills.
+  \item \textbf{Result cache:} no effect here, since each run uses a fresh server and the browser keeps its own tiles, so
+  no tile is asked for twice. It matters across sessions and clients, which E6 does not exercise.
+  \item \textbf{Product, mode, data, OS cache:} slope and aspect tiles are about 10\% slower than hillshade; precomputed
+  slope is the fastest on the server (p95 56 vs 98\,ms: one block, no halo, no kernel); the 8\,m dataset behaves like
+  the 2\,m one; a flushed OS file cache changes nothing, because decoding, not the disk, is the cost (as in E1--E3).
+\end{itemize}
+\begin{figure}[!htbp]
+\centering
+\includegraphics[width=0.55\linewidth]{e6_memory.png}
+\caption{Server memory during zoom-pan (one run): steps when a zoom-in decodes a new level's blocks; without the block
+cache memory stays lower but every block is decoded again.}
+\end{figure}
+
+\par\medskip\noindent\begin{minipage}{\linewidth}
+\setlength{\parskip}{4pt}
+\noindent\textbf{A real browser.} \code{bench/e6\_browser.py} replays three traces in headless Chrome, driven in real time over
+the DevTools protocol, and compares with the virtual client:
+\begin{center}\small
+\begin{tabularx}{\linewidth}{lRRRR}
+\toprule
+Trace & Fg requests (Chrome / virtual) & Commits & TTFF ms (Chrome / virtual) & Complete ms (Chrome / virtual) \\
+\midrule
+zoom-burst-in-1 & 15 / 15 & 1 / 1 & 248 / 273 & 298 / 325 \\
+pan-line-1 & 0 / 0 & 0 / 0 & -- & -- \\
+box & 35 / 35 & 3 / 3 & 46 / 64 & 123 / 127 \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Same commits, same foreground requests, the same prefetched tiles (120 vs 120; 306--310 vs 308--313), view-complete
+within 10\%, first frames 18--25\,ms sooner in Chrome. The Python client is slightly conservative, so E6 latencies are
+upper bounds.
+\end{minipage}
+
+\subsection{Policy set from the data}\label{sec:p5policy}
+\begin{table}[H]
+\centering\small
+\caption{Defaults in \code{viz/web/policy.json} and on the server after E6.}
+\label{tab:e6policy}
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{4.1cm}>{\raggedright\arraybackslash}p{2.0cm}>{\raggedright\arraybackslash}p{2.0cm}L}
+\toprule
+Setting & Before E6 & Now & Why \\
+\midrule
+\code{debounceMs} & 200 & \textbf{150} & Same tiles as 200 and 250\,ms on every trace, notched wheels included; 40--50\,ms sooner;
+100\,ms commits between notches \\
+\code{maxWaitMs} & off & off & A forced commit nearly doubles tiles per gesture for 9\,ms \\
+\code{prefetch.backoffP95Ms} & 100 & \textbf{250} & 100\,ms sits at the cold-start p95 and switches prefetch off at
+random; 250\,ms equals ``no back-off'' everywhere and keeps a safety valve \\
+\code{prefetch.order} & velocity-first & velocity-first & 0.99 vs 0.91 hit rate at 2 view widths per second \\
+\code{prefetch.maxInFlight} & 2 & 2 & Leaves 4 of the browser's 6 connections for the foreground; hit rate already
+0.98--1.00 \\
+Server fg workers & 8 & 8 & 4--8 equal for one browser; 8 leave room for a second client \\
+Server bg placement & E-cores + yield & E-cores + yield & Verified on every job; not yielding costs 9\% foreground p95 \\
+Block cache & 1024\,MiB & 1024\,MiB & 256\,MiB is enough for short traces; longer sessions and QGIS reuse more blocks \\
+\bottomrule
+\end{tabularx}
+\end{table}
+Other values (unchanged by E6): level hysteresis 10\%, device-pixel-ratio cap 1, browser cache 256\,MiB, ring recentre
+at 25\% (at most every 100\,ms), ring at most 150 tiles, back-off window 20 tiles and 2\,s, prefetch request time-out
+10\,s; on the server 3 bg workers, result cache 512\,MiB, prefetch queue cap 256, and the memory guard at 1.0\,GB free
+(lowered from 2.5\,GB while building the viewer, because 2.5\,GB kept prefetch paused on this laptop).
+
+\key{Phase 5 answer: computing derivatives on demand keeps up with continuous pan and zoom on one laptop. A
+velocity-first ring of neighbouring views makes panning seamless at no cost to the foreground, because prefetch never runs
+while the user is waiting; a 150\,ms trailing debounce cuts the server's work per zoom gesture 3.3$\times$. The latency
+that remains is set by decoding compressed blocks and the browser's 6 connections, not by computing the derivatives:
+the same data-movement bottleneck Phases 2--4 found for whole grids.}
+
+%=====================================================================
 \section{The whole story (what to say in the presentation)}
 \begin{enumerate}
   \item \textbf{Problem:} a 1\,m DEM of our area is 43\,GB, 2.6$\times$ the laptop's RAM.
@@ -718,7 +1346,13 @@ underestimate, worst on steep ground. Aspect costs much less. Good for display; 
   \item \textbf{So} don't process everything: read and compute only what is viewed, from the right pyramid level. That
   makes every view cost 5--8\,ms regardless of zoom, with a known, measured accuracy cost (slope too low by
   $\sim$2.5$^\circ$ + 1.5$^\circ$/level), and no storage for precomputed products.
-  \item \textbf{Next}, the box-zoom viewer turns this into an interactive tool.
+  \item \textbf{The viewer} turns this into a map: continuous pan and zoom over a fixed $512^2$ tile lattice, every tile
+  computed on demand. A 150\,ms trailing debounce cuts the server's work per zoom gesture 3.3$\times$; a velocity-first
+  ring of neighbouring views makes panning seamless (98--100\% of new tiles already in the browser); prefetch runs
+  on the efficiency cores and never while the user waits, so it does not slow the visible tiles.
+  \item \textbf{And the bottleneck is still data movement:} the viewer's remaining latency is decoding compressed
+  blocks and waiting for one of the browser's 6 connections, not computing slope or hillshade. The same lesson at
+  the scale of one tile.
 \end{enumerate}
 
 %=====================================================================
@@ -768,6 +1402,54 @@ Overstated claims & e.g.\ ``reads the whole 16.6\,GB file'' (really 12.7\,GB), `
 (false at 90\,m), tile time ``6--7\,ms'' (really 5--8). Write ranges from the data, not from memory. \\
 Correctness gate on 90/30\,m never run & Added; passes. Plan items need a checklist. \\
 Median only, plan asked median + IQR & \code{run\_stats} for every configuration. \\
+\midrule
+\multicolumn{2}{l}{\textit{Phase 5: tile engine, scheduler and server (final plan Phases 1--2)}} \\
+Parallel gate only 4.3$\times$ on 8 threads & NumPy colour quantising and Pillow PNG encoding held the GIL, so threads
+waited for each other. A \code{nogil} Numba quantiser and our own PNG writer with \code{zlib} (Z\_RLE: 2--3$\times$
+faster, 5--15\% larger tiles): 5.4$\times$. Check every stage of a threaded path for the GIL, not just the kernel. \\
+Windows gives E- and LP-cores the same efficiency class & A split by class alone would mix the very slow LP-cores into the
+prefetch pool. We tell them apart by their separate last-level cache (CPUs 20--21) and leave them unused. \\
+Cancelled job still running could be joined & A new request for the same tile could attach to a job that was cancelled
+but still finishing its stage, and that job's clean-up could remove the newer job from the
+table. Now a request never joins a cancelled job (a new one is created), and clean-up removes the entry only if it is
+still the same job. \\
+Isolation gate noisy (+6 to +15\%) & Even on separate cores, background threads share the GIL and memory bandwidth with
+the foreground. Prefetch now yields (no new prefetch tile while foreground work is pending): +0.4\%. \\
+Exact-mode tiles slow to cancel & A running tile can stop only between stages; exact tiles are now computed in strips
+one stored block row deep, so they stop at the next strip (7--155\,ms). \\
+Disconnects found by polling every 20\,ms & Gave 58--80\,ms (gate 50\,ms). Event-driven disconnect detection: median
+37\,ms. \\
+\midrule
+\multicolumn{2}{l}{\textit{Phase 5: web viewer and QGIS plugin (final plan Phases 3--4)}} \\
+Memory guard at 2.5\,GB kept prefetch paused & This laptop often runs with $<$2\,GB free. Default lowered to 1.0\,GB;
+paused prefetch now gets 503 at once, so the client backs off for 2\,s instead of holding two connections open;
+prefetch requests time out after 10\,s. \\
+Prefetch never resumed in some cases & If prefetch could not start right after a commit (backing off, hidden tab), it did
+not start. Now it is marked pending and starts on a later frame. \\
+Box zoom produced two commits & The animation's moves also started the debounce timer. Animated moves (box zoom, Back,
+Whole map) now suppress the timer and commit once at the end. \\
+Blank map at start & The first view was fitted before the canvas size was known. The viewer now reads the canvas size
+before fitting the first view (and follows resizes). \\
+Headless Chrome in virtual-time mode & It distorts every network wait. Switched to real-time headless Chrome driven over
+the DevTools protocol with the \code{websockets} package the server already uses: Playwright (which would have needed the
+team's OK to install) was not needed. \\
+One QGIS box could build a multi-GB mosaic & \code{POST /view} refuses boxes over 64\,M cells (HTTP 400 with the
+reason). \\
+\midrule
+\multicolumn{2}{l}{\textit{Phase 5: E6 (final plan Phase 5)}} \\
+Virtual client's timers up to 16\,ms early & Python 3.12's Windows event-loop clock moves in 15.6\,ms steps and fires
+timers up to one step early, so the debounce fired early. First sweep stopped after 17 runs (kept in \code{old
+files/results\_superseded/}) and rerun on our own high-resolution loop ($\sim$1\,ms). \\
+Back-off threshold of 100\,ms & Sat at the cold-start p95 ($\sim$100\,ms: a fresh view's blocks decoding while 15--20 tiles
+queue on 6 connections), so prefetch switched off at random (pilot) and the fast reversing pan fell to a 0.50 hit rate.
+Raised to 250\,ms before the sweep (the sweep still measures 100\,ms as a variant). \\
+The spec's gate 1 compares different tiles & Per-trace foreground p95 with prefetch on vs off: with prefetch on, pans
+need almost no foreground tiles, so the two sides are different tile sets. Used the like-for-like box trace (identical
+tiles). \\
+Steady 60\,Hz ticks hide the debounce choice & Gaps of 17\,ms make 100--250\,ms behave the same. Notched-wheel traces
+(30--150 and 120--300\,ms gaps, 72 runs) added after the main sweep; they set 150\,ms. \\
+Laptop has only $\sim$2\,GB free with the editor open & E6 sets the prefetch memory guard to 0.5\,GB; no prefetch request
+was refused in any run (free memory never below 633\,MB). \\
 \bottomrule
 \end{longtable}
 
@@ -784,79 +1466,73 @@ Median only, plan asked median + IQR & \code{run\_stats} for every configuration
   \item \textbf{Truth is itself a DEM} with noise; the 8\,m DEM's truth is only 8\,m.
   \item \textbf{Python start-up} ($\sim$0.5\,s) is included in every engine time, like gdaldem's start-up: fair, but it
   dominates the small grids.
+  \item \textbf{E6: one client on one laptop.} The result cache and the spare foreground workers are there for several
+  clients (browser + QGIS); E6 runs one.
+  \item \textbf{E6: short synthetic traces} (1--11\,s), seeded rather than recorded from people. Caches never fill, so
+  long sessions (evictions, the result cache) are not measured.
+  \item \textbf{E6: simulated client.} The virtual client is a port of the viewer; the headless-Chrome check agrees on all
+  counts and within 10\% on view-complete times, but covers three traces.
+  \item \textbf{E6: cold start only.} Every run starts with an empty server; a returning user would see faster tiles.
+  \item \textbf{E6: CPU only.} The GPU path is not used for tiles: at $512\times512$ per tile, E4 predicts little gain once the
+  transfer is counted (1.3$\times$ including the copies).
+  \item \textbf{Not done:} the QGIS box-drawing baseline listed in the plan (QGIS's own rendering is covered by E1q), and
+  one look at the plugin in the QGIS GUI by hand.
 \end{itemize}
 
 %=====================================================================
-\section{Future work}
-\subsection{Phase 5: the box-zoom viewer (E6)}\label{sec:phase5}
-\textbf{Team decision:} instead of loading pyramid tiles continuously while the user scrolls and pans, the viewer works
-with \textbf{bounding boxes}. The whole map is shown first (from a coarse level). The user drags a box; only that box is
-computed and displayed, at the level where one cell $\approx$ one screen pixel. To zoom further the user drags a second
-box inside the current view, and so on, down to full resolution. One zoom step = one computation of one box at one level.
-\begin{figure}[!htbp]
-\centering
-\begin{tikzpicture}[font=\small, arr/.style={-{Stealth}, thick}]
-\draw[fill=gray!10] (0,0) rectangle (3.4,2.4); \node[font=\scriptsize] at (1.7,2.65) {whole map (level 6, 128\,m)};
-\draw[thick, blue] (1.2,0.6) rectangle (2.4,1.5);
-\draw[arr] (3.6,1.2) -- (4.4,1.2);
-\draw[fill=blue!6] (4.6,0) rectangle (8.0,2.4); \node[font=\scriptsize] at (6.3,2.65) {box 1 (level 3, 16\,m)};
-\draw[thick, orange] (6.0,0.9) rectangle (6.9,1.5);
-\draw[arr] (8.2,1.2) -- (9.0,1.2);
-\draw[fill=orange!10] (9.2,0) rectangle (12.6,2.4); \node[font=\scriptsize] at (10.9,2.65) {box 2 (level 0, 2\,m)};
-\node[align=center, font=\scriptsize, text width=12.6cm, anchor=north] at (6.3,-0.25) {each box: snap to the screen's aspect ratio $\to$
-choose level $k = \lfloor\log_2(\text{box width in fine cells} / \text{screen width in pixels})\rfloor$ $\to$ read only
-that window (+ halo) $\to$ compute slope/aspect/hillshade (CPU or GPU) $\to$ colour $\to$ show, with the expected error from
-E5. ``Exact'' toggle: compute from full resolution instead.};
-\end{tikzpicture}
-\caption{Box zoom: every step computes only the selected box, at the resolution the screen can show.}
-\end{figure}
-\textbf{Why this design:} explicit resolution handling, one computation per zoom step (easy to measure and to explain),
-constant cost per view (E5), and a known accuracy cost shown to the user. \textbf{Choices made:} both a browser viewer
-(native UTM, breadcrumb of boxes, back button, switches for operation / auto--exact / CPU--GPU) and a QGIS plugin (map
-tool: drag a rectangle, the box comes back as a georeferenced layer), sharing one FastAPI server; automatic level with an
-exact toggle; the XYZ tile server is dropped; the Cesium globe becomes a stretch item.
+\section{What is left}\label{sec:future}
+\subsection{Final deliverables (final plan Phase 6)}
+\begin{itemize}
+  \item \textbf{Final report} (LaTeX, \code{report/final\_report/}): introduction, literature, data, method, E1--E6 results,
+  the bottleneck story (G1), the pyramid trade-off (G2), the viewer, limitations, conclusion.
+  \item \textbf{Slides} (\code{report/slides/}) and a \textbf{recorded demo video} of the viewer and the QGIS plugin, as the
+  fallback for the live demo.
+  \item \textbf{Professor update covering Phases 3--5} (\code{docs/prof\_update\_final.md}).
+  \item Update \code{README.md}, \code{PROJECT\_PLAN.md} and this report; freeze the code, tag the release, push, refresh
+  the copy on the external drive.
+\end{itemize}
 
-\textbf{Planned files:} \code{demlab/view.py} (box $\to$ level, window, compute, colour, PNG, timings; result cache),
-\code{server/app.py} (\code{GET /overview}, \code{POST /view}, \code{GET /info}), \code{viz/web/}, \code{qgis\_plugin/},
-\code{bench/experiments/e6\_view.py}.
-
-\textbf{E6 will measure:} time per zoom step split into read, compute, colour map + PNG, transfer + display; p50/p95 over
-random nested box sequences from the whole map to full resolution; CPU vs GPU; auto vs exact vs precomputed; cold vs warm;
-result cache hit vs miss; QGIS drawing the same boxes as the baseline; expected slope error per step (from E5).
-
-\subsection{Phase 6 (stretch) and Phase 7}
-\textbf{Phase 6}, only if time allows: viewshed (exact R3 vs approximate XDraw vs \code{gdal\_viewshed}: time and share of
-cells classified differently, gap G3; heights first converted to one vertical datum) and terrain distance (Dijkstra vs A*
-on a slope-based cost surface). \textbf{Phase 7:} final report (introduction, literature, method, results E1--E6, the
-bottleneck story, limitations), slides, live demo with a video fallback, code frozen and tagged.
+\subsection{Stretch (only if the above is on track)}
+\begin{itemize}
+  \item GPU tile path as an E6 variant (expected small gain at $512^2$, per E4).
+  \item Cesium globe showing the viewer's tiles draped on terrain.
+  \item Viewshed (exact R3 vs approximate XDraw vs \code{gdal\_viewshed}: time and share of cells classified differently,
+  gap G3; heights first converted to one vertical datum) and terrain distance (Dijkstra vs A* on a slope-based cost
+  surface): the original plan's Phase 6.
+\end{itemize}
 
 \subsection{Schedule and owners (relative weeks)}
 \noindent\begin{tabularx}{\linewidth}{lLl}
 \toprule
-When & Work & Owner (as in the plan) \\
+When & Work & Owner \\
 \midrule
 Weeks 1--2 & Phases 0--3 (setup, data, baseline, engine) & done \\
 Weeks 2--3 & Phase 4 pyramid accuracy (E5) & done \\
-Week 3 & Phase 5 box server + web viewer & Swayam \\
-Week 3 & Phase 5 QGIS plugin (Cesium stretch) & Kartikeya \\
-Week 3 & Phase 6 stretch, if on track & Siddharth \\
-End of Week 3 & Report, slides, demo & all \\
+Week 3 & Phase 5: tile engine, scheduler, server (final plan Phases 1--2) & Swayam, done \\
+Week 3 & Phase 5: web viewer and prefetch (final plan Phase 3) & Kartikeya, done \\
+Week 3 & Phase 5: QGIS plugin (final plan Phase 4) & shared, done \\
+Week 3 & Phase 5: E6 benchmark and tuning (final plan Phase 5) & Siddharth, done \\
+End of Week 3 & Final report, slides, demo (final plan Phase 6) & all \\
 \bottomrule
 \end{tabularx}
 
 \subsection{Open items}
 \begin{itemize}
-  \item The professor update (\code{docs/prof\_update\_phase2.md}) covers Phase 2 only and has not been sent; Phase 3 and 4
-  progress reports are ready in \code{report/}.
-  \item Possible improvements found but not done: cache decoded tiles across windows (halo re-decoding); a per-level
-  correction factor for the slope underestimate; padding grids to a multiple of $2^k$ for exact overviews.
+  \item The professor update (\code{docs/prof\_update\_phase2.md}) covers Phase 2 only and has not been sent; the Phase 3, 4
+  and 5 progress reports are ready in \code{report/}.
+  \item Not done in Phase 5: the QGIS box-drawing baseline from the plan (QGIS's own rendering is covered by E1q); one look
+  at the plugin in the QGIS GUI by hand.
+  \item Possible improvements found but not done: a per-level correction factor for the slope underestimate; padding grids
+  to a multiple of $2^k$ for exact overviews; caching decoded blocks across windows in the batch engine (the viewer's
+  block cache already does this for tiles).
 \end{itemize}
 
 \subsection{Questions to ask the professor}
 \begin{itemize}
   \item Is ``standard tools don't break, they become slow; after parallelising, data movement is the bottleneck'' the kind
   of bottleneck answer he wants, or should we also benchmark other tools (WhiteboxTools, GRASS)?
-  \item Is box-based zoom acceptable as the interactive design (instead of continuous tile streaming)?
+  \item Does the debounced pan/zoom viewer with neighbour prefetch match what he asked for, and is the E6 method (a
+  virtual client replaying seeded traces, cross-checked in headless Chrome) acceptable evidence for it?
   \item Is an honest ``when the GPU helps and when it doesn't'' (1.4$\times$ end to end, 50$\times$ kernel) the expected GPU result?
   \item Is the slope underestimate at coarse levels acceptable for display, if the viewer shows the expected error?
 \end{itemize}
@@ -864,10 +1540,11 @@ End of Week 3 & Report, slides, demo & all \\
 %=====================================================================
 \section{Presentation preparation}
 \subsection{Numbers to remember}
-\begin{tabularx}{\linewidth}{lL}
+\begin{longtable}{>{\raggedright\arraybackslash}p{5.3cm}>{\raggedright\arraybackslash}p{10.1cm}}
 \toprule
 Fact & Number \\
 \midrule
+\endhead
 Largest grid & 10.8 billion cells, 43\,GB float32, 2.6$\times$ RAM \\
 gdaldem slope at 1\,m & 208\,s, 1 of 22 threads, 0.87\,GB RAM, 73\% computation \\
 QGIS whole-area redraw at 1\,m & 31.9\,s without pyramid, 0.09\,s with (360$\times$) \\
@@ -881,9 +1558,28 @@ On-demand tile & 5--8\,ms at every level; 8--450$\times$ faster than exact \\
 Slope error per level & 2.3$^\circ$ (1 up), 4.4$^\circ$ (2), 5.6$^\circ$ (3), 6.4$^\circ$ (4), 10$^\circ$ (6); always too low \\
 Aspect error & median 1.8--8.5$^\circ$ \\
 Precomputed slope pyramid & 10.6\,s, 1.0\,GB per derivative \\
-Runs measured & 1817 process runs (E1--E4) + E5 timings; 2 failures (intended out-of-memory) \\
+Runs measured & 1817 process runs (E1--E4) + E5 timings; 2 failures (intended out-of-memory); E6 1{,}068 viewer runs \\
+\midrule
+\multicolumn{2}{l}{\textit{Phase 5: the viewer (E6)}} \\
+Tile kernels in parallel & 5.4$\times$ on 8 threads (4.3$\times$ before moving quantising and PNG off the GIL) \\
+Block cache & 64 tiles decode 100 blocks instead of up to 576; without it 6$\times$ more decoding, p95 +40\% \\
+E6 size & 24 configurations, 17 traces, 1 warm-up + 5 runs, fresh server per run: 1{,}068 runs \\
+Panning with prefetch & 98--100\% of new tiles already in the browser (without: 0\% straight, $\sim$50\% reversing);
+0--5 foreground requests instead of 36--202 \\
+Debounce (gate 2) & 62 $\to$ 19 server tiles per zoom gesture (3.3$\times$); first exact tile 63--71\,ms after the debounce \\
+Why 150\,ms & notched wheel: 100\,ms gives 36 tiles (= no debounce), 150--250\,ms give 15; 200\,ms is 40--50\,ms slower \\
+Prefetch vs foreground (gate 1) & server p95 90\,ms with vs 95\,ms without (same tiles); isolation test +0.4\%; only 3\% of
+foreground tiles overlap a prefetch request \\
+Prefetch cost & precision 0.20--0.56 (2--5 fetched per tile used); $\sim$3 E-core CPU-seconds per 5\,s pan \\
+Latency after a zoom & first exact tile 57--89\,ms after the commit, whole view 76--158\,ms; box zoom 64 / 127\,ms \\
+Connection wait & client p95 $\sim$40\,ms above server p95 (6 connections per browser) \\
+Cancellation & aborted request dropped in a median 37\,ms (polling gave 58--80\,ms) \\
+Server memory & never above 982\,MiB (budget $\approx$2.2\,GB); prefetch pauses below 1.0\,GB free \\
+Pinning held & 20{,}242 fg jobs on P-cores only, 122{,}215 bg jobs on E-cores only \\
+Chrome vs virtual client & same commits and requests; view complete within 10\% \\
+QGIS plugin & full-resolution box identical to gdaldem (1.22\,M cells, max difference 0); 13/13 checks \\
 \bottomrule
-\end{tabularx}
+\end{longtable}
 
 \subsection{Suggested slide order}
 \begin{enumerate}
@@ -894,8 +1590,15 @@ Runs measured & 1817 process runs (E1--E4) + E5 timings; 2 failures (intended ou
   \item Our engine: pipeline diagram; speed-up and memory; naive breaking point; correctness.
   \item GPU: kernel vs end to end; crossover; optimisation steps; ``the bottleneck moves'' chart.
   \item Pyramid on demand: error by level and slope class, maps, time saved, trade-off chart.
-  \item The story and the answer to G1 and G2.
-  \item Phase 5 box-zoom design (and demo, once built); limitations; future work.
+  \item The viewer: what the professor asked for (map-like pan/zoom, prefetch); architecture diagram
+  (Figure~\ref{fig:arch}); the design choices that matter (lattice on COG blocks, block cache, fg/bg on P/E cores,
+  generations and cancellation, debounce, prefetch ring).
+  \item \textbf{Demo} (live, with the recorded video as fallback): pan and zoom in the browser (hillshade, then slope with
+  the expected error shown), Shift + drag box zoom, exact mode; then one box in QGIS.
+  \item E6 method: virtual client, traces, protocol, the two gates; Chrome cross-check.
+  \item E6 results: pan hit rate vs speed; debounce chart and why 150\,ms; gate 1 (prefetch does not slow the
+  foreground); the 6-connection and block-decoding bottleneck.
+  \item The story and the answer to G1 and G2 (and the viewer as the practical result); limitations; what is left.
 \end{enumerate}
 
 \subsection{Likely questions and answers}
@@ -920,10 +1623,50 @@ Is that error acceptable? & For display, yes (the map keeps every landform; erro
 no: use the exact mode or a precomputed slope pyramid. \\
 Why not precompute everything? & Exact and slightly faster, but a full pass and $\sim$1\,GB per derivative and parameter; on demand
 needs no storage and supports any parameter. \\
-Why bounding boxes instead of tiles? & Explicit resolution per step, one computation per zoom, constant cost, measurable, and the
-error of each step can be shown. \\
+Why did you drop box zoom as the main interaction? & The professor asked for map-like continuous pan and zoom. The fixed
+$512^2$ lattice keeps the cost per tile at the same few ms at every zoom (E5), so continuous viewing is possible. Box zoom
+remains as Shift + drag and as \code{POST /view} for QGIS. \\
+Why debounce the zoom? & A wheel gesture sends many ticks; committing on each one starts and aborts a new view every
+17\,ms. The server then renders 62 foreground tiles per gesture instead of 19 (3.3$\times$ more), most of them for views the
+user never stops at. During the gesture the screen shows the tiles it has, rescaled, so nothing goes blank. \\
+Why 150\,ms and not 100 or 200? & With 60\,Hz bursts 100--250\,ms all give 19 tiles. A notched wheel (ticks 30--150\,ms
+apart) separates them: 100\,ms commits between notches (36 tiles, as bad as none); 150\,ms and longer coalesce the
+gesture (15). 200\,ms adds 40--50\,ms of delay for no fewer tiles. \\
+Why doesn't prefetch slow the foreground? & Three reasons: it runs on the efficiency cores while the foreground runs on the
+performance cores; a prefetch worker does not start a tile while any foreground tile is pending; and the client stops
+prefetch at the first input of a gesture and restarts it only when the view is complete (only 3\% of foreground tiles
+ever overlap a prefetch request). On identical tiles server p95 is 90\,ms with prefetch vs 95\,ms without: it even helps,
+because it has already decoded shared blocks. Not yielding costs 9\%. \\
+Isn't prefetch wasteful? & Yes, 2--5 tiles fetched per tile used (precision 0.20--0.56), because a ring of 8 neighbours
+loads directions the user does not take. The cost is about 3 E-core CPU-seconds per 5\,s pan; the gain is 98--100\%
+of new tiles ready while panning instead of 0--50\%. Velocity-first ordering keeps it useful at speed (0.99 vs 0.91). \\
+Why do the 6 connections matter? & A browser opens at most 6 HTTP/1.1 connections to one server; other tile requests wait.
+That wait is why client p95 is about 40\,ms above server p95, and why 4, 6 or 8 server workers give the same client
+latency. Prefetch takes at most 2 connections, leaving 4 for visible tiles. We keep 8 workers so a second client (QGIS)
+does not queue. \\
+Why not the GPU for the tiles? & A $512^2$ tile sits at the CPU/GPU crossover from E4 (GPU only 1.3$\times$ faster
+including the copies), and a tile's cost is mostly decoding compressed blocks, not the kernel. In E5 the 12-thread kernel
+took $\sim$0.5\,ms of a 5--8\,ms tile; the server instead runs one single-threaded kernel per tile (median 2.3\,ms,
+p95 6.2\,ms for foreground tiles in E6) on 8 tiles at once, which gives more throughput than threading inside one
+tile. E6 is CPU only; a GPU
+tile path is a stretch item. \\
+How does the QGIS plugin work? & A panel and a box tool. The box is reprojected to UTM 44N and sent with the map's width to
+the same server's \code{POST /view} in a background \code{QgsTask}; the server picks the level that matches the box on
+screen (or full resolution) and returns a GeoTIFF that is added as a styled layer with level, cell size and expected E5
+error in its metadata. A full-resolution box is identical to gdaldem's slope (max difference 0). \\
+What happens with little free memory? & All caches are byte-budgeted (blocks 1024\,MiB, tiles 512\,MiB, browser 256\,MiB;
+server peak in E6 982\,MiB). Below 1.0\,GB free RAM the server pauses prefetch and answers prefetch requests with 503 at
+once; the client backs off for 2\,s. Visible tiles are always served. \code{POST /view} refuses boxes over 64\,M cells. \\
+How do you know the virtual client behaves like a browser? & It is a port of the viewer's code reading the same
+\code{policy.json}, with 6 connections and real aborts. We replayed three traces in real headless Chrome over the DevTools
+protocol: same commits, same foreground requests (15, 0, 35), same prefetched tiles, view complete within 10\%, first
+frames 18--25\,ms sooner in Chrome. So E6 latencies are slight upper bounds. \\
+What happens when the user zooms away while tiles are computing? & The zoom commit raises the generation; the server
+drops older queued work of that session, the browser aborts requests no longer visible (the server sees the disconnect
+and cancels in a median 37\,ms), and running tiles stop at their next stage check. \\
 How do you know your results are correct? & 119 tests; every cell of four full grids compared with gdaldem; differences explained
-by gdaldem's float32 rounding and reproduced exactly. \\
+by gdaldem's float32 rounding and reproduced exactly. For the viewer: 161 tests in total; every auto tile equals the
+engine's result cell for cell; a QGIS full-resolution box equals gdaldem's slope exactly. \\
 How repeatable are the timings? & Median IQR 1.2--1.6\% of the median; cold cache verified; background interference detected and
 removed; disturbed attempts kept as evidence. \\
 What would change on another laptop? & Absolute times; the shape of the results (where the bottleneck is) should hold on similar
@@ -947,22 +1690,40 @@ python -m pytest tests/ -q                                     # correctness
 python -m tests.check_full_grid
 python -m bench.analysis.phase2_report   # also: phase3_report,
                                          # e4_report, e5_report, run_stats
+# Phase 5 (viewer, E6)
+python -m server                         # http://127.0.0.1:8765/viewer/
+python -m bench.check_tile_parallel      # parallel gate (Phase 1)
+python -m bench.check_server             # isolation + cancellation gates
+python -m bench.check_viewer             # in-browser self-test (Chrome)
+powershell -ExecutionPolicy Bypass -File bench\run_e6.ps1      # E6, ~2.5 h
+python -m bench.experiments.e6_view --only base debounce-off debounce-100
+  debounce-150 debounce-250 maxwait-500 --traces zoom-notched
+  zoom-notched-slow                      # notched traces (one line)
+python -m bench.e6_browser               # headless Chrome vs virtual client
+python -m bench.analysis.e6_report       # e6_tables.md, plots/e6_*.png
+cd viz/web && node --test tests/viewer.test.js   # viewer unit tests
 \end{verbatim}
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{6.4cm}L}
+{\small
+\begin{longtable}{>{\raggedright\arraybackslash}p{7.6cm}>{\raggedright\arraybackslash}p{7.8cm}}
 \toprule
 Where & What \\
 \midrule
-\code{docs/PROJECT\_PLAN.md} & plan, methodology (\S6), phase status, Phase 5 design \\
-\code{docs/PHASE2\_RESULTS.md}, \code{PHASE3\_RESULTS.md}, \code{PHASE3\_GPU\_RESULTS.md}, \code{PHASE4\_RESULTS.md} & detailed results per phase \\
-\code{report/} & progress reports (Phase 2, 3, 4) and this report \\
-\code{results/runs.csv}, \code{results/e5\_*.csv} & every measurement \\
+\endhead
+\code{docs/PROJECT\_PLAN.md} & original plan, methodology (\S6), phase status (its Phase 5--7 part is replaced by the final plan) \\
+\code{docs/FINAL\_PLAN.md} & working plan for the viewer and what is left (Phase 0 = done, Phases 1--5 viewer + E6, Phase 6 deliverables) \\
+\code{docs/PHASE5\_DEBOUNCED\_\allowbreak ZOOM\_SPEC.md} & the team's engineering spec for the viewer (goals, gates) \\
+\code{docs/PHASE2\_RESULTS.md}, \code{PHASE3\_RESULTS.md}, \code{PHASE3\_GPU\_RESULTS.md}, \code{PHASE4\_RESULTS.md}, \code{PHASE5\_RESULTS.md} & detailed results per phase \\
+\code{report/} & progress reports (Phase 2, 3, 4, 5) and this report \\
+\code{results/runs.csv}, \code{results/e5\_*.csv}, \code{results/e6\_*.csv} & every measurement \\
 \code{results/plots/}, \code{results/*\_tables.md}, \code{results/run\_stats.md} & charts, tables, spreads \\
-\code{demlab/}, \code{bench/}, \code{tests/} & engine, harness and experiments, tests \\
+\code{demlab/}, \code{bench/}, \code{tests/} & engine, tile engine and scheduler, harness and experiments, tests \\
+\code{server/}, \code{viz/web/}, \code{qgis\_plugin/} & tile server, web viewer (with \code{policy.json}), QGIS plugin \\
 \code{old files/} (local only) & earlier scripts, superseded results, logs, with a README \\
 GitHub & \url{https://github.com/Swayamgoyal/Geoguessers} (no data, no \code{old files}) \\
 \code{K:\textbackslash spatial project\textbackslash} \code{GeoGuessers\_handoff} & complete verified copy: project, all data,
 environment, notes; start with \code{README\_HANDOFF.md} \\
 \bottomrule
-\end{tabularx}
+\end{longtable}
+}
 
 \end{document}

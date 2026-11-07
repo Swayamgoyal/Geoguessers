@@ -264,7 +264,7 @@ like-for-like test is the box trace, where the foreground tiles are identical (F
   complete. Only 25 of 905 foreground tiles (3\%) were ever requested while a prefetch request was in flight.
   \item \textbf{Placement:} letting prefetch start while foreground work is pending raises server p95 by 9\% on
   zoom-pan.
-  \item \textbf{Pinning held throughout:} 18{,}250 foreground jobs ran on performance cores only, and 114{,}962
+  \item \textbf{Pinning held throughout:} 20{,}242 foreground jobs ran on performance cores only, and 122{,}215
   prefetch jobs on efficiency cores only.
 \end{itemize}
 
@@ -331,7 +331,8 @@ The simulated latencies are therefore slight upper bounds.
   run.
   \item Short, synthetic traces (1--11\,s): caches never fill, so long sessions are not measured.
   \item Every run starts with an empty server, so a returning user would see faster tiles.
-  \item CPU only: Phase 3 predicts no GPU gain at $512\times512$ per tile once the transfer is counted.
+  \item CPU only: Phase 3 predicts little GPU gain at $512\times512$ per tile once the transfer is counted
+  (1.3$\times$ including the copies).
 \end{itemize}
 
 \section{Next step}

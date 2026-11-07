@@ -82,7 +82,7 @@ Gates passed while building it (details in `docs/FINAL_PLAN.md`):
      +0.4%.
    - **Placement:** on the zoom-pan trace, letting prefetch start while foreground work is pending raises server
      p95 by 9% (64 vs 58 ms).
-   - **Pinning verified:** across all runs, 18,250 foreground jobs ran on performance cores only and 114,962
+   - **Pinning verified:** across all runs, 20,242 foreground jobs ran on performance cores only and 122,215
      prefetch jobs on efficiency cores only.
 6. **The client's latency back-off must not sit near the cold-start latency.** The first policy backed prefetch
    off for 2 s whenever the last 20 foreground tiles had p95 above 100 ms. Right after a cold start that p95 is
@@ -304,7 +304,7 @@ makes it slightly faster.
   agrees on all counts and within 10% on view-complete times, but it covers three traces.
 - **Cold start only.** Every run starts with an empty server. A warm server (a returning user) answers more tiles
   from its caches, so these latencies are on the slow side.
-- **CPU only.** The GPU path (E4) is not used: at 512 × 512 per tile, E4 predicts no gain once the transfer is
+- **CPU only.** The GPU path (E4) is not used: at 512 × 512 per tile, E4 predicts little gain (1.3× including the copies) once the transfer is
   counted.
 
 ## Reproduce

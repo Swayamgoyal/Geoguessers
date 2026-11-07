@@ -40,3 +40,5 @@ report/**/*.fls
 report/**/*.fdb_latexmk
 report/**/*.synctex.gz
 
+report/**/*.nav
+report/**/*.snm
