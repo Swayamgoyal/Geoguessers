@@ -5,7 +5,6 @@ level choice, block-cache sharing and palette PNG encoding.
     python -m pytest tests/test_view.py -q
 """
 import io
-import subprocess
 
 import numpy as np
 import pytest
@@ -19,31 +18,8 @@ from demlab.pyramid import block_sums, footprint_edges
 from demlab.view import TILE, Pyramid, TileSpec, render_box, render_tile
 from tests.fixtures import DATA
 
-SRC = DATA / "prepared" / "tile571_8m.tif"
 OPS = [("slope", "Horn"), ("slope", "ZevenbergenThorne"), ("aspect", "Horn"), ("hillshade", "Horn"),
        ("TRI", "Riley"), ("TRI", "Wilson"), ("TPI", ""), ("roughness", "")]
-
-
-@pytest.fixture(scope="module")
-def cog(tmp_path_factory):
-    """1300 × 1100-cell COG with overviews from the 8 m tile's gappy south-east part: 3 × 3 tiles at level 0
-    (partial at the right and bottom), nodata gaps, two overview levels."""
-    d = tmp_path_factory.mktemp("view")
-    out = d / "fixture_cog.tif"
-    subprocess.run(["gdal_translate", "-q", "-srcwin", "11500", "10500", "1300", "1100", "-of", "COG",
-                    "-co", "BLOCKSIZE=512", "-co", "COMPRESS=ZSTD", "-co", "PREDICTOR=3",
-                    "-co", "OVERVIEW_RESAMPLING=AVERAGE", str(SRC), str(out)], check=True)
-    slope = d / "fixture_slope.tif"
-    tmp = d / "slope_raw.tif"
-    subprocess.run(["gdaldem", "slope", "-q", str(out), str(tmp)], check=True)
-    subprocess.run(["gdal_translate", "-q", "-of", "COG", "-co", "BLOCKSIZE=512", "-co", "COMPRESS=ZSTD",
-                    "-co", "OVERVIEW_RESAMPLING=AVERAGE", str(tmp), str(slope)], check=True)
-    return out, slope
-
-
-@pytest.fixture(scope="module")
-def pyr(cog):
-    return Pyramid(cog[0], precomputed=cog[1])
 
 
 def whole_level(pyr, k):

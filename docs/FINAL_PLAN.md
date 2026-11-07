@@ -125,9 +125,26 @@ Steps 1–4 of the spec; useful on their own, because they also speed up box zoo
 | Colormaps (slope, aspect, hillshade, TRI/TPI/roughness) as 256-entry palettes | `demlab/colormap.py` | Palette PNG round-trips to the right values |
 | Tests | `tests/test_view.py`, `test_blockcache.py`, `test_resultcache.py` | All pass with the existing 119 |
 
-## Phase 2: scheduler and server API
+## Phase 2: scheduler and server API · ✅ done
 
 **Goal:** many tiles at once on the right cores, cancellable, served over HTTP with timing headers. Spec steps 5–6.
+
+**Result:** `demlab/sched.py`, `demlab/service.py`, `demlab/cpus.py`, `server/app.py` (`python -m server`); 17 new
+tests (`tests/test_sched.py`, `tests/test_server.py`), 160 in total, all passing. Gates (`python -m bench.check_server`,
+real server, Chamoli 2 m):
+- **Isolation:** foreground p95 16.6 ms idle vs 16.6 ms with 256 prefetch tiles queued (+0.4%; median of 3 rounds ×
+  100 tiles; gate ≤ +10%). Without yielding the result swung between +6% and +15% over runs (background threads still
+  share the GIL and memory bandwidth), so **prefetch now yields: it does not start a new tile while any foreground tile
+  is queued or running** (`DEMLAB_BG_YIELD`, default on; off for the E6 comparison).
+- **Cancellation:** an aborted request still queued is dropped in a median 37 ms (gate 50 ms), with event-driven
+  disconnect detection instead of 20 ms polling (which gave 58–80 ms). A running exact-mode tile stops at its next strip
+  (7–155 ms); exact strips are now one stored block row deep.
+- Core classes detected per thread: performance CPUs 0, 1, 10–19 (foreground), efficiency CPUs 2–9 (prefetch);
+  low-power CPUs 20–21 (unused) are told apart by their separate cache, because Windows gives them the same class.
+- The free-memory guard works: with only 1.9 GB free on the laptop it paused prefetch, as designed (threshold
+  `DEMLAB_BG_MIN_FREE_GB`, default 2.5 GB).
+- Deviation from the spec's URL: tiles are `/tiles/{dataset}/{level}/{tx}/{ty}.png` (two datasets are served); `/view`
+  renders boxes directly from the shared block cache (values, not cached PNGs) and can return a GeoTIFF for QGIS.
 
 | Task | Files | Done when |
 |---|---|---|

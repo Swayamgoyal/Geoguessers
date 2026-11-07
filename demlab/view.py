@@ -240,6 +240,8 @@ def _auto(pyr, spec, blockcache, token):
 
 
 EXACT_STRIP_CELLS = 16_000_000  # fine cells per strip in exact mode: bounds memory (~0.2 GB) whatever the level
+EXACT_STRIP_ROWS = 512          # ... and about one stored block row per strip: reads line up with the file's blocks
+                                # and a cancelled job stops within one strip (tens of ms)
 
 
 def _exact(pyr, spec, token):
@@ -265,7 +267,7 @@ def _exact(pyr, spec, token):
     i = 0
     while i < h:
         j = i + 1
-        while j < h and (re[j + 1] - re[i]) * fine_w <= EXACT_STRIP_CELLS:
+        while j < h and (re[j + 1] - re[i]) <= EXACT_STRIP_ROWS and (re[j + 1] - re[i]) * fine_w <= EXACT_STRIP_CELLS:
             j += 1
         token.check("read")
         t = time.perf_counter()
