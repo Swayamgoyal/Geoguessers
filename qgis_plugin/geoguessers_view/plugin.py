@@ -110,7 +110,7 @@ class GeoguessersPlugin:
         self.dock.setObjectName("GeoguessersDock")
         self.dock.setWidget(self.panel)
         self.dock.visibilityChanged.connect(self.action.setChecked)
-        self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock)
+        self.iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dock)
         self.dock.hide()
 
         canvas = self.iface.mapCanvas()
