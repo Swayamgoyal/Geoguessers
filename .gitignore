@@ -43,6 +43,3 @@ report/**/*.synctex.gz
 
 report/**/*.nav
 report/**/*.snm
-
-# raw QGIS-session server logs (per-request timings, /stats snapshots): local only
-logs/qgis_session/

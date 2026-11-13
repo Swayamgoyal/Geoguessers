@@ -1,0 +1,36 @@
+# Session 1794489405–1794489536 (2.2 min)
+
+- Requests: 27 (0 tiles OK, 20 QGIS boxes OK); status {200: 26, 400: 1}
+- Datasets {}; products {}; levels {}
+- Cache tiers {}
+- Tiles: none
+- Machine CPU %: median 4.2, max 55.1 (cores busy max 8.8 of 16)
+- Server CPU (100 = 1 core): median 0.9, p95 5.5, max 27.1
+- Server RSS MB: max 432; disk read MB/s max 90.0
+- Slow requests (> 2 s): none
+- dGPU util %: max 0; samples with GPU processes: 0/122
+  - QGIS box +0.14 min: hillshade Horn mode=auto full_res=False level 6 (128 m), [937, 742] cells, 0.07 s, 0.5 MB
+  - QGIS box +0.34 min: slope Horn mode=auto full_res=False level 1 (4 m), [1063, 478] cells, 0.22 s, 1.7 MB
+  - QGIS box +0.40 min: slope Horn mode=auto full_res=False level 6 (128 m), [240, 207] cells, 0.01 s, 0.2 MB
+  - QGIS box +0.52 min: hillshade Horn mode=auto full_res=False level 0 (2 m), [68, 48] cells, 0.06 s, 0.0 MB
+  - QGIS box +0.58 min: hillshade Horn mode=auto full_res=False level 1 (4 m), [448, 278] cells, 0.05 s, 0.1 MB
+  - QGIS box +0.73 min: hillshade Horn mode=auto full_res=False level 1 (4 m), [464, 275] cells, 0.03 s, 0.1 MB
+  - QGIS box +0.83 min: TRI Riley mode=auto full_res=False level 1 (4 m), [229, 280] cells, 0.02 s, 0.2 MB
+  - QGIS box +0.90 min: TRI Wilson mode=auto full_res=False level 1 (4 m), [207, 174] cells, 0.01 s, 0.1 MB
+  - QGIS box +0.98 min: slope Horn mode=auto full_res=False level 1 (4 m), [311, 215] cells, 0.04 s, 0.2 MB
+  - QGIS box +1.09 min: slope ZevenbergenThorne mode=auto full_res=False level 1 (4 m), [180, 156] cells, 0.02 s, 0.1 MB
+  - QGIS box +1.17 min: slope ZevenbergenThorne mode=auto full_res=False level 1 (4 m), [210, 91] cells, 0.02 s, 0.1 MB
+  - QGIS box +1.23 min: slope ZevenbergenThorne mode=auto full_res=False level 1 (4 m), [749, 157] cells, 0.04 s, 0.4 MB
+  - QGIS box +1.36 min: aspect ZevenbergenThorne mode=auto full_res=False level 5 (64 m), [489, 713] cells, 0.10 s, 1.2 MB
+  - QGIS box +1.45 min: aspect Horn mode=auto full_res=False level 5 (64 m), [369, 441] cells, 0.03 s, 0.6 MB
+  - QGIS box +1.60 min: aspect Horn mode=auto full_res=True level 0 (2 m), [402, 388] cells, 0.14 s, 0.5 MB
+  - QGIS box +1.66 min: aspect Horn mode=auto full_res=True level 0 (2 m), [1148, 1103] cells, 0.21 s, 4.4 MB
+  - QGIS box +1.72 min: aspect Horn mode=auto full_res=True level 0 (2 m), [12, 16] cells, 0.01 s, 0.0 MB
+  - QGIS box +1.81 min: slope Horn mode=auto full_res=False level 0 (2 m), [44, 32] cells, 0.01 s, 0.0 MB
+  - QGIS box +1.87 min: slope Horn mode=auto full_res=False level 0 (2 m), [213, 158] cells, 0.01 s, 0.1 MB
+  - QGIS box +1.90 min: slope Horn mode=auto full_res=False level 0 (2 m), [381, 280] cells, 0.02 s, 0.4 MB
+- QGIS boxes not OK: {400: 1}
+- QGIS CPU (100 = 1 core): median 12, max 839; RSS max 1252 MB
+- iGPU util %: median 5, p95 20, max 33
+- Block cache end: 91 MB, hit rate 79.2%, 0 evictions; result cache 0 MB, hit rate 0.0%, 0 evictions
+- Scheduler tiles completed: fg 0, bg (prefetch) 0; CPU s fg 0.0, bg 0.0
