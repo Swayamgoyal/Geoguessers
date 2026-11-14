@@ -8,7 +8,8 @@
 | `phase5_report/` | Progress report, Phase 5: interactive viewing with debounced pan/zoom and prefetch (tile engine, scheduler, server, web viewer, QGIS plugin) | E6 |
 | `internal_report/` | Internal team report: everything we did and why, all results (Phases 0–5 incl. the viewer and E6), problems faced, glossary, presentation preparation (numbers to remember, slide order, likely questions with answers) | Phases 0–5 |
 | `final_report/` | **Final report**: introduction, related work, data, method, E1–E6, discussion (the bottleneck story, G1, G2), recommendations, limitations, reproducibility, problems met | E1–E6 |
-| `slides/` | Final presentation (Beamer, 16:9, 23 slides) | E1–E6, demo |
+| `presentation/` | **Final presentation** (Beamer, 16:9, 21 slides): the team draft rebuilt with a short recap of E1–E4, plots, live-demo slides, the Swiss Alps validation and checked numbers; see its README | E1–E6, demo, Swiss validation |
+| `slides/` | Earlier presentation (Beamer, 16:9, 23 slides) | E1–E6, demo |
 | `demo/` | Demo video (58 s, silent with captions) of the web viewer and the QGIS plugin; see its README | Phase 5 |
 
 Figures come straight from `results/plots/` (and `figures/` for the study-area map), so a rebuild picks up regenerated
