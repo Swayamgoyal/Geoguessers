@@ -324,13 +324,13 @@ Cancellation & New generation per pan or zoom; aborted requests dropped in a med
 \begin{columns}[T]
 \column{0.44\textwidth}
 \centering
-\stats{6.9--14\,ms}{median tile, Auto mode}\quad\stats{0.01--0.02}{server cores (median)}\quad\stats{0\%}{GPU use}
+\stats{6.9--15\,ms}{median tile, Auto mode}\quad\stats{0.01--0.02}{server cores (median)}\quad\stats{0\%}{GPU use}
 \column{0.54\textwidth}
 \footnotesize
 \begin{itemize}
-  \item swissALTI3D 2\,m: 60{,}000 $\times$ 47{,}500 cells, 5.6\,GB COG; 3 viewer + 2 QGIS sessions
+  \item swissALTI3D 2\,m: 60{,}000 $\times$ 47{,}500 cells, 5.6\,GB COG; 7 sessions (viewer, QGIS, both)
   \item Decompression is 52--55\% of a tile read from disk: \textbf{decoding, not computing}, is the cost
-  \item Browser and QGIS use more CPU than the server
+  \item CPU time: QGIS 62\%, tile server 22\%
 \end{itemize}
 \end{columns}
 \vspace{2pt}
@@ -343,14 +343,14 @@ Cancellation & New generation per pan or zoom; aborted requests dropped in a med
 \begin{frame}{Validation: where it breaks, Exact mode at this scale}
 \centering
 \includegraphics[width=0.84\linewidth]{swiss_run4_cpu_mem.png}\par
-{\tiny\color{ink2}Run 4 (7.3\,min). Grey: Exact work running. Top: cores busy; bottom: memory (MB)\par}
+{\tiny\color{ink2}Run 4 (7.3\,min). Grey: Exact work running. Top: cores busy (tile server, browser); bottom: memory (MB)\par}
 \vspace{2pt}
 \footnotesize
 \begin{columns}[T]
 \column{0.49\textwidth}
 \begin{itemize}
-  \item \textbf{Auto mode stays at budget:} 1.9--2.3\,GB with both caches full
-  \item \textbf{Exact whole-map overview:} 47--129\,s on one core; 2.9\,GB (one) to 3.9\,GB (six at once)
+  \item \textbf{Auto mode stays at budget:} 1.9--2.3\,GB (full caches); $\sim$3\,GB may stay after Exact
+  \item \textbf{Exact whole-map overview:} 47--129\,s on one core; server memory 2.9--4.9\,GB
 \end{itemize}
 \column{0.49\textwidth}
 \begin{itemize}
@@ -376,13 +376,13 @@ Speed-up & 1$\times$ & 3.5$\times$ & 4.75$\times$ & \textbf{8--450$\times$ vs ex
 Threads used & 1 of 22 & 12 P-core & CPU + GPU & \textbf{0.01--0.02 cores (median)} \\
 Peak memory & 0.87\,GB & 1.4\,GB & $\leq$2.0\,GiB on GPU & \textbf{0.98--2.3\,GB} \\
 Full-view redraw & 31.9\,s (QGIS, no pyramid) & -- & -- & \textbf{76--158\,ms after zoom} \\
-Box in QGIS & -- & -- & -- & \textbf{10--225\,ms} \\
+Box in QGIS & -- & -- & -- & \textbf{10--225\,ms} (4.4\,s near the 64\,M-cell limit) \\
 \bottomrule
 \end{tabular}}
 \vspace{6pt}
 \begin{flushleft}\scriptsize\color{ink2}
 Engines: whole-grid processing (E1, E3, E4). Viewer: E5 tiles, E6 (Chamoli, peak 982\,MiB) and the Swiss runs (2.85\,B
-cells, up to 2.3\,GB with full caches; Exact overviews excluded).
+cells, up to 2.3\,GB with full caches; Exact overviews excluded, after which up to $\sim$3\,GB may be kept).
 \end{flushleft}
 \end{frame}
 
@@ -420,6 +420,7 @@ cells, up to 2.3\,GB with full caches; Exact overviews excluded).
   \item Per-level slope bias correction
   \item Viewshed and terrain distance (G3)
   \item GPU tile path for bulk exports
+  \item Decompress on the GPU to cut copies (est.\ up to 1.4$\times$)
   \item Several clients; cloud-hosted COGs
 \end{itemize}
 \end{columns}

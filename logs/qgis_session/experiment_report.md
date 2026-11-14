@@ -6,7 +6,9 @@ on a second machine, and to measure what E6 did not: client-side cost and long s
 
 *Revised after runs 4 and 5. Run 2's tile figures now exclude its 43 Exact tiles (the first version mixed them in),
 and the memory finding is restated: the overshoot comes from Exact overviews, not from GDAL's caches as first
-guessed.*
+guessed. Revised again on 2026-11-14 with three more sessions using both tools (runs 6 and 7, and one without the
+usage sampler): a higher memory peak (4.9 GB), memory staying high after Exact work, and the CPU split between QGIS,
+browser and server.*
 
 ## Summary
 
@@ -17,10 +19,12 @@ guessed.*
 - **CPU only, as the report states.** The tile server never used the NVIDIA GPU. The AMD iGPU stayed at its lowest
   clock (800 MHz) and showed no load beyond ordinary desktop drawing.
 - **The clients cost more CPU than the server** in normal use. The browser used a median of 0.2–0.5 cores against the
-  server's 0.01–0.02, and QGIS peaked at 8.4 cores while redrawing layers, against the server's 0.27.
+  server's 0.01–0.02, and QGIS peaked at 8.4–10.4 cores while redrawing layers. In a 9-minute session using both
+  tools (run 7), QGIS took 62% of all CPU time, the tile server 22% (nearly all of it Exact work) and the browser 4%.
 - ***Exact* mode is where it breaks down on a dataset this large**, in three ways:
   1. **Memory.** Without Exact work the server stayed within its ≈2.2 GB budget (peaks 1.9–2.3 GB). Exact overviews
-     pushed it to **2.9 GB** with one running and **3.9 GB** with six running at once.
+     pushed it to **2.9 GB** with one running, **3.9 GB** with six running at once, and **4.9 GB** in a session with
+     nine. Afterwards the server sometimes keeps the memory: 2.2–3.0 GB for the rest of runs 6 and 7.
   2. **Stalls.** An Exact whole-map overview takes **47–129 s** on one core. During one, the viewer requested no tiles
      for about 36 s.
   3. **No cancellation.** Changing the sun direction in Exact mode started a new overview each time, and the old ones
@@ -59,6 +63,9 @@ is the machine all numbers in the final report come from.
 | 3, QGIS plugin | 18:46:45 | 2.2 min | 21 boxes (the first is a hillshade backdrop drawn at start-up); all *Auto*, 3 at full resolution | [overview](charts/run_qgis_20261112/overview.png), [summary](charts/run_qgis_20261112/summary.md) |
 | 4, web viewer | 22:03:58 | 7.3 min | mostly levels 0–1; hillshade, aspect, slope, roughness; two periods of *Exact*, dragging the sun direction during the first | [overview](charts/run4_webview/overview.png), [tile stages](charts/run4_webview/tile_stages.png), [summary](charts/run4_webview/summary.md) |
 | 5, QGIS plugin | 22:23:46 | 6.0 min | 24 boxes (incl. the start-up backdrop) over 7 products; one *Exact* box | [overview](charts/run5_qgis/overview.png), [summary](charts/run5_qgis/summary.md) |
+| — , both (14 Nov) | 10:41:00 | 36 min | viewer then QGIS (59 boxes, three datasets); 9 Exact overviews. **Usage sampler not running**: server logs only, and the laptop suspended from 11:04:35 to about 11:10 | none |
+| 6, both (14 Nov) | 11:19:49 | 8.1 min | QGIS (40 boxes incl. 3 *Exact* and 2 near the size limit), then the viewer (six products) with *Exact* | [overview](charts/run_20261114_1127/overview.png), [tile stages](charts/run_20261114_1127/tile_stages.png), [summary](charts/run_20261114_1127/summary.md) |
+| 7, both (14 Nov) | 15:50:54 | 9.1 min | QGIS (40 boxes) and the viewer, with *Exact* overviews | [overview](charts/run_20261114_1600/overview.png), [tile stages](charts/run_20261114_1600/tile_stages.png), [summary](charts/run_20261114_1600/summary.md) |
 
 Conditions that affect the readings:
 - **Run 1** did not sample the iGPU or the browser; both were added before run 2.
@@ -120,11 +127,29 @@ What drives the differences:
 In runs 2 and 4 the server's CPU median (0.02 vs 1.58 cores) differs because of Exact work: run 4 spent about 4.2 of
 its 7.3 minutes computing Exact overviews and tiles.
 
+### Sessions with both tools (2026-11-14)
+
+No background load in runs 6 and 7. The 10:41 session has server logs only.
+
+| | 10:41 session | Run 6 | Run 7 |
+|---|---|---|---|
+| *Auto* tiles, median | 6,030, 15.3 ms | 3,522, 10.9 ms | 3,268, 9.7 ms |
+| QGIS boxes OK | 59 of 59 | 38 of 40 (2 over the size limit) | 40 of 40 |
+| Exact overviews, longest | 9, 109 s | 2, 116 s | 3, 121 s |
+| Tile server memory, max | **4,870 MB** | 3,564 MB | 3,314 MB |
+| Server memory after the last Exact work | — | 2,954–3,018 MB (to the end, 4 min) | 2,235–2,490 MB (5 min) |
+| QGIS CPU peak / memory max | not sampled | 10.4 cores / 2,407 MB | 9.6 cores / 3,034 MB |
+| NVIDIA GPU / iGPU max | not sampled | 0% / 35% | 0% / 31% |
+
+**Where the CPU time went in run 7** (9.1 min): QGIS 1,020 core-seconds (62%), tile server 362 (22%, of which 354
+during Exact work), browser 72 (4%), everything else 203 (12%).
+
 ### QGIS plugin
 
 - **Auto boxes:** 43 of 44 succeeded across runs 3 and 5, over 7 products. The level followed the box size on screen:
   128 m for a dataset-wide box, then 64, 16, 8, 4 and 2 m as boxes shrank. Server time was 10–225 ms per box. The
-  largest was a full-resolution aspect box of 1148 × 1103 cells (0.21 s, 4.4 MB GeoTIFF).
+  largest was a full-resolution aspect box of 1148 × 1103 cells (0.21 s, 4.4 MB GeoTIFF). In run 6, two
+  full-resolution boxes near the 64 M-cell limit (4721 × 6899 and 7625 × 5810 cells) took 3.2 and 4.4 s.
 - **Rejected box:** a full-resolution box of 43 × 38 km (about 400 M cells) was refused in 1 ms with HTTP 400. The
   server's limit is 64 M cells (`MAX_BOX_CELLS`, about 16 × 16 km at 2 m), so this is the intended behaviour.
 - **Exact box (run 5):** an aspect box of about 22 × 25 km at 32 m (696 × 779 cells) took **99 s** on one core. In
@@ -158,8 +183,11 @@ What the split shows:
   the server to 2.9 GB, and six at once took it to 3.9 GB.
 - **Not every Exact request does.** Run 1's overview did not exceed the budget, because the caches were not yet full,
   and a single Exact box (run 5) stayed at 733 MB.
-- **Memory returns when the work ends.** In run 4 it fell from about 3 GB to about 1 GB within seconds of the
-  overviews finishing, so this is not a leak.
+- **Memory does not always return when the work ends.** In run 4 it fell from about 3 GB to about 1 GB within
+  seconds of the overviews finishing. In runs 6 and 7 it stayed at 2.2–3.0 GB for the remaining 4–5 minutes. The
+  likely cause is that freed memory is kept by the process for reuse rather than handed back to the system, which
+  would not be a leak; this has not been verified.
+- **Peak so far: 4.9 GB**, in the 14 Nov 10:41 session with nine Exact overviews.
 
 ### 2. An Exact whole-map overview takes minutes and stalls the viewer
 
@@ -211,7 +239,7 @@ plausible but not confirmed by these logs.
 | Prefetch fetches 2–5 tiles per tile used (precision 0.20–0.56) | E6 | 3.4–4.0 prefetched per visible tile (not the same metric) | Consistent |
 | The QGIS plugin picks the level to match the box | System table | All 43 accepted *Auto* boxes at the expected level, 128 m → 2 m; the oversized box refused | Holds |
 | Exact mode works without prefetch | Spec goal 7 | An Exact QGIS box: 99 s, within memory, server still responsive | Holds (slow on large boxes) |
-| Server memory budget ≈2.2 GB; E6 peak 982 MiB | FINAL_PLAN goal 6; § Interactive viewing | 1.9–2.3 GB without Exact work; **2.9–3.9 GB** with Exact overviews | **Holds without Exact overviews; exceeded with them** |
+| Server memory budget ≈2.2 GB; E6 peak 982 MiB | FINAL_PLAN goal 6; § Interactive viewing | 1.9–2.3 GB without Exact work; **2.9–4.9 GB** with Exact overviews, and up to ~3 GB kept afterwards | **Holds without Exact overviews; exceeded with them** |
 | Exact tiles are never prefetched; the overview keeps the view from going blank | § Interactive viewing; internal report | Exact overviews take 47–129 s; no tile requests for about 36 s in run 1 | **Gap: not covered** |
 | 5–8 ms per tile at every zoom level (E5) | E5; slides | 5.8–10.1 ms with decoded blocks, 14–22 ms reading from disk, under interactive load | Same order; not comparable (E5 timed one slope tile on an idle server, and its cold/warm is the OS file cache) |
 | Foreground on performance cores, prefetch on efficiency cores | System table | Pinning is Windows-only; this CPU has no efficiency cores | Not tested |

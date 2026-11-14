@@ -15,7 +15,9 @@ pdflatex main.tex
 pdflatex main.tex
 ```
 Figures come from `results/plots/`, `report/figures/`, `report/demo/`, `logs/qgis_session/charts/` and `figures/`
-(three viewer stills taken from the demo video, and a crop of the CPU and memory panels of Swiss run 4).
+(three viewer stills taken from the demo video, and a CPU and memory chart of Swiss run 4 drawn from
+`logs/qgis_session/`: tile server and browser CPU only, because an unrelated background application inflated the
+whole-machine CPU during that run).
 
 ## Slide order
 
