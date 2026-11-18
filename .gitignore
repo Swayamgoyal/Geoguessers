@@ -43,3 +43,12 @@ report/**/*.synctex.gz
 
 report/**/*.nav
 report/**/*.snm
+
+# personal / course-admin files that stay local
+report/final_submission/peer_review_*.md
+report/final_submission/Peer_Review_Form_*.docx
+report/final_submission/AI_USAGE.md
+report/final_submission/~$*
+Peer_Review_Form*.docx
+final_report/
+ways_to_humanize

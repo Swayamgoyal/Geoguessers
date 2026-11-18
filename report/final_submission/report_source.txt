@@ -1,0 +1,325 @@
+TITLE| Where the bottleneck lies: processing and interactively viewing billion-cell digital elevation models on one laptop
+CENTER| Swayam Goyal{sup}1{/sup}, Siddharth Choudhary{sup}1{/sup} and Yakkala Viswanadha Kartikeya{sup}1{/sup}
+CENTER| swayam.goyal@research.iiit.ac.in{sup}1{/sup}, siddharth.c@research.iiit.ac.in{sup}1{/sup}, kartikeya.yakkala@research.iiit.ac.in{sup}1{/sup}
+CENTERSMALL| {sup}1{/sup}International Institute of Information Technology Hyderabad, Gachibowli, Hyderabad, Telangana, 500032, India.
+CENTERSMALL| Project repository (code, data manifests and measured results): https://github.com/Swayamgoyal/Geoguessers
+
+H0| Abstract
+
+At 1 m resolution, a 100 km × 100 km stretch of the Himalaya becomes 10.8 billion cells, 43 GB as float32 and 2.6 times our laptop's memory. Our question was how much of such data one machine can process and display, and which stage slows it down. Over six experiments and 2,885 measured runs on Garhwal Himalaya DEMs, we tested GDAL and QGIS, built a tiled terrain engine for the CPU and the GPU, derived slope on demand from pyramid levels, and wrote an interactive viewer. Memory was never gdaldem's problem; it was slow because 73% of its time went into computing on one thread. Our CPU engine ran 2.1–3.5 times faster and matched gdaldem cell for cell. The GPU kernel was 50 times quicker than the CPU kernel, but complete runs improved only 1.0–1.4 times once decompression, copying and writing dominated. Served on demand from the pyramid, a 512 × 512 display tile cost 5–8 ms at any zoom, 8–450 times less than an exact computation, while slope came out 2.3–6.4° RMSE too low one to four levels up. On a 2.85-billion-cell lidar DEM, too, the viewer kept up with continuous pan and zoom.
+
+KEYWORDS| Digital elevation model; Terrain derivatives; Multi-resolution pyramid; GPU computing; Interactive visualisation; Performance benchmarking
+
+# 1. Introduction
+
+Most terrain analysis starts from a digital elevation model (DEM), a raster in which every cell holds a ground height. Desktop GIS tools turn it into slope, aspect, hillshade and roughness with local operators that look only at the 3 × 3 window around each cell (Horn 1981; Zevenbergen and Thorne 1987). The same rasters feed heavier, non-local analyses such as viewsheds and least-cost paths. Halving the cell size quadruples the number of cells. A 100 km × 100 km area holds 169 million cells at 8 m, 2.7 billion at 2 m and 10.8 billion at 1 m, which is 43 GB as 4-byte floats. Stereo satellite imagery and airborne lidar now produce grids of this size for a single study area. Yet a lot of the analysis still happens on a laptop with 16 GB of memory and a screen of about two million pixels.
+
+That screen is the first thing that struck us. A 1920 × 1080 display can show at most one cell in five thousand of a whole-area 1 m view; the remaining 99.98% are read, decoded and computed only to be averaged away. Hazard work adds urgency. After the February 2021 rock and ice avalanche at Chamoli in the Garhwal Himalaya, high-resolution DEMs of the affected valleys were released soon afterwards (Bhushan and Shean 2021), and many of the people who need them work on laptops, not clusters. Which stage limits the work on such a machine, and what is lost by looking at the data at a coarser resolution? Those are practical questions as much as technical ones.
+
+Computationally, these operators are cheap. Every one of them touches each cell once, so a simple implementation and a heavily tuned one share the same O(N) cost for N cells; what separates them is how the work is laid out. The popular variants mostly change the weights. Horn (1981) gives the four edge neighbours double the weight of the corners. Zevenbergen and Thorne (1987) fit a surface to the window instead. The terrain ruggedness index exists in two forms (Riley et al. 1999; Wilson et al. 2007), which Trevisani et al. (2023) took another look at. Guth and Kane (2021) extended slope, aspect and hillshade to cells that are not square and saw computed slope change roughly with the logarithm of grid spacing. So at high resolution the expense lies in the volume of data and in the code that moves it. The maths is the easy part.
+
+Cell size also shifts the numbers you get. As a grid coarsens, computed slope drops (Zhang and Montgomery 1994), by an amount that depends on where a point sits within the landform (Deng et al. 2007). Polidori and El Hage (2020) go further: errors in the source DEM pass into every derivative, which makes nominal resolution a poor measure of how useful a DEM is. The sheer size of modern products shows in global work. Amatulli et al. (2020) produced geomorphometric layers for the entire planet, and Ho et al. (2025) point out that a global grid at 1 arc-second holds roughly 202 billion pixels, which leaves overlapping tiles processed in parallel as the only option. In both cases every layer was computed ahead of time, at fixed scales.
+
+Most attempts to scale terrain computation have aimed at raw throughput. Barnes (2016) split the DEM into tiles handled by producers and consumers; the same code runs on a single core, on many cores or on a cluster, and it processed trillion-cell datasets on ordinary machines. Yu et al. (2024) shared neighbourhood operations between CPU and GPU and got roughly a 29-fold speed-up on a 1.7 GB raster, about a fifth more than the GPU managed by itself. Non-local operations are harder. XDraw viewsheds have been ported to the GPU (Cauchi-Saunders and Lewis 2015) and balanced across equal-area partitions (Dou et al. 2019), while Sanchez-Fernandez et al. (2021) gained more by rearranging the DEM in memory than by adding GPUs. Display has its own lineage. Pyramids that halve the resolution from one level to the next date back to Williams (1983). Losasso and Hoppe (2004) kept terrain in nested grids around the viewer, so detail tracks the camera at a steady frame rate however large the dataset, and Campos et al. (2020) assembled a virtual-globe pyramid tile by tile because a continent-sized mesh would not fit in memory. Every one of these pyramids stores elevation; derived layers are still prepared beforehand. Speed also shapes how people explore. In the experiments of Liu and Heer (2014), an extra 500 ms of delay was enough to make analysts cover less of a dataset, and Battle et al. (2016) masked such delays by fetching in advance the tiles a user would probably want next.
+
+Reading these studies side by side, we found two things missing. Reported speed-ups span roughly 29 to several hundred times, measured against different baselines on different hardware, and none of the papers breaks a run into disk reads, decompression, CPU–GPU transfer, computation, writing and display. From them nobody can tell where GDAL and QGIS stop being practical on one laptop, or in which cases a GPU earns its keep (gap G1). The second gap concerns pyramids. They serve elevation for display, but derivatives are not computed from them on the fly, and no one has set the slope error of a coarse level against the time it saves (gap G2).
+
+It is tempting to throw a GPU at a problem like this. The course instructor advised the opposite order: stay within the hardware we had, find the real bottleneck before reaching for a GPU, render only what is in view, compute derivatives for that view on demand from a pyramid, and plug into GDAL and QGIS instead of rebuilding a GIS. That framing gave us four objectives. (1) Measure where gdaldem and QGIS stop being practical on one laptop, from 1.3 million to 10.8 billion cells, and which stage limits them. (2) Build a parallel terrain engine for the CPU and the GPU and see where the bottleneck goes once computation is parallel. (3) Measure the slope and aspect error of every pyramid level against the time it saves per view, on real high-resolution data. (4) Build an interactive viewer and a QGIS plugin on these results and test whether on-demand computation keeps up with continuous pan and zoom, first in a controlled experiment and then on a larger, independent lidar DEM on a second laptop.
+
+None of the building blocks is new. Local operators, tiling and pyramids are all established. What we add is a stage-by-stage account of where the time goes, from the standard tools to a GPU engine, on one machine; a measured trade-off between error and time for derivatives taken from pyramid levels; and a viewer policy chosen from 1,068 measured runs.
+
+# 2. Study area
+
+The cost of a terrain operator is set by the cell count, whatever mountain the cells describe, so every timing experiment shares one study area and changes only the grid size. Our area is NASA High Mountain Asia (HMA) tile-571 in the Garhwal Himalaya, Chamoli district, Uttarakhand (Figure 1a). It spans 79.125–80.235°E and 30.033–30.970°N, roughly 105 km × 103 km in UTM zone 44N, and climbs from 674 m to 7,790 m. Glaciated ridges around the Nanda Devi massif stand above deep river valleys (Figure 1b). With a mean true slope of 31° across the 8 m tile and 38° in the Chamoli sub-area, the terrain is far steeper than most, a point that returns when we look at slope errors in Section 4.3. The Chamoli (Rishiganga) sub-area, about 30 km × 35 km, lies inside the tile and has a real 2 m DEM, a composite of pre-event images from September 2015 published after the 2021 disaster (Bhushan and Shean 2021). We had used the same region for the pilot test in our literature review, which lets us compare old and new measurements.
+
+FIG| fig1_study_area.png | 16.0 | Figure 1. The study area. (a) Where tile-571 of the HMA mosaic (red box) lies within Uttarakhand (shaded) and India; district boundaries are drawn in grey. (b) Shaded relief from the 8 m DEM of the tile; the orange box marks the Chamoli sub-area that the real 2 m DEM covers.
+
+# 3. Data and methods
+
+## 3.1 Elevation data and preparation
+
+Six grids of the study area make up a resolution ladder (Table 1). The 90 m and 30 m grids are Copernicus GLO-90 and GLO-30 tiles from OpenTopography (European Space Agency 2021), the 8 m grid is the HMA 8 m mosaic for tile-571 (Shean 2017), and the 2 m grid is the Chamoli composite (Bhushan and Shean 2021). There is no free 1 m DEM of this region, so we made 2 m and 1 m grids of the whole tile by cubic upsampling of the 8 m mosaic. Were such grids good enough for timing? We rebuilt an 8 m crop of 16 million cells from a 16 m copy of itself and compared. gdaldem took the same time on both (0.87–0.90 s), but the slope of the rebuilt crop was off by 2.3–3.0° RMSE, so we used synthetic grids for timing and never for accuracy. We also learned to avoid nearest-neighbour upsampling: its blocky output compressed 26% better than real terrain and would have made every read look faster than it really is.
+
+TAB| Table 1. The resolution ladder. Real grids serve both timing and accuracy; synthetic grids serve timing only.
+| Resolution | Source | Type | Cells | Valid | Role |
+| 90 m | Copernicus GLO-90 | real | 1.3 M | 100% | coarsest level |
+| 30 m | Copernicus GLO-30 | real | 12 M | 100% | baseline level |
+| 8 m | HMA 8 m mosaic, tile-571 | real | 169 M | 84% | finest real, whole tile |
+| 2 m | Chamoli 2 m composite | real | 264 M | 94% | accuracy truth (sub-area) |
+| 2 m | cubic upsample of 8 m | synthetic | 2.7 B | ~89% | timing only |
+| 1 m | cubic upsample of 8 m | synthetic | 10.8 B | ~89% | timing only (43 GB) |
+
+All grids were reprojected with GDAL (GDAL/OGR contributors 2024) to WGS 84 / UTM zone 44N (EPSG:32644) so that cell sizes are true metres, on one aligned grid whose origin sits on a 360 m lattice that every cell size divides. Each grid is a Cloud-Optimized GeoTIFF (COG; Open Geospatial Consortium 2023) with 512 × 512 tiles, Zstandard (ZSTD) compression (Collet and Kucherawy 2021) and internal overviews built by averaging. These overviews are the pyramid. Level k has a cell about 2{sup}k{/sup} times the base cell, so on the 2 m data the levels run from 4 m to 128 m. We checksum-verified every download. Where the 2 m and 8 m DEMs overlap, the 2 m DEM averaged to 8 m differs from the 8 m DEM by a median of −0.7 m, with a normalised median absolute deviation of 5.1 m over 14 million cells. The 8 m DEM sits 24.5 m below Copernicus because HMA heights refer to the WGS 84 ellipsoid and Copernicus heights to the EGM2008 geoid. An almost constant offset like this leaves slope, aspect and hillshade untouched.
+
+For the validation in Section 4.5 we added a larger, independent dataset: swissALTI3D, the 2 m lidar terrain model of Switzerland (swisstopo 2024). We merged 8,765 one-kilometre tiles over Valais and the Bernese Oberland (LV95 E 2555–2675 km, N 1075–1170 km; surveys 2019–2025) into one COG with the same settings. The result has 60,000 × 47,500 = 2.85 billion cells, 77% of them valid (the rest is outside Switzerland), heights of 366–4,634 m, a size of 5.6 GB and seven overview levels. That is about eleven times the Chamoli grid.
+
+## 3.2 Terrain operators
+
+Every product comes from the 3 × 3 window around a cell. Label the window a, b, c along the top row, d, e, f in the middle and g, h, i at the bottom, with cell sizes Δx and Δy. Horn's (1981) gradients are then
+
+EQ| \frac{\partial z}{\partial x} = \frac{(c + 2f + i) - (a + 2d + g)}{8\,\Delta x} | (1)
+
+EQ| \frac{\partial z}{\partial y} = \frac{(g + 2h + i) - (a + 2b + c)}{8\,\Delta y} | (2)
+
+NOINDENT| and slope S follows from the size of the gradient:
+
+EQ| S = \arctan \sqrt{\left(\frac{\partial z}{\partial x}\right)^{2} + \left(\frac{\partial z}{\partial y}\right)^{2}} | (3)
+
+The same gradient also gives aspect, its direction, and hillshade, which mixes slope and aspect with a sun azimuth and altitude. Our tests covered ten gdaldem configurations. Slope, aspect and hillshade were each run with the Horn method and with the Zevenbergen–Thorne (1987) method; the terrain ruggedness index was run in the forms of Riley et al. (1999) and Wilson et al. (2007); the topographic position index and roughness completed the set. Since slope, aspect and hillshade all start from one gradient, our engine (Section 3.4) works out that gradient once and produces the three together.
+
+## 3.3 Benchmark harness and protocol
+
+Every controlled timing ran on one laptop: an Intel Core Ultra 9 185H with 6 performance, 8 efficiency and 2 low-power cores (22 threads), 16 GB of RAM, an NVMe SSD and an NVIDIA RTX 4060 Laptop GPU with 8 GiB, under Windows 11. The baseline was GDAL 3.13.3 and QGIS 3.44.14 (QGIS Development Team 2024). Each measurement ran one tool as its own process, and our harness recorded that process's wall time, peak memory, CPU time and bytes read and written. CPU time divided by wall time tells how many threads were busy. Before each cold run we emptied the operating system's file cache and checked that the file really was read again from disk. Real grids ran five times cold and five times warm after one warm-up; synthetic grids ran three times cold and once warm. We report medians. Across all configurations the median interquartile range was 1.2–1.6% of the median. The harness, all scripts and every raw measurement are in the project repository (https://github.com/Swayamgoyal/Geoguessers).
+
+Getting to that level of repeatability took some work. In an early run Windows moved gdaldem from a performance core to an efficiency core part-way through, and the run took 108.9 s instead of about 56 s; on an efficiency core gdaldem is 1.7 times slower. From then on every tool was pinned to the 12 performance-core threads. Later we noticed our numbers drifting between repeats and traced it to the antivirus scanner reading our 10–40 GB temporary outputs, which slowed later runs by 25–35%. We excluded only the scratch folders from scanning and re-measured every final number.
+
+For each grid, two reference runs split a gdaldem run into stages. One only reads and decompresses every block; the other copies the grid to an uncompressed GeoTIFF of the same size. Writing is then copy minus read, and computation is gdaldem minus copy. If computation is a share p of a run, Amdahl's (1967) bound caps the speed-up from making computation faster at
+
+EQ| S_{\max} = \frac{1}{1 - p} | (4)
+
+NOINDENT| Table 2 lists the six experiments.
+
+TAB| Table 2. Overview of the six experiments. E5 ran inside one long-lived process, as a viewer's server does; every other measurement ran as its own process.
+| ID | Question | What was varied | Runs |
+| E1 | How does gdaldem scale? | 10 operator configurations, 6 grids, cold and warm cache | 560 |
+| E2 | Does storage layout matter? | 7 layouts: strips or tiles, 256 or 512, four compressions | 224 |
+| QGIS | What limits display? | whole area or zoomed in, with or without pyramid, 3 grids | 48 |
+| E3 | How fast is a parallel CPU engine? | threads, operators, fused products, window size | 501 |
+| E4 | When does the GPU help? | kernel versions, precision, windows, reader threads | 484 |
+| E5 | Error against time on the pyramid | every pyramid level of two real DEMs, three routes | in-process |
+| E6 | Does the viewer keep up? | 24 configurations × 17 interaction traces | 1,068 |
+
+## 3.4 Terrain engine for the CPU and the GPU
+
+Our engine walks through a grid in windows of 2048 × 2048 cells. Each window is read with a one-cell border, the halo, so that the 3 × 3 operators give exact results at window edges (Figure 2a). Three stages run at the same time. Four reader threads, each with its own GDAL handle, decode windows ahead, with at most six in flight so memory stays bounded. The compute kernel, compiled with Numba (Lam et al. 2015), splits the rows of a window across all cores. One writer thread writes the results, because GDAL advises against writing from several threads. Slope, aspect and hillshade can be fused into one pass since they share the gradient. Picking the window size is a balancing act. The input is stored in compressed 512 × 512 tiles, so the halo of a window w cells wide forces
+
+EQ| T(w) = \left(\frac{w}{512} + 2\right)^{2} | (5)
+
+NOINDENT| stored tiles to be decoded instead of (w/512){sup}2{/sup}. Small windows waste decoding; big ones hold more memory in flight. The GPU engine swaps out only the compute stage. Each window goes into a page-locked host buffer, is sent to the GPU, runs through our own CUDA kernels compiled at run time with CuPy (Okuta et al. 2017), and comes back, with two streams so that one window's copies overlap the next window's kernel. Arithmetic is float32, as in GDAL. The engine reproduces all ten gdaldem configurations. Our first full-grid comparison against gdaldem showed tiny differences in a few cells; they vanished once we copied the order in which gdaldem adds the Horn neighbours in float32. After that, both engines matched gdaldem on every cell of the 90 m, 30 m, 8 m and 2 m real grids.
+
+FIG| fig2_architecture.png | 15.0 | Figure 2. (a) The whole-grid terrain engine: reader threads decode windows with a one-cell halo, a parallel kernel computes them, and one writer thread writes the products, with bounded queues between the stages. (b) The interactive viewer system: a web viewer and a QGIS plugin share one tile server, whose scheduler runs visible tiles on performance cores and prefetch on efficiency cores, with caches of decoded blocks and encoded tiles in front of the COG pyramid.
+
+## 3.5 Derivatives on demand from the pyramid
+
+For E5 we kept to the two real high-resolution DEMs: Chamoli 2 m with levels 1–6 (4 m to 128 m) and the HMA 8 m tile with levels 1–5 (16 m to 256 m). Slope and aspect were computed on demand at every level, from that level's DEM and with its cell size. The reference had to represent what a pixel of that size should really display, so we computed slope at full resolution and averaged it over precisely the fine cells inside each coarse cell, taking the circular mean for aspect. Because GDAL halves each level and rounds the size down, footprints came from the geometry, and we repeated each measurement on an exact power-of-two pyramid as a check. A cell counted only if its footprint and neighbours had no gaps, which left 61 million cells at 4 m and 51 thousand at 128 m on Chamoli. Writing ŝ{sub}i{/sub} for the slope displayed in coarse cell i and s{sub}i{/sub} for the averaged full-resolution slope, the error at level k is
+
+EQ| \mathrm{RMSE}_{k} = \sqrt{\frac{1}{n_{k}} \sum_{i=1}^{n_{k}} \left(\hat{s}_{i} - s_{i}\right)^{2}} | (6)
+
+NOINDENT| and the bias is the mean of ŝ{sub}i{/sub} − s{sub}i{/sub}. We timed three ways of serving one 512 × 512 display tile at level k, at eight random places per level. On demand reads the tile from level k with a halo and computes it. Full resolution reads the same ground at full resolution, computes and averages, which is the exact answer without any precomputation. Precomputed reads the tile from a slope pyramid built in advance.
+
+## 3.6 Interactive viewer and its evaluation
+
+The viewer system has four parts (Figure 2b). A tile engine renders a fixed lattice of 512 × 512 tiles per pyramid level, aligned to the COG blocks. Its single-threaded Numba kernels release Python's interpreter lock, so many tiles render in parallel. Decoded blocks go into a 1 GiB cache shared by neighbouring tiles, and finished tiles into a 512 MiB cache. A scheduler keeps a queue for visible (foreground) tiles and one for prefetch (background) tiles, puts foreground work on the performance cores and prefetch on the efficiency cores, merges identical requests, and cancels work that a newer view has made pointless. A FastAPI server exposes tiles, a whole-map overview and a box endpoint that returns a GeoTIFF. Every request carries the generation of the view that made it. When the user pans or zooms, a new generation starts: queued work from older generations is dropped, and a running tile is cancelled as soon as the browser closes its connection. Each tile response also reports its own stage times (queue, read, decode, kernel, colour mapping and encoding), which we later used to split latency by stage. In the browser, the viewer draws tiles from the level whose cell best matches one screen pixel:
+
+EQ| k^{*} = \max \left\{ k : r_{k} \le m \right\} | (7)
+
+NOINDENT| where r{sub}k{/sub} is the cell size of level k and m the ground distance under one screen pixel. Until the right tiles arrive, the viewer stretches whatever nearby level it has cached, coarser or finer, so the screen never goes blank mid-zoom. A status panel shows the level, its cell size and the slope error to expect from E5. A zoom commits once, after a trailing debounce. Panning asks for new tiles straight away. After each commit the eight neighbouring views are prefetched, the direction of travel first, much like the tile prefetching of Battle et al. (2016). The QGIS plugin sends a box drawn on the map to the same server and adds the result as a styled layer. A full-resolution slope box came back identical to gdaldem's slope (1.22 million cells, maximum difference 0).
+
+To put all of this to the test, E6 replayed 17 seeded interaction traces in real time, each against a freshly started server. The traces covered straight and reversing pans at three speeds, a random walk, smooth and notched mouse-wheel zoom bursts, zoom and pan in alternation, and nested box zooms. A Python port of the viewer's policy acted as the client and, like a browser, used at most six connections. For each of 24 configurations it ran one warm-up and five measured runs per trace on the Chamoli 2 m DEM. Two pass marks were set before any run. Prefetching could not raise the 95th-percentile (p95) latency of visible tiles by more than 10%, and the zoom debounce had to reduce the tiles rendered per gesture while still delivering the first frame within 100 ms of firing. Three of the traces were also played in headless Chrome to confirm that the simulated client behaves like a real browser. Our first E6 sweep went in the bin. The client's timers ran on Windows' 15.6 ms event-loop clock and fired up to 16 ms early, enough to distort first-frame times, so we moved to a high-resolution timer and ran everything again.
+
+One of us ran the validation sessions of Section 4.5 on a personal laptop, using the swissALTI3D grid. That machine has an AMD Ryzen 7 7840HS (16 threads), 14 GiB of RAM, an NVMe SSD, an NVIDIA RTX 4050 Laptop GPU and an AMD Radeon 780M integrated GPU that drives the screen, and it runs Linux with QGIS 4.2. Across seven sessions driven by hand we used the web viewer, the QGIS plugin, or both together. The server wrote a log line for every request with its stage times and recorded its own memory and cache counters every 2 s; a separate sampler logged per-core CPU load, both GPUs, memory and disk once a second.
+
+# 4. Results
+
+## 4.1 Where standard tools stop being practical
+
+gdaldem's run time grew in a straight line with the number of cells (Figure 3a). One slope pass took 4.0 s at 8 m, 53.7 s on the 2 m synthetic grid and 208 s at 1 m, about 19–25 ns per cell once program start-up stopped mattering. Peak memory flattened out at 0.87 GB, so all 43 GB went through without any memory trouble. But the tool used 0.99 of the 22 threads available. The stage split showed that about 73% of every large run was this single-threaded computation, with 14–15% reading and decompressing and 11–14% writing (Table 3). Cold and warm cache differed by 2% or less. The ten operators cost between 17.5 and 27 ns per cell, so the product mattered far less than the grid size. We also tried GDAL's parallel decompression. It made gdaldem 2–4% slower, since decompression is a small share of its time; the default configuration was already its fastest.
+
+TAB| Table 3. Horn slope across the resolution ladder for gdaldem, the CPU engine on the same 12 threads and the GPU engine (warm cache, medians), with the share of gdaldem's time spent computing.
+| Grid | Cells | gdaldem | Compute share | CPU engine | GPU engine | GPU vs gdaldem |
+| 8 m | 169 M | 4.02 s | 71% | 1.94 s | 1.90 s | 2.1× |
+| 2 m real | 264 M | 6.63 s | 74% | 2.53 s | 2.18 s | 3.0× |
+| 2 m synthetic | 2.7 B | 53.7 s | 74% | 16.3 s | 11.3 s | 4.7× |
+| 1 m synthetic | 10.8 B | 208.4 s | 73% | 60.3 s | 43.8 s | 4.75× |
+
+Storage layout (E2) moved gdaldem's time by up to about 40%, because decompression happens inside its single thread. On the 2 m synthetic grid, LZW compression made slope 39% slower than uncompressed strips, ZSTD only 14% (Appendix Table A1). ZSTD files were 2.9 times smaller than uncompressed ones and decoded 2.6 times faster than LZW, so every COG in this study uses ZSTD. Display told a sharper story. With the pyramid, QGIS drew a 1920 × 1080 view of the whole area in 0.09 s at every resolution. Without it, the same view at 1 m took 31.9 s, because QGIS had to read the full-resolution level, about 12.7 GB. A zoomed-in view read only its own window and took about 0.1 s either way. On a laptop, then, standard tools fail by getting slow rather than by running out of memory, and for display the pyramid alone decides whether a whole-area view is usable.
+
+FIG| fig3_scaling_crossover.png | 16.0 | Figure 3. (a) How gdaldem's run time grows with the number of cells (warm cache), for slope and hillshade, next to the read-only and copy runs used to split it into stages. (b) A single slope window already in memory: the 12-thread CPU kernel against the GPU, with and without the transfers to and from the device.
+
+## 4.2 Parallel computation on the CPU and the GPU
+
+On the same cores, the CPU engine beat gdaldem by 2.1–3.5 times, and the gap widened as grids grew (Table 3): 60.3 s against 208.4 s at 1 m, about 5.6 ns per cell. Memory stayed flat at about 1.4 GB at every size. That is a little above gdaldem's figure, because several windows sit in memory while reading, computing and writing overlap. Twelve performance-core threads beat all 22 (60 s against 68 s at 1 m): the work is split evenly, and the slower cores hold everyone else up. For comparison, we also wrote the obvious program that loads the whole grid into NumPy. It needed about 24 bytes per cell and died on the 2 m synthetic grid, which puts the limit for whole-grid processing on 16 GB at roughly 0.5–0.7 billion cells. Streaming tools have no such ceiling. Tiling alone did not buy the speed. The same pipeline with a single-threaded NumPy kernel ran 2.6–3 times slower than gdaldem, so the gain comes from the compiled parallel kernel. Fusing slope, aspect and hillshade into one pass took 134.8 s at 1 m. gdaldem needed more than 367 s for slope and hillshade alone, and on the real grids the fused pass was 3.4–4.2 times faster than three gdaldem runs.
+
+With computation in parallel, moving data became the limit. At 1 m the kernel needed 33 s while the writer thread was busy for 65 s writing 43 GB. Without any output, the run instead waited 23 s for windows to be decompressed. Decompression held reading back, not the disk: with no output, eight reader threads instead of four cut the read wait on the 2 m synthetic grid from 5.8 s to 1.2 s, and a cold cache changed the 1 m run by just one second (67 s against 68 s). We tried compressing the output with ZSTD too. Files shrank by 40% (6.6 GB instead of 10.9 GB on the 2 m synthetic grid), but the run slowed from 16.4 s to 21.2 s because compression stole processor time from the kernel. Window size behaved as Equation 5 predicts. The halo costs nine times the necessary decoding at 512 cells and 2.25 times at 2048, while 8192-cell windows held 7.4 GB in flight for nothing, so 2048 came out best overall (Appendix Table A2).
+
+The GPU kernel computed slope for the whole 10.8-billion-cell grid in 1.1 s; the CPU kernel took 34 s. That is about 50 times faster. A whole run, though, was only 1.0–1.4 times faster than the CPU engine (43.8 s against 60.3 s at 1 m; Table 3). Figure 3b shows why. For a 2048 × 2048 window the kernel took 0.18 ms, and the kernel plus its copies 3.85 ms, so 95% of the GPU's own time went into copying over PCIe. Counting the copies, the GPU was 2.2–2.4 times faster than the CPU kernel for windows of 1024{sup}2{/sup} cells and up, only 1.3 times at 512{sup}2{/sup}, and slower below that. How we used the GPU mattered more than the GPU itself. A direct port of our NumPy code to CuPy took 17.0 s on the 2 m synthetic grid, slower than the CPU engine. Writing our own kernel, using page-locked buffers and adding a second stream brought it down to 11.3 s. Double precision made the kernel 8–24 times slower and the total barely moved (11.5 s against 11.3 s), one more sign that computation was no longer the limit. We never pushed the GPU hard; it stayed at or below 63 °C and used at most 2.0 GiB of its 8 GiB. Fused products gained the most (81.4 s at 1 m against 134.8 s on the CPU). With the kernel almost free, the main thread at 1 m spent 25.7 s waiting for decompressed input. Eight readers cut that wait to 3.2 s. Then writing took over, and the total only dropped from 43.8 s to 42.6 s (Figure 4).
+
+FIG| fig4_stages.png | 12.5 | Figure 4. Slope run time split into stages (warm cache) on four grid sizes. gdaldem's bars come from the stage split; the CPU and GPU engines report their own stage timings. From gdaldem to the engines the computing share shrinks, while reading, copying and writing stay.
+
+## 4.3 Error and time of derivatives from the pyramid
+
+Slope taken from a coarser level was always too low, and the further up the pyramid, the lower it got (Table 4, Figure 5a). The Chamoli RMSE climbed from 2.3° at 4 m to 6.4° at 32 m and 10.0° at 128 m, and the mean slope shown slid from 99% to 81% of the real mean. How many levels up mattered more than the cell size in metres. Compared level for level, up to four levels, the two DEMs stayed within 0.5° of each other: roughly 2.5° for the first level and about 1.5° for each one after that. GDAL's overviews gave the same errors as an exact power-of-two pyramid, to within 0.2° RMSE.
+
+TAB| Table 4. On-demand slope from each level of the Chamoli 2 m pyramid, scored against the averaged full-resolution truth, with the time to serve one 512 × 512 tile (warm cache, median over eight places). Times were measured up to four levels above the base.
+| Level | Cells scored | RMSE | Bias | ≥45° shown / truth | On demand | Full resolution | Time saved |
+| 4 m | 61.4 M | 2.3° | −0.5° | 32.1 / 33.2% | 7.2 ms | 56 ms | 7.8× |
+| 8 m | 15.2 M | 4.4° | −1.2° | 29.2 / 32.3% | 6.4 ms | 192 ms | 30× |
+| 16 m | 3.7 M | 5.6° | −2.2° | 25.7 / 30.8% | 6.6 ms | 624 ms | 94× |
+| 32 m | 0.91 M | 6.4° | −3.3° | 21.9 / 29.3% | 6.4 ms | 2,867 ms | 447× |
+| 64 m | 0.22 M | 7.9° | −5.0° | 16.5 / 28.4% | – | – | – |
+| 128 m | 51 k | 10.0° | −7.3° | 10.1 / 27.4% | – | – | – |
+
+The steepest ground took the biggest hit. At 32 m, slopes of 0–10° were underestimated by 0.9° on average and slopes of 40–50° by 4.0°; over a third (36%) of the 40–50° cells missed by more than 5°, compared with a tenth of flat cells (Appendix Figure A2). That shifts thresholds. A map of terrain at or above 45° was still 97% unchanged one level up, but four levels up a quarter of that terrain had vanished (29.3% to 21.9%), and six levels up nearly two thirds (27.4% to 10.1%). Aspect coped far better, with median errors of 1.8° at 4 m, 6.3° at 32 m and 8.5° at 128 m, and no more than 13.7% of cells wrong by over one sector of a 16-point compass. One finding surprised us. Over the Chamoli footprint, the 2 m data averaged to 8 m, 30 m or 90 m always beat the independent DEMs of matching cell size against the 2 m truth: slope RMSE of 4.5°, 6.3° and 8.7°, against 8.6° for HMA 8 m, 9.4° for Copernicus 30 m and 9.9° for Copernicus 90 m.
+
+Moving between levels barely changed the time per tile (Table 4, Figure 5b). On demand, every tile cost 5–8 ms whatever the zoom, because each one means reading 514 × 514 cells and running the kernel over them. The exact route at full resolution reads four times as much ground for each level up, and one tile at 32 m took it 2.9 s. Every level therefore gained a factor of 2–5: one to four levels up saved 7.8–447 times per tile on Chamoli and 7.6–193 times on the 8 m DEM. A cold cache added at most 1.5 ms. Tiles from a precomputed slope pyramid arrived 1.3–3.0 ms sooner, but building that pyramid takes a full pass per product (10.6 s and 1,005 MB for Chamoli, 1.5 times the size of the elevation pyramid), and it must be redone whenever a parameter or the DEM changes.
+
+FIG| fig5_pyramid.png | 16.0 | Figure 5. (a) How slope RMSE and the underestimate (negative bias) grow with each pyramid level on the two real DEMs, Chamoli 2 m and HMA 8 m. (b) The cost of one 512 × 512 slope tile at each Chamoli level when served on demand, computed at full resolution and averaged, or read from a precomputed pyramid, with warm and cold cache.
+
+## 4.4 Interactive viewing
+
+On-demand computation kept up with continuous viewing (Table 5). After a zoom gesture the first exact tile arrived 57–89 ms after the commit and the whole view 76–158 ms after it. After a box zoom the first exact tile came 64 ms after the animation ended and the full view at 127 ms. The server never needed more than 982 MiB in these runs. Without a debounce, every wheel tick committed a new view, up to 121 times in a 2 s burst, and the server rendered a median of 62 foreground tiles per gesture. With a trailing debounce it rendered 19, 3.3 times fewer, and the first exact tile followed 63–71 ms after the debounce fired. The second gate passed (Figure 6a). Choosing the debounce value was less obvious than we expected. Smooth 60 Hz bursts made every value from 100 to 250 ms look the same, because the ticks come only 17 ms apart. A notched mouse wheel settled it. At 100 ms the viewer committed between notches and rendered 36 tiles, as many as with no debounce at all; at 150 ms and above the gesture collapsed into 15. Going to 200 ms only added 40–50 ms of delay, so 150 ms became the default (Appendix Table A3).
+
+TAB| Table 5. Key viewer results from E6 (medians of five runs per trace, Chamoli 2 m DEM).
+| Measure | Without the policy | With the policy |
+| Server tiles per zoom gesture, 60 Hz bursts | 62 (no debounce) | 19 (debounce) |
+| Server tiles per gesture, notched wheel 30–150 ms | 36 (100 ms) | 15 (150 ms) |
+| First exact tile after the debounce | – | 63–71 ms |
+| Tiles already cached when panned into view | 0% straight, ~50% reversing | 98–100% |
+| Foreground requests per pan | 36–202 | 0–5 |
+| Visible-tile p95 on identical tiles, server / client | 95 / 138 ms (prefetch off) | 90 / 129 ms (prefetch on) |
+| Blocks decoded on mixed traces | 1,128 (no block cache) | 185 (1 GiB cache) |
+
+Prefetching made panning seamless. With it, 98–100% of the tiles entering the view during a pan were already in the browser, at every pan speed, and a pan needed 0–5 foreground requests instead of 36–202 (Figure 6b). Without it the hit rate was 0% on a straight pan and about 50% on a pan that doubled back. The ring of eight neighbouring views fetched 2–5 tiles for every tile actually used (precision 0.20–0.56), all of it on efficiency cores that would otherwise sit idle. Loading the direction of travel first kept the hit rate at 0.99 at two view widths per second; a fixed order dropped it to 0.91. We tested the first gate like for like on the box trace, where the visible tiles are identical with and without prefetch. Server p95 was 90 ms with prefetch and 95 ms without, and client p95 129 against 138 ms, so prefetch did not slow the visible tiles and the gate passed (Appendix Figure A1). Only 3% of visible tiles were ever requested while a prefetch request was in flight, and all 122,215 prefetch jobs ran on efficiency cores. Two details of the policy came straight out of these runs. Prefetch pauses when the p95 of the last twenty visible tiles goes above a threshold, as a safeguard for an overloaded server. At 100 ms that threshold sat right at the latency of a cold start and paused prefetch at random; the hit rate of a fast reversing pan fell from 0.98 to 0.50. At 250 ms the viewer behaved as if the rule did not exist on every trace, and the safeguard stayed in place. And when we let prefetch start while visible work was still pending, the server's p95 rose by 9% (64 against 58 ms), so prefetch now waits until a view is complete.
+
+Two things accounted for the latency that was left: the browser and block decoding. At p95 the client waited around 40 ms longer than the server, because a tile had to queue for one of six connections; running 4, 6 or 8 workers on the server made no difference to what the client saw. Turning off the decoded-block cache multiplied the blocks decoded by six and raised client p95 by 40%. Emptying the file cache had no effect at all. Changing the product, moving to the 8 m DEM or drawing slope or aspect rather than hillshade shifted latency by 10% or less. As a last check, three traces replayed in a real headless Chrome browser issued the same commits and requests as our simulated client and completed their views within 10% of its times.
+
+FIG| fig6_viewer.png | 12.5 | Figure 6. (a) Zoom bursts at each debounce setting: how many foreground tiles the server draws per gesture, and how long after the last wheel tick the first exact tile appears. (b) How many of the tiles entering the view during a pan are already cached in the browser, by pan speed and prefetch policy.
+
+## 4.5 Validation on a 2.85-billion-cell lidar DEM
+
+Over seven sessions on the swissALTI3D grid, the system served about 18,000 web-viewer tiles and 125 QGIS boxes (Table 6, Figure 7). In the default mode, which computes from the pyramid level that fits the screen, the median tile took 6.9–14.1 ms per session. A full view of a 625-million-cell part of the same data loaded in 91 ms, inside the 76–158 ms range E6 had measured on a dataset eleven times smaller. Tiles whose blocks were already decoded took 5.8 ms on average and tiles read from disk 14.1 ms, and decompression was 52–55% of the latter (Figure 7c), just as in E5. Of the 125 QGIS boxes, 122 came back at the level that matched the box on screen, from 128 m for a dataset-wide box down to 2 m. Ordinary boxes took 10–225 ms; full-resolution boxes close to the 64-million-cell limit took 3.2–4.4 s. The other three were over that limit and the server turned them away in 1 ms, which is what the limit is for. QGIS stayed responsive throughout, because the plugin computes each box in a background task.
+
+TAB| Table 6. Results of the validation sessions on the 2.85-billion-cell swissALTI3D 2 m DEM, run on a second laptop in the default (pyramid) mode.
+| Measure | Result |
+| Sessions | 7 (3 web viewer, 2 QGIS, 2 both), 2.2–9.1 min |
+| Web-viewer tiles served | about 18,000 |
+| Tile time (median per session) | 6.9–14.1 ms |
+| Full view on a 625-million-cell block | 91 ms |
+| Decompression share of a tile read from disk | 52–55% |
+| QGIS boxes returned at the matching level | 122 of 125 (3 over the size limit, refused in 1 ms) |
+| Box time, ordinary / full resolution near the limit | 10–225 ms / 3.2–4.4 s |
+| Tile server CPU (median) | 0.01–0.02 cores |
+| Tile server memory with both caches full | 1.9–2.3 GB |
+| NVIDIA GPU use by the system | 0% |
+
+The server itself barely registered. It used a median of 0.01–0.02 cores in the default mode, while the browser used 0.2–0.5 cores and QGIS peaked at 8–10 cores redrawing its layers. With both caches full, server memory stayed at 1.9–2.3 GB, right at the planned budget of about 2.2 GB, and both caches stopped at their caps and evicted as intended. The system never touched the NVIDIA GPU, and the integrated GPU that draws the screen stayed at its lowest clock almost all the time.
+
+FIG| fig7_system.png | 15.0 | Figure 7. The system in use. (a) The web viewer at full resolution (2 m cells) on the Chamoli DEM, with the status panel showing the pyramid level, cell size and expected slope error. (b) A full-resolution slope box drawn in QGIS through the plugin and added as a GeoTIFF layer. (c) Where a tile's server time goes on the 2.85-billion-cell swissALTI3D grid: tiles with blocks already decoded (warm) and tiles read from disk (cold).
+
+# 5. Discussion
+
+Looking back over the six experiments, the same story repeats: arithmetic stops being the bottleneck very quickly. gdaldem is limited by computation only because it does all of it on a single thread. With 73% of its time spent computing, Amdahl's law (Equation 4) allows at most about 3.7 times from parallel computation, and our CPU engine got to 3.5. Past that point, decompression and writing govern whole-grid runs. The GPU makes computation almost free but brings PCIe copies, so it inherits those two costs plus one more. Sanchez-Fernandez et al. (2021) reached a similar conclusion when data layout in memory beat extra GPUs, and Barnes (2016) built his tiling around data movement for the same reason. What we did not find was a slow disk. A flushed file cache moved run times by 2% at most on the NVMe SSD, and reading was really limited by the CPU's decompression work. The pilot in our literature review had seen caching triple the run time at 5 m. It was timed through the QGIS interface on another laptop, and in hindsight it probably measured one-off start-up costs.
+
+The GPU results put the large speed-ups in earlier work in perspective. Yu et al. (2024) reported about 29 times for neighbourhood operations shared between CPU and GPU. Our kernel alone was about 50 times faster than the CPU kernel, and yet complete runs gained 1.0–1.4 times. The difference is in what gets counted. A kernel-to-kernel comparison leaves out the copies and the input and output that a real run cannot skip. Our crossover measurements agree with their point that the CPU and the GPU suit different parts of the work, and give a simple rule. Below 512 × 512 cells the CPU wins. The GPU pays off for large windows, fused products, or results that stay in GPU memory. Since a straight port of array code to the GPU was slower than our CPU engine, the gain comes from kernels written for the device, not from owning one. In our view the GPU is the wrong first step for this kind of work on a laptop. A parallel CPU engine gets most of the way there with far less effort.
+
+On the display side, the evidence supports the pyramids of Losasso and Hoppe (2004) and Campos et al. (2020) and takes the idea one step further, from elevation to derivatives computed as needed. A tile at the screen-matched level always covers the same number of cells, so a view costs a few milliseconds whether the user is zoomed in or out, and switching product or sun angle costs only the cells on screen. Global layers precomputed in the style of Amatulli et al. (2020) and Ho et al. (2025) are exact and slightly quicker per tile. Yet each needs a full pass and, for our data, about 1.5 times the storage of the elevation pyramid. Computing on demand swaps that cost for an error whose size is now known. Zhang and Montgomery (1994) described slope falling with cell size; here the fall appears level by level, and it is largest on steep ground, as the landform dependence found by Deng et al. (2007) would suggest. A pyramid level of the 2 m data came closer to the truth than any independent DEM of equal cell size, which supports Polidori and El Hage (2020) in their view that the quality of the source counts as much as its nominal resolution. The error also grows roughly with the logarithm of the number of levels, much like the grid-spacing effect that Guth and Kane (2021) reported.
+
+What does this mean in practice? For viewing, slope from the level whose cell is about one screen pixel keeps every valley and ridge, and its expected error can sit right next to it, as it does in the viewer's status panel. For analysis that thresholds slope, landslide susceptibility being the obvious case, full-resolution values are the right choice; four levels up, a quarter of the terrain steeper than 45° simply disappears. So both the viewer and the plugin offer an approximate mode for exploring and an exact mode for analysis, and the user picks between speed and exactness knowing the error in advance.
+
+Once computation is cheap, latency comes from elsewhere, and the viewer runs show where. The debounce and the prefetch ring rest on the same idea as the pyramid: compute only what will actually be seen. One skips the views a user merely passes through. The other spends idle efficiency-core time on the views a user is about to reach, close in spirit to the tile prefetching of Battle et al. (2016). Visible tiles did not suffer from either, since prefetch gives way to foreground work and runs on separate cores. What remained was the browser's six-connection limit and the decoding of compressed blocks, which the shared block cache reduced to a sixth. At 76–158 ms for a complete view, the viewer stays well clear of the 500 ms that Liu and Heer (2014) found was enough to dampen exploration.
+
+The second laptop and a dataset eleven times larger reproduced both the per-tile cost and the decoding share. The cost of the design depends on the size of a tile, not on the size of the dataset. In ordinary use the browser and QGIS used more processor time than the tile server, which got by on hundredths of a core. One laptop can comfortably serve both clients at once, and the server has room for more users than the single browser E6 simulated. Building a QGIS plugin instead of a separate GIS also paid off. A box drawn on the map comes back as a georeferenced layer at the level that matches the screen, with its level and expected error reported, while the same server and caches keep serving the web viewer.
+
+From all this we would suggest a few rules for terrain work on a single laptop. Store DEMs as COGs with 512 × 512 ZSTD tiles and internal overviews; the pyramid adds about a third to the storage and makes every whole-area view interactive. For whole-grid products, stream the grid in windows of about 2048 cells with a halo, compute in parallel on the performance cores, and fuse products that share a gradient. That keeps memory flat and captures most of the available speed-up. Use the GPU when windows are large or several products are needed at once, and write kernels for it. For viewing, compute derivatives on demand from the level that fits the screen and show the expected error, debounce zoom by about 150 ms, and prefetch neighbouring views on spare cores. These rules come from where the time goes, not from our particular hardware. They should carry over to other laptops even where absolute times differ, and the second laptop in our validation suggests they do.
+
+# 6. Limitations and future scope
+
+Every controlled timing was taken on one laptop with a local NVMe SSD. Ratios such as speed-ups and stage shares should travel to other machines better than absolute times, and serving COGs over a network would add latency to each request. The 1 m and whole-tile 2 m grids are synthetic and were used for timing only, as no free 1 m DEM covers the region. We measured accuracy in a single steep region, where pyramid errors run larger than they would on gentler ground, against a reference that is itself a DEM with errors of its own. GDAL and QGIS formed the baseline since they are the standard open tools for this kind of work. E6 tested one client on scripted traces starting from a cold server, whereas the validation sessions covered longer, hand-driven use with full caches on another machine; between them, both controlled and realistic use are represented. How the GPU would handle display tiles follows from the crossover measurements.
+
+Several next steps follow from this work. Exact mode is designed for small areas and careful analysis, and on the 2.85-billion-cell grid its whole-map overview needs 47–129 s on one core; deriving that overview from its own pyramid level, and cancelling superseded overview requests just as tiles are cancelled now, would remove the wait. Moving decompression onto the GPU would let compressed blocks cross PCIe (2.2–2.6 times fewer bytes on our data) and free the CPU from decoding. Going by the E4 crossover, we would expect up to about 1.4 times on the GPU stage, while runs that write to disk would still be bound by writing. Per-level correction factors could remove most of the slope bias, but not the scatter around it. Longer sessions with several clients would put the result cache and returning users to the test, and serving COGs remotely would show how the design copes with a network. One gap from our literature review is still open. We have not yet tested how close the approximate XDraw viewshed comes to the exact method (Cauchi-Saunders and Lewis 2015; Dou et al. 2019), or how A* compares with Dijkstra for terrain distance (Hart et al. 1968) in high-relief terrain.
+
+# 7. Conclusions
+
+Even at 10.8 billion cells, standard terrain tools keep working on a 16 GB laptop; what they lose is speed. gdaldem gets through 43 GB using 0.87 GB of memory, but on one thread, and QGIS without a pyramid re-reads full-resolution data each time it redraws the whole area. A tiled engine with a compiled parallel kernel lifts the computation limit and runs 2.1–3.5 times faster while matching gdaldem exactly. A GPU cuts computation further still, but decompression, copying and writing then set the pace, leaving a 1.0–1.4-fold gain over the CPU engine. On a laptop, moving and decoding data costs far more than the arithmetic.
+
+Getting past that limit means reading and computing less. Derived on demand from the pyramid level that matches the screen, a tile costs 5–8 ms at any zoom, 8–450 times less than an exact computation. The price is a slope underestimate we have measured: about 2.5° one level up and 1.5° more for each further level, worst on steep ground. Our viewer, with a 150 ms zoom debounce and prefetch that follows the direction of travel, keeps up with continuous pan and zoom, and the QGIS plugin brings the same server into an everyday GIS workflow. Both held up on a 2.85-billion-cell lidar DEM on a second laptop, with a server that needed only hundredths of a core. Thresholds and hazard maps should still use full-resolution slope, and the exact mode exists for that.
+
+H0| Acknowledgements
+
+Our thanks go to the course instructor, whose advice set the direction of this project. Elevation data were made available by NASA's National Snow and Ice Data Center (High Mountain Asia 8 m DEM mosaics), by S. Bhushan and D. Shean via Zenodo (the Chamoli 2 m composite), by the European Space Agency through OpenTopography (Copernicus GLO-30 and GLO-90, produced using Copernicus WorldDEM-30 © DLR e.V. 2010–2014 and © Airbus Defence and Space GmbH 2014–2018) and by the Federal Office of Topography swisstopo (swissALTI3D © swisstopo). We built on the open-source GDAL, QGIS, Numba, CuPy and FastAPI projects.
+
+H0| Declarations
+
+SUBHEAD| Author contributions
+All three authors contributed in roughly equal measure to the design of the experiments, the implementation of the terrain engine, the viewer and the QGIS plugin, the measurements and the writing of this report. Swayam Goyal led the back-end and development work, Siddharth Choudhary led ideation and documentation, and Yakkala Viswanadha Kartikeya led testing and validation. All authors read and approved the final report.
+
+SUBHEAD| Funding
+This work did not receive any specific grant from funding agencies in the public, commercial or non-profit sectors.
+
+SUBHEAD| Data and code availability
+All elevation data are publicly available from the providers listed above. The code, benchmark harness, measured results and data manifests are available at https://github.com/Swayamgoyal/Geoguessers.
+
+SUBHEAD| Conflict of interest
+The authors have no relevant financial or non-financial competing interests to disclose.
+
+H0| References
+
+REF| Amatulli G, McInerney D, Sethi T, Strobl P, Domisch S (2020) Geomorpho90m, empirical evaluation and accuracy assessment of global high-resolution geomorphometric layers. Sci Data 7:162. https://doi.org/10.1038/s41597-020-0479-6
+REF| Amdahl GM (1967) Validity of the single processor approach to achieving large scale computing capabilities. In: Proceedings of the AFIPS Spring Joint Computer Conference, pp 483–485. https://doi.org/10.1145/1465482.1465560
+REF| Barnes R (2016) Parallel Priority-Flood depression filling for trillion cell digital elevation models on desktops or clusters. Comput Geosci 96:56–68. https://doi.org/10.1016/j.cageo.2016.07.001
+REF| Battle L, Chang R, Stonebraker M (2016) Dynamic prefetching of data tiles for interactive visualization. In: Proceedings of the 2016 International Conference on Management of Data (SIGMOD), pp 1363–1375. https://doi.org/10.1145/2882903.2882919
+REF| Bhushan S, Shean D (2021) Chamoli disaster pre-event 2-m DEM composite: September 2015. Zenodo. https://doi.org/10.5281/zenodo.4554647
+REF| Campos R, Quintana J, Garcia R, Schmitt T, Spoelstra G, Schaap DMA (2020) 3D simplification methods and large scale terrain tiling. Remote Sens 12:437. https://doi.org/10.3390/rs12030437
+REF| Cauchi-Saunders AJ, Lewis IJ (2015) GPU enabled XDraw viewshed analysis. J Parallel Distrib Comput 84:87–93
+REF| Collet Y, Kucherawy M (2021) Zstandard compression and the 'application/zstd' media type. RFC 8878, Internet Engineering Task Force. https://doi.org/10.17487/RFC8878
+REF| Deng Y, Wilson JP, Bauer BO (2007) DEM resolution dependencies of terrain attributes across a landscape. Int J Geogr Inf Sci 21:187–213. https://doi.org/10.1080/13658810600894364
+REF| Dou W, Li Y, Wang Y (2019) An equal-area triangulated partition method for parallel Xdraw viewshed analysis. Concurr Comput Pract Exp 31:e5216
+REF| European Space Agency (2021) Copernicus Global Digital Elevation Model (GLO-30). Distributed by OpenTopography. https://doi.org/10.5069/G9028PQB
+REF| GDAL/OGR contributors (2024) GDAL/OGR Geospatial Data Abstraction software Library. Open Source Geospatial Foundation. https://gdal.org
+REF| Guth PL, Kane M (2021) Slope, aspect, and hillshade algorithms for non-square digital elevation models. Trans GIS 25:2309–2332
+REF| Hart PE, Nilsson NJ, Raphael B (1968) A formal basis for the heuristic determination of minimum cost paths. IEEE Trans Syst Sci Cybern 4:100–107. https://doi.org/10.1109/TSSC.1968.300136
+REF| Ho Y-F, Grohmann CH, Lindsay J, Reuter HI, Parente L, Witjes M, Hengl T (2025) GEDTM30: global ensemble digital terrain model at 30 m and derived multiscale terrain variables. PeerJ 13:e19673. https://doi.org/10.7717/peerj.19673
+REF| Horn BKP (1981) Hill shading and the reflectance map. Proc IEEE 69:14–47. https://doi.org/10.1109/PROC.1981.11918
+REF| Lam SK, Pitrou A, Seibert S (2015) Numba: a LLVM-based Python JIT compiler. In: Proceedings of the Second Workshop on the LLVM Compiler Infrastructure in HPC, pp 1–6. https://doi.org/10.1145/2833157.2833162
+REF| Liu Z, Heer J (2014) The effects of interactive latency on exploratory visual analysis. IEEE Trans Vis Comput Graph 20:2122–2131. https://doi.org/10.1109/TVCG.2014.2346452
+REF| Losasso F, Hoppe H (2004) Geometry clipmaps: terrain rendering using nested regular grids. ACM Trans Graph 23:769–776. https://doi.org/10.1145/1015706.1015799
+REF| Okuta R, Unno Y, Nishino D, Hido S, Loomis C (2017) CuPy: a NumPy-compatible library for NVIDIA GPU calculations. In: Workshop on Machine Learning Systems (LearningSys), NIPS 2017
+REF| Open Geospatial Consortium (2023) OGC Cloud Optimized GeoTIFF Standard, version 1.0. OGC 21-026. https://docs.ogc.org/is/21-026/21-026.html
+REF| Polidori L, El Hage M (2020) Digital elevation model quality assessment methods: a critical review. Remote Sens 12:3522. https://doi.org/10.3390/rs12213522
+REF| QGIS Development Team (2024) QGIS Geographic Information System. Open Source Geospatial Foundation Project. https://qgis.org
+REF| Riley SJ, DeGloria SD, Elliot R (1999) A terrain ruggedness index that quantifies topographic heterogeneity. Intermt J Sci 5:23–27
+REF| Sanchez-Fernandez AJ, Romero LF, Bandera G, Tabik S (2021) A data relocation approach for terrain surface analysis on multi-GPU systems: a case study on the total viewshed problem. Int J Geogr Inf Sci 35:1500–1520. https://doi.org/10.1080/13658816.2020.1844207
+REF| Shean D (2017) High Mountain Asia 8-meter DEM mosaics derived from optical imagery, version 1. NASA National Snow and Ice Data Center Distributed Active Archive Center. https://doi.org/10.5067/KXOVQ9L172S2
+REF| swisstopo (2024) swissALTI3D: the high precision digital elevation model of Switzerland. Federal Office of Topography swisstopo. https://www.swisstopo.admin.ch/en/height-model-swissalti3d
+REF| Trevisani S, Teza G, Guth PL (2023) Hacking the topographic ruggedness index. Geomorphology 439:108838
+REF| Williams L (1983) Pyramidal parametrics. Comput Graph 17:1–11. https://doi.org/10.1145/964967.801126
+REF| Wilson MFJ, O'Connell B, Brown C, Guinan JC, Grehan AJ (2007) Multiscale terrain analysis of multibeam bathymetry data for habitat mapping on the continental slope. Mar Geod 30:3–35. https://doi.org/10.1080/01490410701295962
+REF| Yu Z, Zhou C, Li M (2024) A parallel strategy to accelerate neighborhood operation for raster data coordinating CPU and GPU. Cartogr Geogr Inf Sci 51:813–829. https://doi.org/10.1080/15230406.2023.2272660
+REF| Zevenbergen LW, Thorne CR (1987) Quantitative analysis of land surface topography. Earth Surf Process Landf 12:47–56. https://doi.org/10.1002/esp.3290120107
+REF| Zhang W, Montgomery DR (1994) Digital elevation model grid size, landscape representation, and hydrologic simulations. Water Resour Res 30:1019–1028. https://doi.org/10.1029/93WR03553
+
+PAGEBREAK
+H0| Appendix: supplementary tables and figures
+
+TAB| Appendix Table A1. Storage layouts of the 2 m synthetic grid (2.7 billion cells). Cold-cache medians; write times are single runs.
+| Layout | File size | Write | Read + decompress | gdaldem slope |
+| Strips, uncompressed (GDAL default) | 10.8 GB | 13.9 s | 4.0 s | 47.1 s |
+| Tiles 256, uncompressed | 10.9 GB | 13.5 s | 4.0 s | 51.8 s |
+| Tiles 512, uncompressed | 10.9 GB | 13.3 s | 3.3 s | 49.1 s |
+| Tiles 512, LZW | 5.0 GB | 88.9 s | 20.1 s | 65.7 s |
+| Tiles 512, DEFLATE | 3.9 GB | 113.4 s | 11.4 s | 57.0 s |
+| Tiles 512, ZSTD (our COGs) | 3.8 GB | 123.9 s | 7.8 s | 53.7 s |
+| Tiles 256, ZSTD | 3.8 GB | 121.0 s | 8.6 s | 55.3 s |
+
+TAB| Appendix Table A2. Window size of the CPU engine (slope, 12 performance-core threads, warm cache).
+| Window | 8 m | 2 m real | 2 m synthetic | Read wait (2 m synthetic) | Peak memory (2 m synthetic) |
+| 512 | 2.51 s | 3.47 s | 36.7 s | 25.0 s | 1.02 GB |
+| 1024 | 2.21 s | 2.89 s | 19.6 s | 8.7 s | 1.09 GB |
+| 2048 (default) | 1.94 s | 2.53 s | 16.3 s | 5.8 s | 1.30 GB |
+| 4096 | 2.22 s | 2.66 s | 15.2 s | 1.9 s | 2.70 GB |
+| 8192 | 2.52 s | 2.93 s | 15.9 s | 2.3 s | 7.36 GB |
+
+TAB| Appendix Table A3. Viewer settings chosen from the E6 measurements.
+| Setting | Value | Reason |
+| Zoom debounce | 150 ms | Same tiles as 200 and 250 ms on every trace and 40–50 ms sooner; 100 ms commits between wheel notches |
+| Forced commit during long scrolls | off | Nearly doubles tiles per gesture to save 9 ms |
+| Prefetch back-off threshold | 250 ms | A 100 ms threshold sits at the cold-start p95 and would pause prefetch at random |
+| Prefetch order | direction of travel first | Hit rate 0.99 against 0.91 at two view widths per second |
+| Prefetch requests in flight | 2 | Leaves 4 of the browser's 6 connections for visible tiles |
+| Foreground workers | 8 | 4–8 equal for one browser; 8 leave room for a second client |
+| Prefetch placement | efficiency cores, yielding | Not yielding costs 9% of visible-tile p95 |
+| Block cache | 1,024 MiB | Shared by all tiles; without it six times more decodes |
+
+FIG| figA1_gate1.png | 14.0 | Appendix Figure A1. Visible-tile latency (95th percentile) on identical tile sets, at the server (queue and render) and at the client. Left: the box trace with prefetch off and on. Right: the zoom-pan trace with different placements of the prefetch work.
+
+FIG| figA2_error_map.png | 15.0 | Appendix Figure A2. Slope on the Chamoli DEM at the 32 m pyramid level. Left: the truth, 2 m slope averaged to 32 m cells. Middle: slope computed on demand from the 32 m level. Right: the error (on demand minus truth); blue shows where the coarse level underestimates slope, mostly on steep ground.

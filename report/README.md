@@ -1,24 +1,23 @@
 # Reports
 
-| Folder | Report | Covers |
+| Folder | What | Covers |
 |---|---|---|
-| `prof_report/` | Progress report, Phase 2: data preparation and baseline benchmarks (gdaldem, storage layouts, QGIS) | E1, E2, QGIS display |
-| `phase3_report/` | Progress report, Phase 3: our own CPU and GPU terrain engine | E3, E4 |
-| `phase4_report/` | Progress report, Phase 4: terrain derivatives on demand from the pyramid | E5 |
-| `phase5_report/` | Progress report, Phase 5: interactive viewing with debounced pan/zoom and prefetch (tile engine, scheduler, server, web viewer, QGIS plugin) | E6 |
-| `internal_report/` | Internal team report: everything we did and why, all results (Phases 0–5 incl. the viewer and E6), problems faced, glossary, presentation preparation (numbers to remember, slide order, likely questions with answers) | Phases 0–5 |
-| `final_report/` | **Final report**: introduction, related work, data, method, E1–E6, discussion (the bottleneck story, G1, G2), recommendations, limitations, reproducibility, problems met | E1–E6 |
-| `presentation/` | **Final presentation** (Beamer, 16:9, 21 slides): the team draft rebuilt with a short recap of E1–E4, plots, live-demo slides, the Swiss Alps validation and checked numbers; see its README | E1–E6, demo, Swiss validation |
-| `slides/` | Earlier presentation (Beamer, 16:9, 23 slides) | E1–E6, demo |
-| `demo/` | Demo video (58 s, silent with captions) of the web viewer and the QGIS plugin; see its README | Phase 5 |
+| `final_submission/` | **Final report** (Word, course format): `GeoGuessers_final_report.docx` (+ PDF export), built from `report_source.txt` by `build_docx.py`; see its README | E1–E6, Swiss validation |
+| `presentation/` | **Final presentation** (Beamer, 16:9): plots, live-demo slides, the Swiss Alps validation; see its README | E1–E6, demo |
+| `demo/` | Demo video (58 s) of the web viewer and the QGIS plugin, a fallback for the live demo; see its README | Phase 5 |
+| `end_report/` | The team's draft of the end report (LaTeX/Word builder) that the final report was developed from | E1–E6 |
+| `figures/` | Study-area map used by the presentation | – |
+
+The progress reports of Phases 2–5, the earlier LaTeX final report, the internal report and the earlier slides were
+moved out of the repository at the final clean-up; their content is in the final report.
 
 Figures come straight from `results/plots/` (and `figures/` for the study-area map), so a rebuild picks up regenerated
 charts. Numbers match `docs/PHASE2_RESULTS.md`, `docs/PHASE3_RESULTS.md`, `docs/PHASE3_GPU_RESULTS.md` and
 `docs/PHASE4_RESULTS.md` and `docs/PHASE5_RESULTS.md`. Sizes use MB = 10^6 and GB = 10^9 bytes; GPU memory is in GiB.
 
-Build (MiKTeX or TeX Live), twice for references:
+Build the presentation (MiKTeX or TeX Live), twice for references:
 ```
-cd report/phase3_report
+cd report/presentation
 pdflatex main.tex
 pdflatex main.tex
 ```
